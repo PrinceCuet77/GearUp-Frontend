@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
+import Footer from '@/components/footer';
+import Navbar from '@/components/Navbar';
+import { ThemeProvider } from 'next-themes';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,8 +37,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className='min-h-screen flex flex-col antialiased'
       >
-        <Toaster position='top-right' richColors closeButton />
-        <main className='flex-1'>{children}</main>
+        <ThemeProvider attribute='class' enableSystem defaultTheme='system'>
+          <Navbar />
+          <Toaster position='top-right' richColors closeButton />
+          <main className='flex-1'>{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
