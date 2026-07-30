@@ -4,7 +4,7 @@ import { Compass, ArrowLeft, Search } from 'lucide-react';
 export default function NotFound() {
   return (
     <main
-      className='flex min-h-screen flex-col items-center justify-center px-6 text-center'
+      className='flex flex-1 flex-col items-center justify-center overflow-hidden px-6 text-center'
       style={{ backgroundColor: 'var(--background)' }}
     >
       {/* Big 404 */}
@@ -65,7 +65,7 @@ export default function NotFound() {
       </div>
 
       {/* Decorative divider */}
-      <div className='mt-16 flex items-center gap-3'>
+      <div className='mt-8 flex items-center gap-3'>
         {[...Array(3)].map((_, i) => (
           <span
             key={i}

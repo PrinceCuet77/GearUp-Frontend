@@ -39,7 +39,7 @@ export default function RootLayout({
       >
         <ThemeProvider attribute='class' enableSystem defaultTheme='system'>
           <Navbar />
-          <Toaster position='top-right' richColors closeButton />
+          <Toaster richColors closeButton />
           <main className='flex-1 flex flex-col min-h-0'>{children}</main>
           <Footer />
         </ThemeProvider>

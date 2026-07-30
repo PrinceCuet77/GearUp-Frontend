@@ -1,11 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { Dumbbell, Eye, EyeOff } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Dumbbell, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { loginSchema } from '@/lib/validations/auth';
+import { loginAction } from '@/app/(auth)/_actions/loginActions';
+import z from 'zod';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = (data: z.infer<typeof loginSchema>) => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.append('email', data.email);
+      formData.append('password', data.password);
+
+      const result = await loginAction(null, formData);
+
+      if (result?.success) {
+        toast.success(result.message || 'Login successful!');
+        router.push('/dashboard');
+      } else {
+        toast.error(result?.message || 'Login failed. Please try again.');
+      }
+    });
+  };
 
   return (
     <>
@@ -41,7 +75,10 @@ export default function LoginPage() {
           </div>
 
           {/* Form */}
-          <form className='flex flex-col gap-5'>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex flex-col gap-5'
+          >
             {/* Email */}
             <div className='flex flex-col gap-1.5'>
               <label
@@ -53,20 +90,34 @@ export default function LoginPage() {
               </label>
               <input
                 id='email'
-                name='email'
                 type='email'
                 autoComplete='email'
                 placeholder='you@example.com'
                 className='w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors placeholder:text-sm'
                 style={{
                   backgroundColor: 'var(--input-bg)',
+                  borderColor: form.formState.errors.email
+                    ? 'var(--destructive)'
+                    : undefined,
                 }}
+                {...form.register('email')}
                 onFocus={(e) => {
                   e.currentTarget.style.borderColor = 'var(--primary)';
                   e.currentTarget.style.boxShadow =
                     '0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent)';
                 }}
+                onBlur={(e) => {
+                  if (!form.formState.errors.email) {
+                    e.currentTarget.style.borderColor = '';
+                    e.currentTarget.style.boxShadow = '';
+                  }
+                }}
               />
+              {form.formState.errors.email && (
+                <p className='text-xs' style={{ color: 'var(--destructive)' }}>
+                  {form.formState.errors.email.message}
+                </p>
+              )}
             </div>
 
             {/* Password */}
@@ -83,18 +134,27 @@ export default function LoginPage() {
               <div className='relative'>
                 <input
                   id='password'
-                  name='password'
                   type={showPassword ? 'text' : 'password'}
                   autoComplete='current-password'
                   placeholder='••••••••'
                   className='w-full rounded-lg border px-4 py-2.5 pr-11 text-sm outline-none transition-colors'
                   style={{
                     backgroundColor: 'var(--input-bg)',
+                    borderColor: form.formState.errors.password
+                      ? 'var(--destructive)'
+                      : undefined,
                   }}
+                  {...form.register('password')}
                   onFocus={(e) => {
                     e.currentTarget.style.borderColor = 'var(--primary)';
                     e.currentTarget.style.boxShadow =
                       '0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent)';
+                  }}
+                  onBlur={(e) => {
+                    if (!form.formState.errors.password) {
+                      e.currentTarget.style.borderColor = '';
+                      e.currentTarget.style.boxShadow = '';
+                    }
                   }}
                 />
                 <button
@@ -111,15 +171,28 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+              {form.formState.errors.password && (
+                <p className='text-xs' style={{ color: 'var(--destructive)' }}>
+                  {form.formState.errors.password.message}
+                </p>
+              )}
             </div>
 
             {/* Submit */}
             <button
               type='submit'
+              disabled={isPending}
               className='mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer'
               style={{ backgroundColor: 'var(--primary)' }}
             >
-              Submit
+              {isPending ? (
+                <>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  Signing in...
+                </>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </form>
 
