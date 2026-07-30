@@ -77,10 +77,12 @@ export default function GearCard({ gear }: { gear: GearItem }) {
         {/* Image  */}
         <Link
           href={`/gears/${gear.id}`}
-          className='relative block aspect-[4/3] overflow-hidden'
+          className='relative block aspect-4/3 overflow-hidden'
         >
           <Image
-            src={images[0]}
+            src={
+              images[0]
+            }
             alt={gear.name}
             fill
             sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'

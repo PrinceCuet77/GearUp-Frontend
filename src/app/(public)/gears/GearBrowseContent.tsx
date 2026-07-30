@@ -6,25 +6,10 @@
  * Client component for the /gear browse page.
  * All filter + sort state lives in the URL (useSearchParams + router.push),
  * so links are shareable and the browser back button works naturally.
- *
- * ── TODO: API integration ──────────────────────────────────────────────────
- * When integrating the backend, replace the client-side `filtered` useMemo
- * with an API call:
- *
- *   const res = await fetch(
- *     `${API_URL}/api/gears?` +
- *     new URLSearchParams({ category, minPrice, maxPrice, search,
- *                           page: String(page), limit: '9',
- *                           sortBy, sortOrder })
- *   );
- *   const json = await res.json(); // ApiResponse<GearItem[]>
- *   setGears(json.data);
- *   setTotal(json.meta?.total ?? 0);
- * ──────────────────────────────────────────────────────────────────────────
  */
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { useMemo, useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import {
   SlidersHorizontal,
   Filter,
@@ -32,13 +17,15 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Loader2,
 } from 'lucide-react';
-import { DUMMY_GEARS, DUMMY_CATEGORIES } from '@/lib/dummy-data';
+import type { GearItem, Category } from '@/lib/api';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
+import { getAllGearsAction } from '../_actions/getAllGears';
+import { getAllCategoriesAction } from '../_actions/getAllCategories';
 import GearFilters from '../_components/GearFilters';
 import GearCard from '../_components/GearCard';
-
-const PAGE_SIZE = 9;
+import { toast } from 'sonner';
 
 function Pagination({
   page,
@@ -219,6 +206,12 @@ export default function GearBrowseContent() {
   const pathname = usePathname();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [gears, setGears] = useState<GearItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const search = searchParams.get('search') ?? '';
   const category = searchParams.get('category') ?? '';
@@ -227,6 +220,57 @@ export default function GearBrowseContent() {
   const sortBy = (searchParams.get('sortBy') ?? 'createdAt') as SortBy;
   const sortOrder = (searchParams.get('sortOrder') ?? 'desc') as SortOrder;
   const page = Math.max(Number(searchParams.get('page') ?? '1'), 1);
+
+  useEffect(() => {
+    const fetchGears = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await getAllGearsAction({
+          category: category || undefined,
+          minPrice: minPrice ? Number(minPrice) : undefined,
+          maxPrice: maxPrice ? Number(maxPrice) : undefined,
+          search: search || undefined,
+          page,
+          limit: 9,
+          sortBy,
+          sortOrder,
+        });
+
+        if (result?.success) {
+          setGears(result.data || []);
+          setTotalPages(result.meta?.totalPages || 1);
+          setTotal(result.meta?.total || 0);
+        } else {
+          setGears([]);
+        }
+      } catch {
+        setError('An error occurred');
+        toast.error('Failed to fetch gears');
+        setGears([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGears();
+  }, [category, minPrice, maxPrice, search, page, sortBy, sortOrder]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await getAllCategoriesAction();
+        if (result?.success) {
+          setCategories(result.data || []);
+        }
+      } catch {
+        toast.error('Failed to fetch categories');
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const updateParams = useCallback(
     (updates: Record<string, string>, resetPage = true) => {
@@ -253,57 +297,6 @@ export default function GearBrowseContent() {
       updateParams({ page: n === 1 ? '' : String(n) }, false);
     },
     [updateParams],
-  );
-
-  const filtered = useMemo(() => {
-    let list = [...DUMMY_GEARS];
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      list = list.filter(
-        (g) =>
-          g.name.toLowerCase().includes(q) ||
-          g.description.toLowerCase().includes(q),
-      );
-    }
-
-    if (category) {
-      list = list.filter((g) => g.category?.name === category);
-    }
-
-    if (minPrice) {
-      list = list.filter((g) => Number(g.price) >= Number(minPrice));
-    }
-
-    if (maxPrice) {
-      list = list.filter((g) => Number(g.price) <= Number(maxPrice));
-    }
-
-    // Sort
-    list.sort((a, b) => {
-      if (sortBy === 'name') {
-        return sortOrder === 'asc'
-          ? a.name.localeCompare(b.name)
-          : b.name.localeCompare(a.name);
-      }
-      if (sortBy === 'price') {
-        const diff = Number(a.price) - Number(b.price);
-        return sortOrder === 'asc' ? diff : -diff;
-      }
-      // createdAt (default)
-      const ta = new Date(a.createdAt).getTime();
-      const tb = new Date(b.createdAt).getTime();
-      return sortOrder === 'asc' ? ta - tb : tb - ta;
-    });
-
-    return list;
-  }, [search, category, minPrice, maxPrice, sortBy, sortOrder]);
-
-  const totalPages = Math.max(Math.ceil(filtered.length / PAGE_SIZE), 1);
-  const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE,
   );
 
   const hasFilters = Boolean(search || category || minPrice || maxPrice);
@@ -334,7 +327,7 @@ export default function GearBrowseContent() {
     });
 
   const filterProps = {
-    categories: DUMMY_CATEGORIES,
+    categories,
     search,
     category,
     minPrice,
@@ -418,9 +411,9 @@ export default function GearBrowseContent() {
                   className='font-semibold'
                   style={{ color: 'var(--foreground)' }}
                 >
-                  {filtered.length}
+                  {total}
                 </span>{' '}
-                item{filtered.length !== 1 ? 's' : ''} found
+                item{total !== 1 ? 's' : ''} found
               </p>
 
               <div className='ml-auto flex items-center gap-2'>
@@ -542,22 +535,33 @@ export default function GearBrowseContent() {
             </div>
 
             {/* Gear grid / empty state */}
-            {paginated.length === 0 ? (
+            {loading ? (
+              <div className='flex items-center justify-center py-20'>
+                <Loader2
+                  className='h-8 w-8 animate-spin'
+                  style={{ color: 'var(--primary)' }}
+                />
+                <span
+                  className='ml-3 text-sm font-medium'
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  Loading gear...
+                </span>
+              </div>
+            ) : error ? (
+              <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
+            ) : gears.length === 0 ? (
               <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
             ) : (
               <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3'>
-                {paginated.map((gear) => (
+                {gears.map((gear) => (
                   <GearCard key={gear.id} gear={gear} />
                 ))}
               </div>
             )}
 
             {/* Pagination */}
-            <Pagination
-              page={safePage}
-              totalPages={totalPages}
-              onPage={setPage}
-            />
+            <Pagination page={page} totalPages={totalPages} onPage={setPage} />
           </div>
         </div>
       </div>
@@ -604,7 +608,7 @@ export default function GearBrowseContent() {
               className='mt-6 h-11 w-full rounded-xl text-sm font-bold text-white transition-colors'
               style={{ backgroundColor: 'var(--primary)' }}
             >
-              Show {filtered.length} Result{filtered.length !== 1 ? 's' : ''}
+              Show {total} Result{total !== 1 ? 's' : ''}
             </button>
           </div>
         </>

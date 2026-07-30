@@ -37,7 +37,6 @@ export const getProfileAction = async (): Promise<UserProfile | null> => {
     }
 
     const result = await response.json();
-    console.log("🚀 ~ getProfileAction ~ result:", result)
 
     if (result.success && result.data) {
       return result.data as UserProfile;
