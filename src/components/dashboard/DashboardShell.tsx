@@ -78,12 +78,7 @@ const ROLE_META: Record<
   },
 };
 
-const OVERVIEW_PATHS = new Set([
-  '/admin',
-  '/dashboard/customer',
-  '/dashboard/provider',
-  '/dashboard/admin',
-]);
+const OVERVIEW_PATHS = new Set(['/admin', '/customer', '/provider']);
 
 function getInitials(name?: string | null, email?: string): string {
   if (name)

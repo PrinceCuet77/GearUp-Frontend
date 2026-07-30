@@ -86,13 +86,13 @@ export default function LoginPage() {
                 className='text-sm font-medium'
                 style={{ color: 'var(--card-foreground)' }}
               >
-                Email address
+                Email
               </label>
               <input
                 id='email'
                 type='email'
                 autoComplete='email'
-                placeholder='you@example.com'
+                placeholder='Enter your email'
                 className='w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition-colors placeholder:text-sm'
                 style={{
                   backgroundColor: 'var(--input-bg)',
@@ -136,7 +136,7 @@ export default function LoginPage() {
                   id='password'
                   type={showPassword ? 'text' : 'password'}
                   autoComplete='current-password'
-                  placeholder='••••••••'
+                  placeholder='Enter your password'
                   className='w-full rounded-lg border px-4 py-2.5 pr-11 text-sm outline-none transition-colors'
                   style={{
                     backgroundColor: 'var(--input-bg)',
