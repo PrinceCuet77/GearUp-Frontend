@@ -222,3 +222,93 @@ export function GearFiltersSkeleton() {
     </div>
   );
 }
+
+export function GearDetailSkeleton() {
+  return (
+    <div
+      className='min-h-screen'
+      style={{ backgroundColor: 'var(--background)' }}
+    >
+      <div className='mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8'>
+        {/* Back link skeleton */}
+        <Skeleton className='mb-6 h-4 w-32 rounded' />
+
+        {/* Main grid */}
+        <div className='grid gap-8 lg:grid-cols-2'>
+          {/* Images column */}
+          <div className='space-y-3'>
+            {/* Primary image */}
+            <Skeleton className='aspect-4/3 w-full rounded-2xl' />
+
+            {/* Thumbnail strip */}
+            {/* <div className='flex gap-2'>
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className='h-16 w-16 shrink-0 rounded-xl' />
+              ))}
+            </div> */}
+
+            {/* Rating card skeleton */}
+            <div
+              className='flex items-center gap-4 rounded-xl border p-4'
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+              }}
+            >
+              <Skeleton className='h-14 w-14 shrink-0 rounded-xl' />
+              <div className='flex-1'>
+                <Skeleton className='mb-2 h-5 w-28' />
+                <Skeleton className='h-3.5 w-20' />
+              </div>
+            </div>
+          </div>
+
+          {/* Info column */}
+          <div className='flex flex-col gap-5'>
+            {/* Status badge */}
+            <Skeleton className='h-6 w-28 rounded-full' />
+
+            {/* Title & price */}
+            <div>
+              <Skeleton className='mb-3 h-8 w-3/4' />
+              <Skeleton className='h-7 w-24' />
+            </div>
+
+            {/* Meta row */}
+            <div className='flex gap-4'>
+              <Skeleton className='h-5 w-32' />
+              <Skeleton className='h-5 w-36' />
+              <Skeleton className='h-5 w-32' />
+            </div>
+
+            {/* Description card */}
+            <div
+              className='rounded-xl border p-4'
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+              }}
+            >
+              <Skeleton className='mb-3 h-3 w-24' />
+              <Skeleton className='h-4 w-full' />
+              <Skeleton className='mt-1.5 h-4 w-full' />
+              <Skeleton className='mt-1.5 h-4 w-2/3' />
+            </div>
+
+            {/* CTA button */}
+            <Skeleton className='h-12 w-full rounded-xl' />
+          </div>
+        </div>
+
+        {/* Reviews section */}
+        <section className='mt-12'>
+          <div className='mb-6 flex items-center justify-between'>
+            <Skeleton className='h-6 w-32' />
+            <Skeleton className='h-4 w-20' />
+          </div>
+          <ReviewSkeleton rows={1} />
+        </section>
+      </div>
+    </div>
+  );
+}

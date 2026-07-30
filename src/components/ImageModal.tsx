@@ -23,7 +23,6 @@ export default function ImageModal({
   src,
   alt = 'Image preview',
 }: ImageModalProps) {
-  /* ── Escape key ──────────────────────────────────────────────────────── */
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -33,7 +32,6 @@ export default function ImageModal({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  /* ── Scroll lock ─────────────────────────────────────────────────────── */
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';
@@ -64,7 +62,7 @@ export default function ImageModal({
         <button
           onClick={onClose}
           aria-label='Close image preview'
-          className='absolute -right-2 -top-2 z-20 flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors'
+          className='absolute -right-2 -top-2 z-20 flex h-10 w-10 items-center justify-center rounded-full text-white transition-colors cursor-pointer'
           style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.backgroundColor =

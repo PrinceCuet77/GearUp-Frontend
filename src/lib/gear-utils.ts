@@ -83,3 +83,15 @@ export function calcAvgRating(reviews?: Array<{ rating: number }>): number {
   if (!reviews?.length) return 0;
   return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 }
+
+/**
+ * Format an ISO date string to a human-readable format.
+ * @example formatDate("2024-06-15T00:00:00.000Z") → "June 15, 2024"
+ */
+export function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}

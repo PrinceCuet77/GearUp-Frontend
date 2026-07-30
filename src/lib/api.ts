@@ -3,8 +3,6 @@ import { cookies } from 'next/headers';
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'https://gear-up-self.vercel.app';
 
-// ─── Response types ───────────────────────────────────────────────────────────
-
 export interface ApiMeta {
   page: number;
   limit: number;
@@ -19,8 +17,6 @@ export interface ApiResponse<T> {
   data: T;
   meta?: ApiMeta;
 }
-
-// ─── Domain types ─────────────────────────────────────────────────────────────
 
 export type UserRole = 'CUSTOMER' | 'PROVIDER' | 'ADMIN';
 export type UserStatus = 'ACTIVE' | 'SUSPENDED';
@@ -57,6 +53,7 @@ export interface GearReview {
   id: string;
   rating: number;
   comment: string;
+  customer?: Pick<User, 'id' | 'name'>;
   createdAt: string;
   updatedAt: string;
 }
@@ -65,19 +62,15 @@ export interface GearItem {
   id: string;
   name: string;
   description: string;
-  /** Rental price per day in BDT (stored as numeric string). */
   price: string;
   stock: number;
-  /** JSON-stringified array of image URLs, e.g. `'["https://..."]'`. */
   images: string;
   isActive: boolean;
   providerId: string;
   categoryId: string;
   category?: Category;
   provider?: User;
-  /** Embedded review snapshots returned by the API. */
   reviews?: GearReview[];
-  /** Embedded rental order item snapshots returned by the API. */
   rentalOrderItems?: Array<{ id: string; quantity: number; price: string }>;
   createdAt: string;
   updatedAt: string;
@@ -130,8 +123,6 @@ export interface Review {
   updatedAt: string;
 }
 
-// ─── Fetch helper ─────────────────────────────────────────────────────────────
-
 export async function serverFetch<T>(
   path: string,
   options?: RequestInit,
@@ -157,8 +148,6 @@ export async function serverFetch<T>(
 
   return json;
 }
-
-// ─── Convenience helpers ──────────────────────────────────────────────────────
 
 export async function getCurrentUser(): Promise<User | null> {
   try {
