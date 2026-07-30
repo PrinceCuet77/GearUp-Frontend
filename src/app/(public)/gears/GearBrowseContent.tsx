@@ -1,13 +1,5 @@
 'use client';
 
-/**
- * GearBrowseContent
- *
- * Client component for the /gear browse page.
- * All filter + sort state lives in the URL (useSearchParams + router.push),
- * so links are shareable and the browser back button works naturally.
- */
-
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import {
@@ -17,7 +9,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Loader2,
 } from 'lucide-react';
 import type { GearItem, Category } from '@/lib/api';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
@@ -26,6 +17,7 @@ import { getAllCategoriesAction } from '../_actions/getAllCategories';
 import GearFilters from '../_components/GearFilters';
 import GearCard from '../_components/GearCard';
 import { toast } from 'sonner';
+import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/Skeleton';
 
 function Pagination({
   page,
@@ -211,6 +203,7 @@ export default function GearBrowseContent() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const search = searchParams.get('search') ?? '';
@@ -259,6 +252,7 @@ export default function GearBrowseContent() {
 
   useEffect(() => {
     const fetchCategories = async () => {
+      setCategoriesLoading(true);
       try {
         const result = await getAllCategoriesAction();
         if (result?.success) {
@@ -266,6 +260,8 @@ export default function GearBrowseContent() {
         }
       } catch {
         toast.error('Failed to fetch categories');
+      } finally {
+        setCategoriesLoading(false);
       }
     };
 
@@ -394,7 +390,11 @@ export default function GearBrowseContent() {
                   Filters
                 </h2>
               </div>
-              <GearFilters {...filterProps} />
+              {categoriesLoading ? (
+                <GearFiltersSkeleton />
+              ) : (
+                <GearFilters {...filterProps} />
+              )}
             </div>
           </aside>
 
@@ -536,18 +536,7 @@ export default function GearBrowseContent() {
 
             {/* Gear grid / empty state */}
             {loading ? (
-              <div className='flex items-center justify-center py-20'>
-                <Loader2
-                  className='h-8 w-8 animate-spin'
-                  style={{ color: 'var(--primary)' }}
-                />
-                <span
-                  className='ml-3 text-sm font-medium'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Loading gear...
-                </span>
-              </div>
+              <GearGridSkeleton count={6} />
             ) : error ? (
               <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
             ) : gears.length === 0 ? (

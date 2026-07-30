@@ -3,8 +3,6 @@
  * All use CSS custom-properties so they respect both light and dark themes.
  */
 
-// ── Primitive ─────────────────────────────────────────────────────────────────
-
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <div
@@ -13,8 +11,6 @@ export function Skeleton({ className = '' }: { className?: string }) {
     />
   );
 }
-
-// ── Table skeleton (for any paginated data table) ─────────────────────────────
 
 export function TableSkeleton({
   rows = 5,
@@ -58,8 +54,6 @@ export function TableSkeleton({
   );
 }
 
-// ── Stats card skeleton ───────────────────────────────────────────────────────
-
 export function StatsCardSkeleton() {
   return (
     <div
@@ -75,8 +69,6 @@ export function StatsCardSkeleton() {
     </div>
   );
 }
-
-// ── Review list skeleton ──────────────────────────────────────────────────────
 
 export function ReviewSkeleton({ rows = 4 }: { rows?: number }) {
   return (
@@ -99,8 +91,6 @@ export function ReviewSkeleton({ rows = 4 }: { rows?: number }) {
     </div>
   );
 }
-
-// ── Category list skeleton ────────────────────────────────────────────────────
 
 export function CategorySkeleton({ rows = 5 }: { rows?: number }) {
   return (
@@ -126,8 +116,6 @@ export function CategorySkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
-// ── Dashboard overview skeleton (stats + recent table) ───────────────────────
-
 export function DashboardOverviewSkeleton({ cols = 4 }: { cols?: number }) {
   return (
     <div>
@@ -148,6 +136,89 @@ export function DashboardOverviewSkeleton({ cols = 4 }: { cols?: number }) {
 
       {/* Recent items table */}
       <TableSkeleton rows={4} cols={4} />
+    </div>
+  );
+}
+
+export function GearCardSkeleton() {
+  return (
+    <article
+      className='flex flex-col overflow-hidden rounded-2xl border'
+      style={{
+        backgroundColor: 'var(--card)',
+        borderColor: 'var(--border)',
+      }}
+    >
+      {/* Image placeholder */}
+      <Skeleton className='aspect-4/3 w-full rounded-none' />
+
+      {/* Content */}
+      <div className='flex flex-1 flex-col p-4'>
+        <div className='mb-2 flex items-start justify-between gap-2'>
+          <Skeleton className='h-5 w-3/4' />
+          <Skeleton className='h-5 w-14 shrink-0 rounded-full' />
+        </div>
+        <Skeleton className='mb-2 h-4 w-full' />
+        <Skeleton className='mb-4 h-4 w-2/3' />
+
+        <div className='mt-auto flex items-center justify-between'>
+          <Skeleton className='h-5 w-20' />
+          <Skeleton className='h-4 w-16' />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function GearGridSkeleton({ count = 6 }: { count?: number }) {
+  return (
+    <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3'>
+      {Array.from({ length: count }).map((_, i) => (
+        <GearCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
+
+export function GearFiltersSkeleton() {
+  return (
+    <div className='space-y-6'>
+      {/* Search skeleton */}
+      <div>
+        <Skeleton className='mb-2 h-3 w-16' />
+        <Skeleton className='h-9 w-full rounded-lg' />
+      </div>
+
+      {/* Categories skeleton */}
+      <div>
+        <Skeleton className='mb-2 h-3 w-20' />
+        <div className='space-y-2'>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className='flex items-center gap-2'>
+              <Skeleton className='h-4 w-4 rounded' />
+              <Skeleton className='h-4 w-24' />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Price range skeleton */}
+      <div>
+        <Skeleton className='mb-2 h-3 w-24' />
+        <div className='flex gap-2'>
+          <Skeleton className='h-9 w-full rounded-lg' />
+          <Skeleton className='h-9 w-full rounded-lg' />
+        </div>
+      </div>
+
+      {/* Sort skeleton */}
+      <div>
+        <Skeleton className='mb-2 h-3 w-14' />
+        <Skeleton className='h-9 w-full rounded-lg' />
+      </div>
+
+      {/* Reset button skeleton */}
+      <Skeleton className='h-9 w-full rounded-xl' />
     </div>
   );
 }
