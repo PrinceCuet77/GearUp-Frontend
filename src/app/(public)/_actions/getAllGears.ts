@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 
 export interface GetGearsParams {
   category?: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import type { Category } from '@/lib/api';
+import type { Category } from '@/lib/types';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
 import { formatBDT } from '@/lib/gear-utils';
 

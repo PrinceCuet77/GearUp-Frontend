@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 import { formatBDT } from '@/lib/gear-utils';
 
 interface Props {

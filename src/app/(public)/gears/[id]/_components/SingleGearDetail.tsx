@@ -15,7 +15,7 @@ import {
   XCircle,
   ChevronRight,
 } from 'lucide-react';
-import type { GearItem, GearReview } from '@/lib/api';
+import type { GearItem, GearReview } from '@/lib/types';
 import {
   formatBDT,
   parseGearImages,
@@ -47,7 +47,6 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
 
   return (
     <div
-      className='min-h-screen'
       style={{ backgroundColor: 'var(--background)' }}
     >
       <div className='mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8'>

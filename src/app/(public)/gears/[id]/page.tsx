@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 import { GearDetailSkeleton } from '@/components/Skeleton';
 import { getSingleGearAction } from '@/app/(public)/gears/[id]/_actions/getSingleGear';
 import NotFound from '@/app/not-found';

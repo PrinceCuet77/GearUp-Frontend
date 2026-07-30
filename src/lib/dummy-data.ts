@@ -11,7 +11,7 @@ import type {
   RentalOrder,
   Payment,
   Review,
-} from './api';
+} from './types';
 
 // ── Users ─────────────────────────────────────────────────────────────────────
 

@@ -241,11 +241,11 @@ export function GearDetailSkeleton() {
             <Skeleton className='aspect-4/3 w-full rounded-2xl' />
 
             {/* Thumbnail strip */}
-            {/* <div className='flex gap-2'>
+            <div className='flex gap-2'>
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className='h-16 w-16 shrink-0 rounded-xl' />
               ))}
-            </div> */}
+            </div>
 
             {/* Rating card skeleton */}
             <div

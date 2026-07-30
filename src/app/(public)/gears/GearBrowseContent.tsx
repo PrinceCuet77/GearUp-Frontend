@@ -10,7 +10,7 @@ import {
   ChevronRight,
   X,
 } from 'lucide-react';
-import type { GearItem, Category } from '@/lib/api';
+import type { GearItem, Category } from '@/lib/types';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
 import { getAllGearsAction } from '../_actions/getAllGears';
 import { getAllCategoriesAction } from '../_actions/getAllCategories';

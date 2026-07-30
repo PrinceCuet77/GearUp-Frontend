@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ShoppingCart, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 import { formatBDT, parseGearImages, calcAvgRating } from '@/lib/gear-utils';
 import AddToCartModal from './AddToCartModal';
 

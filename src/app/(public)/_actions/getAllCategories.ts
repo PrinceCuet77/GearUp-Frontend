@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type { Category } from '@/lib/api';
+import type { Category } from '@/lib/types';
 
 export interface CategoriesApiResponse {
   success: boolean;

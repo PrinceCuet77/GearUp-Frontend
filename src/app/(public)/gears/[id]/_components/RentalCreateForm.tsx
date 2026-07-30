@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ShoppingBag, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 
 interface RentalCreateFormProps {

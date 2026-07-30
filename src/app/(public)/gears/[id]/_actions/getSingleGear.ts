@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 
 export interface SingleGearApiResponse {
   success: boolean;
@@ -10,10 +10,6 @@ export interface SingleGearApiResponse {
   data: GearItem;
 }
 
-/**
- * Fetch a single gear item by its ID from the backend API.
- * Endpoint: GET /api/gears/:gear_id
- */
 export const getSingleGearAction = async (
   gearId: string,
 ): Promise<SingleGearApiResponse | null> => {

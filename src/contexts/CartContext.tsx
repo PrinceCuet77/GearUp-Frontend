@@ -7,7 +7,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import type { GearItem } from '@/lib/api';
+import type { GearItem } from '@/lib/types';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

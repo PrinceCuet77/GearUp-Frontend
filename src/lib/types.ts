@@ -1,8 +1,3 @@
-import { cookies } from 'next/headers';
-
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? 'https://gear-up-self.vercel.app';
-
 export interface ApiMeta {
   page: number;
   limit: number;
@@ -47,8 +42,6 @@ export interface Category {
   createdAt: string;
   updatedAt: string;
 }
-
-/** Lightweight review snapshot embedded in gear list / detail responses. */
 export interface GearReview {
   id: string;
   rating: number;
@@ -123,37 +116,3 @@ export interface Review {
   updatedAt: string;
 }
 
-export async function serverFetch<T>(
-  path: string,
-  options?: RequestInit,
-): Promise<ApiResponse<T>> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('accessToken')?.value;
-
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options?.headers ?? {}),
-    },
-    cache: 'no-store',
-  });
-
-  const json: ApiResponse<T> = await res.json();
-
-  if (!res.ok) {
-    throw new Error(json.message ?? `API ${res.status}: ${res.statusText}`);
-  }
-
-  return json;
-}
-
-export async function getCurrentUser(): Promise<User | null> {
-  try {
-    const res = await serverFetch<User>('/api/user/me');
-    return res.data;
-  } catch {
-    return null;
-  }
-}
