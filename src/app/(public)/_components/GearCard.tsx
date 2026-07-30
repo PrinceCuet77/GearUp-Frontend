@@ -10,8 +10,6 @@ import type { GearItem } from '@/lib/api';
 import { formatBDT, parseGearImages, calcAvgRating } from '@/lib/gear-utils';
 import AddToCartModal from './AddToCartModal';
 
-// ── Rating badge rendered on the card image ───────────────────────────────────
-
 function RatingBadge({ reviews }: { reviews?: Array<{ rating: number }> }) {
   if (!reviews?.length) return null;
   const avg = calcAvgRating(reviews);
@@ -30,8 +28,6 @@ function RatingBadge({ reviews }: { reviews?: Array<{ rating: number }> }) {
     </div>
   );
 }
-
-// ── Stock indicator ───────────────────────────────────────────────────────────
 
 function StockLabel({ stock }: { stock: number }) {
   if (stock === 0) {
@@ -54,8 +50,6 @@ function StockLabel({ stock }: { stock: number }) {
     </span>
   );
 }
-
-// ── GearCard ──────────────────────────────────────────────────────────────────
 
 export default function GearCard({ gear }: { gear: GearItem }) {
   const { addItem, openCart } = useCart();
@@ -80,7 +74,7 @@ export default function GearCard({ gear }: { gear: GearItem }) {
           borderColor: 'var(--border)',
         }}
       >
-        {/* ── Image ─────────────────────────────────────────────────────── */}
+        {/* Image  */}
         <Link
           href={`/gears/${gear.id}`}
           className='relative block aspect-[4/3] overflow-hidden'
@@ -122,7 +116,7 @@ export default function GearCard({ gear }: { gear: GearItem }) {
           </div>
         </Link>
 
-        {/* ── Body ──────────────────────────────────────────────────────── */}
+        {/* Body */}
         <div className='flex flex-1 flex-col p-4'>
           {/* Name */}
           <Link href={`/gears/${gear.id}`}>

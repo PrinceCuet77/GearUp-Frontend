@@ -1,11 +1,12 @@
 import { Suspense } from 'react';
 import GearBrowseContent from './GearBrowseContent';
 
-// ── Loading skeleton ──────────────────────────────────────────────────────────
-
 function GearBrowseSkeleton() {
   return (
-    <div className='min-h-screen' style={{ backgroundColor: 'var(--background)' }}>
+    <div
+      className='min-h-screen'
+      style={{ backgroundColor: 'var(--background)' }}
+    >
       {/* Header skeleton */}
       <div
         className='border-b'
@@ -57,16 +58,31 @@ function GearBrowseSkeleton() {
                   }}
                 >
                   <div
-                    className='aspect-[4/3]'
+                    className='aspect-4/3'
                     style={{ backgroundColor: 'var(--muted)' }}
                   />
                   <div className='p-4 space-y-2'>
-                    <div className='h-4 w-3/4 rounded' style={{ backgroundColor: 'var(--muted)' }} />
-                    <div className='h-3 w-full rounded' style={{ backgroundColor: 'var(--muted)' }} />
-                    <div className='h-3 w-2/3 rounded' style={{ backgroundColor: 'var(--muted)' }} />
+                    <div
+                      className='h-4 w-3/4 rounded'
+                      style={{ backgroundColor: 'var(--muted)' }}
+                    />
+                    <div
+                      className='h-3 w-full rounded'
+                      style={{ backgroundColor: 'var(--muted)' }}
+                    />
+                    <div
+                      className='h-3 w-2/3 rounded'
+                      style={{ backgroundColor: 'var(--muted)' }}
+                    />
                     <div className='flex justify-between pt-2'>
-                      <div className='h-6 w-16 rounded' style={{ backgroundColor: 'var(--muted)' }} />
-                      <div className='h-8 w-16 rounded-xl' style={{ backgroundColor: 'var(--muted)' }} />
+                      <div
+                        className='h-6 w-16 rounded'
+                        style={{ backgroundColor: 'var(--muted)' }}
+                      />
+                      <div
+                        className='h-8 w-16 rounded-xl'
+                        style={{ backgroundColor: 'var(--muted)' }}
+                      />
                     </div>
                   </div>
                 </div>

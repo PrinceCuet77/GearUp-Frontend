@@ -40,8 +40,6 @@ import GearCard from '../_components/GearCard';
 
 const PAGE_SIZE = 9;
 
-// ── Pagination ────────────────────────────────────────────────────────────────
-
 function Pagination({
   page,
   totalPages,
@@ -175,8 +173,6 @@ function Pagination({
   );
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-
 function EmptyState({
   hasFilters,
   onReset,
@@ -217,8 +213,6 @@ function EmptyState({
   );
 }
 
-// ── GearBrowseContent ─────────────────────────────────────────────────────────
-
 export default function GearBrowseContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -226,7 +220,6 @@ export default function GearBrowseContent() {
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // ── Read state from URL params ────────────────────────────────────────────
   const search = searchParams.get('search') ?? '';
   const category = searchParams.get('category') ?? '';
   const minPrice = searchParams.get('minPrice') ?? '';
@@ -235,7 +228,6 @@ export default function GearBrowseContent() {
   const sortOrder = (searchParams.get('sortOrder') ?? 'desc') as SortOrder;
   const page = Math.max(Number(searchParams.get('page') ?? '1'), 1);
 
-  // ── Update URL params helper ──────────────────────────────────────────────
   const updateParams = useCallback(
     (updates: Record<string, string>, resetPage = true) => {
       const params = new URLSearchParams(searchParams.toString());
@@ -263,7 +255,6 @@ export default function GearBrowseContent() {
     [updateParams],
   );
 
-  // ── Client-side filter + sort (swap for API call when ready) ─────────────
   const filtered = useMemo(() => {
     let list = [...DUMMY_GEARS];
 
@@ -320,7 +311,6 @@ export default function GearBrowseContent() {
     SORT_OPTIONS.find((o) => o.sortBy === sortBy && o.sortOrder === sortOrder)
       ?.label ?? 'Newest First';
 
-  // ── Active filter chips ───────────────────────────────────────────────────
   const activeChips: Array<{ label: string; clear: () => void }> = [];
   if (search)
     activeChips.push({
@@ -366,7 +356,7 @@ export default function GearBrowseContent() {
       className='min-h-screen'
       style={{ backgroundColor: 'var(--background)' }}
     >
-      {/* ── Page header ──────────────────────────────────────────────────── */}
+      {/* Page header */}
       <div
         className='border-b'
         style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
@@ -390,7 +380,7 @@ export default function GearBrowseContent() {
 
       <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
         <div className='flex gap-8'>
-          {/* ── Desktop filter sidebar ──────────────────────────────────── */}
+          {/* Desktop filter sidebar */}
           <aside className='hidden w-64 shrink-0 lg:block'>
             <div
               className='sticky top-24 rounded-2xl border p-5'
@@ -415,7 +405,7 @@ export default function GearBrowseContent() {
             </div>
           </aside>
 
-          {/* ── Main content ────────────────────────────────────────────── */}
+          {/* Main content */}
           <div className='min-w-0 flex-1'>
             {/* Top bar: results count + sort + mobile filter btn */}
             <div className='mb-5 flex flex-wrap items-center gap-3'>
@@ -572,7 +562,7 @@ export default function GearBrowseContent() {
         </div>
       </div>
 
-      {/* ── Mobile filter drawer ─────────────────────────────────────────── */}
+      {/* Mobile filter drawer */}
       {mobileFiltersOpen && (
         <>
           {/* Backdrop */}

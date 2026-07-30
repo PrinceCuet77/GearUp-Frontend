@@ -5,8 +5,6 @@ import type { Category } from '@/lib/api';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
 import { formatBDT } from '@/lib/gear-utils';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export interface GearFiltersProps {
   /** All available categories for the filter chips. */
   categories: Category[];
@@ -26,8 +24,6 @@ export interface GearFiltersProps {
   onReset: () => void;
 }
 
-// ── Shared input style ────────────────────────────────────────────────────────
-
 const inputBase =
   'h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-1 transition-colors';
 
@@ -38,8 +34,6 @@ function getInputStyle() {
     color: 'var(--foreground)',
   };
 }
-
-// ── GearFilters ───────────────────────────────────────────────────────────────
 
 /**
  * Reusable filter panel — rendered in the desktop sidebar and
@@ -66,7 +60,7 @@ export default function GearFilters({
 
   return (
     <div className='space-y-6'>
-      {/* ── Search ─────────────────────────────────────────────────────── */}
+      {/* Search */}
       <div>
         <label
           className='mb-2 block text-xs font-semibold uppercase tracking-wide'
@@ -100,7 +94,7 @@ export default function GearFilters({
         </div>
       </div>
 
-      {/* ── Category ───────────────────────────────────────────────────── */}
+      {/* Category */}
       <div>
         <label
           className='mb-2 block text-xs font-semibold uppercase tracking-wide'
@@ -143,7 +137,7 @@ export default function GearFilters({
         </div>
       </div>
 
-      {/* ── Price range ────────────────────────────────────────────────── */}
+      {/* Price range */}
       <div>
         <label
           className='mb-2 block text-xs font-semibold uppercase tracking-wide'
@@ -188,7 +182,7 @@ export default function GearFilters({
         )}
       </div>
 
-      {/* ── Sort ───────────────────────────────────────────────────────── */}
+      {/* Sort */}
       <div>
         <label
           className='mb-2 block text-xs font-semibold uppercase tracking-wide'
@@ -224,7 +218,7 @@ export default function GearFilters({
         </select>
       </div>
 
-      {/* ── Clear filters ──────────────────────────────────────────────── */}
+      {/* Clear filters */}
       {hasFilters && (
         <button
           onClick={onReset}
