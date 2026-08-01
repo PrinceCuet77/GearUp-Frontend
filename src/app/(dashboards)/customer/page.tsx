@@ -1,15 +1,12 @@
 import Link from 'next/link';
 import { ShoppingBag, CreditCard, Star, Clock, ArrowRight } from 'lucide-react';
-// import { getCurrentUser, serverFetch } from '@/lib/api';
-// import type { RentalOrder, Payment, ApiResponse, ApiMeta } from '@/lib/api';
-import {
-  DUMMY_CUSTOMER,
-  DUMMY_ORDERS,
-  DUMMY_PAYMENTS,
-  DUMMY_REVIEWS,
-} from '@/lib/dummy-data';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
+import { getCustomerDashboardInfo } from './_actions/getCustomerDashboardInfo';
+import { DashboardErrorBanner } from './_components/DashboardErrorBanner';
+import type { CustomerRentalOrder } from './_actions/getCustomerDashboardInfo';
+
+export const dynamic = 'force-dynamic';
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -20,35 +17,34 @@ function formatDate(dateStr: string) {
 }
 
 function formatCurrency(amount: string | number) {
-  return `$${Number(amount).toFixed(2)}`;
+  return `৳${Number(amount).toFixed(2)}/day`;
 }
 
 export default async function CustomerOverviewPage() {
-  // ── DEMO MODE: API calls commented out ──────────────────────────────────────
-  // const user = await getCurrentUser();
-  // const [rentalRes, paymentRes, reviewRes] = await Promise.allSettled([...]);
-  const user = DUMMY_CUSTOMER;
-  const rentals = DUMMY_ORDERS.filter(
-    (o) => o.customerId === DUMMY_CUSTOMER.id,
-  ).slice(0, 5);
-  const activeRentals = rentals.filter(
-    (r) => r.status === 'PAID' || r.status === 'PICKED_UP',
-  ).length;
-  const payments = DUMMY_PAYMENTS;
-  const reviews = DUMMY_REVIEWS.filter(
-    (r) => r.customerId === DUMMY_CUSTOMER.id,
-  );
-  // ───────────────────────────────────────────────────────────────────────────
+  const result = await getCustomerDashboardInfo();
+
+  const stats = result.data?.stats ?? {
+    totalOrders: 0,
+    activeRentals: 0,
+    paymentsMade: 0,
+    reviewsGiven: 0,
+  };
+  const recentOrders: CustomerRentalOrder[] = result.data?.recentOrders ?? [];
 
   return (
     <div>
+      {/* Error banner */}
+      {!result.success && result.error && (
+        <DashboardErrorBanner error={result.error} />
+      )}
+
       {/* Welcome */}
       <div className='mb-8'>
         <h1
           className='text-2xl font-bold tracking-tight'
           style={{ color: 'var(--foreground)' }}
         >
-          Welcome back{user?.name ? `, ${user.name.split(' ')[0]}` : ''}!
+          Welcome back!
         </h1>
         <p
           className='mt-1 text-sm'
@@ -62,27 +58,27 @@ export default async function CustomerOverviewPage() {
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <StatsCard
           title='Total Orders'
-          value={rentals.length}
+          value={stats.totalOrders}
           icon={ShoppingBag}
           description='All time'
         />
         <StatsCard
           title='Active Rentals'
-          value={activeRentals}
+          value={stats.activeRentals}
           icon={Clock}
           description='Currently rented'
           accentColor='#22c55e'
         />
         <StatsCard
           title='Payments Made'
-          value={payments.length}
+          value={stats.paymentsMade}
           icon={CreditCard}
           description='All transactions'
           accentColor='#7c3aed'
         />
         <StatsCard
           title='Reviews Given'
-          value={reviews.length}
+          value={stats.reviewsGiven}
           icon={Star}
           description='Your feedback'
           accentColor='#f59e0b'
@@ -116,7 +112,7 @@ export default async function CustomerOverviewPage() {
           </Link>
         </div>
 
-        {rentals.length === 0 ? (
+        {recentOrders.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-16'>
             <ShoppingBag
               className='mb-3 h-10 w-10'
@@ -164,7 +160,7 @@ export default async function CustomerOverviewPage() {
                 className='divide-y'
                 style={{ borderColor: 'var(--border)' }}
               >
-                {rentals.map((order) => (
+                {recentOrders.map((order) => (
                   <tr
                     key={order.id}
                     className='transition-colors hover:bg-muted'
@@ -189,7 +185,11 @@ export default async function CustomerOverviewPage() {
                       {formatCurrency(order.amount)}
                     </td>
                     <td className='px-6 py-4'>
-                      <RentalStatusBadge status={order.status} />
+                      <RentalStatusBadge
+                        status={
+                          order.status as import('@/lib/types').RentalStatus
+                        }
+                      />
                     </td>
                     <td className='px-6 py-4'>
                       <Link
