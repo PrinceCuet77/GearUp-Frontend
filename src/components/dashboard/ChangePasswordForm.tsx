@@ -3,13 +3,14 @@
 import { useState, useCallback } from 'react';
 import { Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { changePassword } from '@/app/(dashboards)/customer/change-password/_actions/passwordChange';
 
 export function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const canSubmit = currentPassword.length > 0 && newPassword.length >= 8;
+  const canSubmit = currentPassword.length > 0 && newPassword.length >= 6;
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -18,16 +19,26 @@ export function ChangePasswordForm() {
 
       setSaving(true);
 
-      // ── DEMO MODE ────────────────────────────────────────────────────
-      await new Promise((r) => setTimeout(r, 600));
-      // ─────────────────────────────────────────────────────────────────
+      try {
+        const result = await changePassword({
+          oldPassword: currentPassword,
+          newPassword: newPassword,
+        });
 
-      toast.success('Password changed successfully. (demo)');
-      setCurrentPassword('');
-      setNewPassword('');
-      setSaving(false);
+        if (result.success) {
+          toast.success('Password changed successfully.');
+          setCurrentPassword('');
+          setNewPassword('');
+        } else {
+          toast.error(result.error || 'Failed to change password.');
+        }
+      } catch {
+        toast.error('An unexpected error occurred. Please try again.');
+      } finally {
+        setSaving(false);
+      }
     },
-    [canSubmit],
+    [canSubmit, currentPassword, newPassword],
   );
 
   const inputStyle = {
@@ -91,7 +102,7 @@ export function ChangePasswordForm() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
-              minLength={8}
+              minLength={6}
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors focus:ring-2'
               style={
                 {
@@ -99,11 +110,11 @@ export function ChangePasswordForm() {
                   '--tw-ring-color': 'var(--ring)',
                 } as React.CSSProperties
               }
-              placeholder='Minimum 8 characters'
+              placeholder='Minimum 6 characters'
             />
-            {newPassword.length > 0 && newPassword.length < 8 && (
+            {newPassword.length > 0 && newPassword.length < 6 && (
               <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-                Password must be at least 8 characters.
+                Password must be at least 6 characters.
               </p>
             )}
           </div>

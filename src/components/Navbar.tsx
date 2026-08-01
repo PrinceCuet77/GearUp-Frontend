@@ -87,6 +87,12 @@ export default function Navbar() {
     userProfile?.role && userProfile.role in ROLE_COLORS
       ? ROLE_COLORS[userProfile.role as AvailableRole]
       : null;
+  const rolePath =
+    userProfile?.role === 'ADMIN'
+      ? '/admin'
+      : userProfile?.role === 'PROVIDER'
+        ? '/provider'
+        : '/customer';
 
   const handleLogout = async () => {
     await logoutAction();
@@ -347,13 +353,7 @@ export default function Navbar() {
                     <div className='py-1'>
                       {userProfile?.role && (
                         <Link
-                          href={
-                            userProfile.role === 'ADMIN'
-                              ? '/admin'
-                              : userProfile.role === 'PROVIDER'
-                                ? '/provider'
-                                : '/customer'
-                          }
+                          href={rolePath}
                           onClick={() => setUserMenuOpen(false)}
                           className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
                           style={{ color: 'var(--foreground)' }}
@@ -404,7 +404,7 @@ export default function Navbar() {
                         );
                       })}
                       <Link
-                        href='/me'
+                        href={`${rolePath}/profile`}
                         onClick={() => setUserMenuOpen(false)}
                         className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
                         style={{ color: 'var(--foreground)' }}
@@ -426,7 +426,7 @@ export default function Navbar() {
                         My Profile
                       </Link>
                       <Link
-                        href='/change-password'
+                        href={`${rolePath}/change-password`}
                         onClick={() => setUserMenuOpen(false)}
                         className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
                         style={{ color: 'var(--foreground)' }}
@@ -624,7 +624,10 @@ export default function Navbar() {
               {[
                 ...PUBLIC_LINKS,
                 ...(userProfile
-                  ? [{ href: '/me', label: 'My Profile' }, ...roleLinks]
+                  ? [
+                      { href: `${rolePath}/profile`, label: 'My Profile' },
+                      ...roleLinks,
+                    ]
                   : []),
               ].map((link) => (
                 <Link
