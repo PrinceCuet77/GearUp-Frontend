@@ -1,17 +1,14 @@
-import { DUMMY_PROVIDER } from '@/lib/dummy-data';
-import { ProfileForm } from '@/components/dashboard/ProfileForm';
+import { ProfileContent } from '@/components/dashboard/ProfileContent';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 
 export default async function ProviderProfilePage() {
-  const user = DUMMY_PROVIDER;
-
   return (
     <div>
       <PageHeader
         title='Profile Settings'
-        description='Manage your provider account and password.'
+        description='View and update your account information.'
       />
-      <ProfileForm user={user} />
+      <ProfileContent />
     </div>
   );
 }

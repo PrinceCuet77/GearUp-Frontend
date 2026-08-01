@@ -17,6 +17,7 @@ import {
   LogOut,
   User,
   LayoutDashboard,
+  Lock,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -374,28 +375,6 @@ export default function Navbar() {
                           Dashboard
                         </Link>
                       )}
-                      <Link
-                        href='/me'
-                        onClick={() => setUserMenuOpen(false)}
-                        className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
-                        style={{ color: 'var(--foreground)' }}
-                        onMouseEnter={(e) => {
-                          (
-                            e.currentTarget as HTMLAnchorElement
-                          ).style.backgroundColor = 'var(--muted)';
-                        }}
-                        onMouseLeave={(e) => {
-                          (
-                            e.currentTarget as HTMLAnchorElement
-                          ).style.backgroundColor = 'transparent';
-                        }}
-                      >
-                        <User
-                          className='h-4 w-4'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        />
-                        My Profile
-                      </Link>
                       {roleLinks.map((link) => {
                         const Icon = link.icon;
                         return (
@@ -424,6 +403,50 @@ export default function Navbar() {
                           </Link>
                         );
                       })}
+                      <Link
+                        href='/me'
+                        onClick={() => setUserMenuOpen(false)}
+                        className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
+                        style={{ color: 'var(--foreground)' }}
+                        onMouseEnter={(e) => {
+                          (
+                            e.currentTarget as HTMLAnchorElement
+                          ).style.backgroundColor = 'var(--muted)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (
+                            e.currentTarget as HTMLAnchorElement
+                          ).style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <User
+                          className='h-4 w-4'
+                          style={{ color: 'var(--muted-foreground)' }}
+                        />
+                        My Profile
+                      </Link>
+                      <Link
+                        href='/change-password'
+                        onClick={() => setUserMenuOpen(false)}
+                        className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
+                        style={{ color: 'var(--foreground)' }}
+                        onMouseEnter={(e) => {
+                          (
+                            e.currentTarget as HTMLAnchorElement
+                          ).style.backgroundColor = 'var(--muted)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (
+                            e.currentTarget as HTMLAnchorElement
+                          ).style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <Lock
+                          className='h-4 w-4'
+                          style={{ color: 'var(--muted-foreground)' }}
+                        />
+                        Change Password
+                      </Link>
                     </div>
 
                     {/* Logout */}

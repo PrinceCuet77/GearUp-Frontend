@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   },
   { href: '/customer/reviews', label: 'My Reviews', icon: 'Star' },
   { href: '/customer/profile', label: 'Profile', icon: 'User' },
+  { href: '/customer/change-password', label: 'Change Password', icon: 'Lock' },
 ];
 
 export default async function CustomerDashboardLayout({

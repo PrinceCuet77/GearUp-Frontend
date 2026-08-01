@@ -20,6 +20,7 @@ import {
   Tag,
   ClipboardList,
   PlusCircle,
+  Lock,
   type LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -36,6 +37,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Tag,
   ClipboardList,
   PlusCircle,
+  Lock,
 };
 
 export interface NavItem {

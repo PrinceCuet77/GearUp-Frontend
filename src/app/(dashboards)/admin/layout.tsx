@@ -12,6 +12,7 @@ const navItems: NavItem[] = [
   { href: '/admin/categories', label: 'Categories', icon: 'Tag' },
   { href: '/admin/rentals', label: 'Rentals', icon: 'ClipboardList' },
   { href: '/admin/profile', label: 'Profile', icon: 'User' },
+  { href: '/admin/change-password', label: 'Change Password', icon: 'Lock' },
 ];
 
 export default async function AdminDashboardLayout({
