@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import Modal from '@/components/Modal';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import type { Review } from '@/lib/types';
+import { deleteReview } from '../_actions/deleteReview';
 import { getAllReviews } from '../_actions/getAllReviews';
 import { updateReview } from '../_actions/updateReview';
 
@@ -121,17 +122,16 @@ export function ReviewsList({
     setDeleting(reviewId);
     setConfirmDelete(null);
 
-    // ── DEMO MODE: API call commented out ──────────────────────────────
-    // const res = await fetch(`${API_URL}/api/reviews/${reviewId}`, {
-    //   method: 'DELETE', credentials: 'include',
-    // });
-    // if (!res.ok) throw new Error('Delete failed.');
-    await new Promise((r) => setTimeout(r, 400));
-    // ───────────────────────────────────────────────────────────────────────
+    const result = await deleteReview(reviewId);
 
-    toast.success('Review deleted. (demo)');
-    setReviews((prev) => prev.filter((r) => r.id !== reviewId));
-    setTotal((t) => t - 1);
+    if (result.success) {
+      toast.success('Review deleted successfully.');
+      setReviews((prev) => prev.filter((review) => review.id !== reviewId));
+      setTotal((total) => total - 1);
+    } else {
+      toast.error(result.error ?? 'Failed to delete review.');
+    }
+
     setDeleting(null);
   };
 
@@ -379,8 +379,7 @@ export function ReviewsList({
             <button
               onClick={handleDelete}
               disabled={!!deleting}
-              className='inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 cursor-pointer'
-              style={{ backgroundColor: 'var(--destructive)' }}
+              className='inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 cursor-pointer'
             >
               {deleting && <Loader2 className='h-4 w-4 animate-spin' />}
               Delete

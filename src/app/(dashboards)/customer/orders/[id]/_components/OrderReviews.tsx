@@ -111,7 +111,7 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
 
     if (res.success) {
       toast.success('Review deleted successfully.');
-      setReviews(reviews.filter((r) => r.id !== deletingReview.id));
+      setReviews(reviews.filter((review) => review.id !== deletingReview.id));
       setDeletingReview(null);
     } else {
       toast.error(res.error ?? 'Failed to delete review.');
@@ -305,8 +305,7 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className='inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50'
-              style={{ backgroundColor: 'var(--destructive)' }}
+              className='inline-flex cursor-pointer items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50'
             >
               {deleting && <Loader2 className='h-4 w-4 animate-spin' />}
               Delete
