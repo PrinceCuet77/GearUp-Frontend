@@ -22,8 +22,8 @@ import {
   PlusCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { logout } from '@/app/actions/auth';
 import { useAuthStore } from '@/store/useAuthStore';
+import { logoutAction } from '@/app/(auth)/_actions/logoutActions';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
@@ -227,7 +227,7 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
               {meta.label}
             </span>
           )}
-          <form action={logout}>
+          <form action={logoutAction}>
             <button
               type='submit'
               className='cursor-pointer flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150'

@@ -16,6 +16,7 @@ import {
   ChevronDown,
   LogOut,
   User,
+  LayoutDashboard,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -343,6 +344,36 @@ export default function Navbar() {
 
                     {/* Quick links */}
                     <div className='py-1'>
+                      {userProfile?.role && (
+                        <Link
+                          href={
+                            userProfile.role === 'ADMIN'
+                              ? '/admin'
+                              : userProfile.role === 'PROVIDER'
+                                ? '/provider'
+                                : '/customer'
+                          }
+                          onClick={() => setUserMenuOpen(false)}
+                          className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
+                          style={{ color: 'var(--foreground)' }}
+                          onMouseEnter={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.backgroundColor = 'var(--muted)';
+                          }}
+                          onMouseLeave={(e) => {
+                            (
+                              e.currentTarget as HTMLAnchorElement
+                            ).style.backgroundColor = 'transparent';
+                          }}
+                        >
+                          <LayoutDashboard
+                            className='h-4 w-4'
+                            style={{ color: 'var(--muted-foreground)' }}
+                          />
+                          Dashboard
+                        </Link>
+                      )}
                       <Link
                         href='/me'
                         onClick={() => setUserMenuOpen(false)}
