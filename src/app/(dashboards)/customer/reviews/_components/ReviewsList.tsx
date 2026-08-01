@@ -288,7 +288,7 @@ export function ReviewsList({
                       <button
                         onClick={() => handleViewOrder(review.rentalOrderId)}
                         className='cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-muted'
-                        title='View order'
+                        title='View rental order'
                       >
                         <Eye className='h-4 w-4' />
                       </button>

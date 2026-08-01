@@ -3,6 +3,7 @@ import {
   CreditCard,
   Package,
   ShoppingBag,
+  Star,
   Tag,
   Users,
 } from 'lucide-react';
@@ -19,12 +20,21 @@ export const ROLE_LINKS: Record<
   Array<{ href: string; label: string; icon: React.ElementType }>
 > = {
   CUSTOMER: [
-    { href: '/rentals', label: 'Rentals', icon: ShoppingBag },
-    { href: '/payments', label: 'Payments', icon: CreditCard },
+    {
+      href: '/customer/rental-orders',
+      label: 'Rental Orders',
+      icon: ShoppingBag,
+    },
+    { href: '/customer/payments', label: 'Payments', icon: CreditCard },
+    { href: '/customer/reviews', label: 'My Reviews', icon: Star },
   ],
   PROVIDER: [
     { href: '/provider/gears', label: 'My Gear', icon: Package },
-    { href: '/orders', label: 'Orders', icon: ClipboardList },
+    {
+      href: '/provider/rental-orders',
+      label: 'Rental Orders',
+      icon: ClipboardList,
+    },
   ],
   ADMIN: [
     { href: '/admin/users', label: 'Users', icon: Users },

@@ -30,7 +30,7 @@ export const getAllRentalOrders = async (params?: {
         success: false,
         data: [],
         meta: null,
-        error: 'You are not logged in. Please log in to view your orders.',
+        error: 'You are not logged in. Please log in to view your rental orders.',
       };
     }
 

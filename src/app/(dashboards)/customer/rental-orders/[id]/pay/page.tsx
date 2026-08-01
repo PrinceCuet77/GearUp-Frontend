@@ -45,7 +45,7 @@ export default function PayOrderPage({ params: _params }: Props) {
         style={{ color: 'var(--muted-foreground)' }}
       >
         <ArrowLeft className='h-4 w-4' />
-        Back to Orders
+        Back to Rental Orders
       </Link>
 
       <div
@@ -76,7 +76,7 @@ export default function PayOrderPage({ params: _params }: Props) {
           style={{ color: 'var(--muted-foreground)' }}
         >
           You will be redirected to SSLCommerz to securely complete your
-          payment. Your order will be confirmed once payment is received.
+          payment. Your rental order will be confirmed once payment is received.
         </p>
 
         {/* Security note */}

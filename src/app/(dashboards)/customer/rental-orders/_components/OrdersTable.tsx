@@ -115,7 +115,7 @@ export function OrdersTable({
               className='text-sm font-medium'
               style={{ color: 'var(--muted-foreground)' }}
             >
-              No orders found
+              No rental orders found
             </p>
             {statusFilter && (
               <button
@@ -139,7 +139,7 @@ export function OrdersTable({
                       color: 'var(--muted-foreground)',
                     }}
                   >
-                    <th className='px-6 py-3'>Order ID</th>
+                    <th className='px-6 py-3'>Rental Order ID</th>
                     <th className='px-6 py-3'>Rental Dates</th>
                     <th className='px-6 py-3'>Amount</th>
                     <th className='px-6 py-3'>Status</th>

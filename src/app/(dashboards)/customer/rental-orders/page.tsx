@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 
 const LIMIT = 10;
 
-export default async function CustomerOrdersPage({
+export default async function RentalOrdersPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; status?: string }>;
@@ -31,7 +31,7 @@ export default async function CustomerOrdersPage({
   return (
     <div>
       <PageHeader
-        title='My Orders'
+        title='My Rental Orders'
         description={`${total} total rental order${total !== 1 ? 's' : ''}`}
       />
 

@@ -8,8 +8,8 @@ import {
 const navItems: NavItem[] = [
   { href: '/customer', label: 'Overview', icon: 'LayoutDashboard' },
   {
-    href: '/customer/orders',
-    label: 'My Orders',
+    href: '/customer/rental-orders',
+    label: 'My Rental Orders',
     icon: 'ShoppingBag',
   },
   {

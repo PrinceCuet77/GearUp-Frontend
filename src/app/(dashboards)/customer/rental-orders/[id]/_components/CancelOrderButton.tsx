@@ -10,7 +10,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
   const router = useRouter();
 
   const handleCancel = async () => {
-    if (!confirm('Are you sure you want to cancel this order?')) return;
+    if (!confirm('Are you sure you want to cancel this rental order?')) return;
     setLoading(true);
 
     // ── DEMO MODE: API call commented out ────────────────────────────────────
@@ -23,7 +23,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
     await new Promise((r) => setTimeout(r, 600)); // simulate network
     // ─────────────────────────────────────────────────────────────────────────
 
-    toast.success('Order cancelled successfully. (demo)');
+    toast.success('Rental order cancelled successfully. (demo)');
     setLoading(false);
     router.push('/customer/orders');
   };

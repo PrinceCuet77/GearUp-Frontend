@@ -57,7 +57,7 @@ export default async function CustomerOverviewPage() {
       {/* Stats cards */}
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <StatsCard
-          title='Total Orders'
+          title='Total Rental Orders'
           value={stats.totalOrders}
           icon={ShoppingBag}
           description='All time'
@@ -101,10 +101,10 @@ export default async function CustomerOverviewPage() {
             className='text-base font-semibold'
             style={{ color: 'var(--foreground)' }}
           >
-            Recent Orders
+            Recent Rental Orders
           </h2>
           <Link
-            href='/customer/orders'
+            href='/customer/rental-orders'
             className='flex items-center gap-1 text-sm font-medium transition-colors'
             style={{ color: 'var(--primary)' }}
           >
@@ -122,7 +122,7 @@ export default async function CustomerOverviewPage() {
               className='text-sm font-medium'
               style={{ color: 'var(--muted-foreground)' }}
             >
-              No orders yet
+              No rental orders yet
             </p>
             <p
               className='mt-1 text-xs'
@@ -149,7 +149,7 @@ export default async function CustomerOverviewPage() {
                     color: 'var(--muted-foreground)',
                   }}
                 >
-                  <th className='px-6 py-3'>Order ID</th>
+                  <th className='px-6 py-3'>Rental Order ID</th>
                   <th className='px-6 py-3'>Dates</th>
                   <th className='px-6 py-3'>Amount</th>
                   <th className='px-6 py-3'>Status</th>

@@ -134,7 +134,7 @@ export function PaymentsTable({
                     }}
                   >
                     <th className='px-6 py-3'>Transaction ID</th>
-                    <th className='px-6 py-3'>Order</th>
+                    <th className='px-6 py-3'>Rental Order</th>
                     <th className='px-6 py-3'>Amount</th>
                     <th className='px-6 py-3'>Status</th>
                     <th className='px-6 py-3'>Date</th>

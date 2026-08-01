@@ -78,7 +78,7 @@ export default async function OrderDetailPage({ params }: Props) {
         style={{ color: 'var(--muted-foreground)' }}
       >
         <ArrowLeft className='h-4 w-4' />
-        Back to Orders
+        Back to Rental Orders
       </Link>
 
       {/* Header */}
@@ -88,7 +88,7 @@ export default async function OrderDetailPage({ params }: Props) {
             className='text-2xl font-bold tracking-tight'
             style={{ color: 'var(--foreground)' }}
           >
-            Order #{order.id.slice(0, 8)}
+            Rental Order #{order.id.slice(0, 8)}
           </h1>
           <p
             className='mt-1 text-sm'
