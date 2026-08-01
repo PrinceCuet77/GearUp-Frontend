@@ -15,11 +15,16 @@ interface Props {
 const inputCls =
   'h-9 w-full rounded-lg border px-2 text-sm outline-none focus:ring-1 transition-colors';
 
+function toLocalDateStr(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export default function AddToCartModal({ gear, onClose }: Props) {
-  const today = new Date().toISOString().split('T')[0];
-  const defaultEnd = new Date(Date.now() + 3 * 86_400_000)
-    .toISOString()
-    .split('T')[0];
+  const today = toLocalDateStr(new Date());
+  const defaultEnd = toLocalDateStr(new Date(Date.now() + 3 * 86_400_000));
 
   const [qty, setQty] = useState(1);
   const [start, setStart] = useState(today);

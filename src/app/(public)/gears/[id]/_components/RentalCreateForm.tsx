@@ -13,11 +13,16 @@ interface RentalCreateFormProps {
   onSuccess: () => void;
 }
 
+function toLocalDateStr(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
-  const today = new Date().toISOString().split('T')[0];
-  const defaultEnd = new Date(Date.now() + 3 * 86400000)
-    .toISOString()
-    .split('T')[0];
+  const today = toLocalDateStr(new Date());
+  const defaultEnd = toLocalDateStr(new Date(Date.now() + 3 * 86400000));
 
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultEnd);
