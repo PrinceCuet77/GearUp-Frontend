@@ -113,6 +113,7 @@ export interface Review {
   rentalOrderId: string;
   gearItem?: GearItem;
   customer?: User;
+  rentalOrder?: Pick<RentalOrder, 'id' | 'status'>;
   createdAt: string;
   updatedAt: string;
 }

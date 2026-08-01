@@ -1,26 +1,25 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type { Payment, ApiMeta } from '@/lib/types';
+import type { Review, ApiMeta } from '@/lib/types';
 
-export interface PaymentsResult {
+export interface ReviewsResult {
   success: boolean;
-  data: Payment[];
+  data: Review[];
   meta: ApiMeta | null;
   error: string | null;
 }
 
 const statusMessages: Record<number, string> = {
   401: 'Your session has expired. Please log in again.',
-  403: 'You do not have permission to view rental orders.',
-  404: 'Rental orders not found.',
+  403: 'You do not have permission to view reviews.',
+  404: 'Reviews not found.',
 };
 
-export const getAllPayments = async (params?: {
+export const getAllReviews = async (params?: {
   page?: number;
   limit?: number;
-  status?: string;
-}): Promise<PaymentsResult> => {
+}): Promise<ReviewsResult> => {
   try {
     const cookie = await cookies();
     const accessToken = cookie.get('accessToken')?.value;
@@ -37,10 +36,9 @@ export const getAllPayments = async (params?: {
     const query = new URLSearchParams();
     if (params?.page) query.set('page', String(params.page));
     if (params?.limit) query.set('limit', String(params.limit));
-    if (params?.status) query.set('status', params.status);
 
     const queryString = query.toString();
-    const url = `${process.env.BACKEND_API_URL}/api/payments${queryString ? `?${queryString}` : ''}`;
+    const url = `${process.env.BACKEND_API_URL}/api/reviews${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -66,8 +64,8 @@ export const getAllPayments = async (params?: {
     if (result.success) {
       return {
         success: true,
-        data: result.data,
-        meta: result.meta ?? null,
+        data: result.data?.reviews ?? [],
+        meta: result.data?.meta ?? null,
         error: null,
       };
     }
@@ -76,7 +74,7 @@ export const getAllPayments = async (params?: {
       success: false,
       data: [],
       meta: null,
-      error: result.message ?? 'Failed to load rental orders.',
+      error: result.message ?? 'Failed to load reviews.',
     };
   } catch {
     return {

@@ -69,28 +69,6 @@ export function StatsCardSkeleton() {
   );
 }
 
-export function ReviewSkeleton({ rows = 4 }: { rows?: number }) {
-  return (
-    <div
-      className='overflow-hidden rounded-xl border'
-      style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
-    >
-      <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
-        {Array.from({ length: rows }).map((_, i) => (
-          <li key={i} className='p-5'>
-            <div className='mb-2 flex items-center gap-2'>
-              <Skeleton className='h-4 w-24' />
-              <Skeleton className='h-3.5 w-20' />
-            </div>
-            <Skeleton className='mb-1.5 h-3.5 w-3/4' />
-            <Skeleton className='h-3 w-1/2' />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function CategorySkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div

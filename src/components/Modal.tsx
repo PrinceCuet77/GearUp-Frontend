@@ -39,6 +39,8 @@ interface ModalProps {
   maxWidth?: string;
   /** Disable the Save button (independent of `saving`). */
   saveDisabled?: boolean;
+  /** Align footer buttons to the right instead of the left. */
+  footerRight?: boolean;
 }
 
 export default function Modal({
@@ -53,6 +55,7 @@ export default function Modal({
   noFooter = false,
   maxWidth = 'max-w-lg',
   saveDisabled = false,
+  footerRight = false,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -143,7 +146,7 @@ export default function Modal({
         {/* Footer */}
         {!noFooter && (
           <div
-            className='flex shrink-0 items-center gap-3 border-t px-6 py-4'
+            className={`flex shrink-0 items-center gap-3 border-t px-6 py-4 ${footerRight ? 'justify-end' : ''}`}
             style={{ borderColor: 'var(--border)' }}
           >
             <button
