@@ -87,6 +87,7 @@ export interface RentalOrder {
   customerId: string;
   customer?: User;
   items?: RentalOrderItem[];
+  payments?: Payment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -115,4 +116,3 @@ export interface Review {
   createdAt: string;
   updatedAt: string;
 }
-
