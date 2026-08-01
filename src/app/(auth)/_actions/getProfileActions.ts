@@ -1,6 +1,5 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 
 export interface UserProfile {
@@ -28,8 +27,8 @@ export const getProfileAction = async (): Promise<UserProfile | null> => {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
-      // cache: 'force-cache',
-      // next: { revalidate: 60 * 60 * 24, tags: ['user-profile'] }, // Enable caching with a tag
+      cache: 'force-cache',
+      next: { revalidate: 60 * 60 * 24, tags: ['user-profile'] },
     });
 
     if (!response.ok) {

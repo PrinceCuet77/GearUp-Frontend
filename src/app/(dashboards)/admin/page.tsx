@@ -1,18 +1,15 @@
 import Link from 'next/link';
 import { Users, Package, ClipboardList, Tag, ArrowRight } from 'lucide-react';
-import {
-  DUMMY_USERS,
-  DUMMY_GEARS,
-  DUMMY_ORDERS,
-  DUMMY_CATEGORIES,
-} from '@/lib/dummy-data';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { getAdminDashboardInfo } from './_actions/getAdminDashboardInfo';
 
 export default async function AdminOverviewPage() {
-  const userTotal = DUMMY_USERS.length;
-  const gearTotal = DUMMY_GEARS.filter((g) => g.isActive).length;
-  const rentalTotal = DUMMY_ORDERS.length;
-  const categoryTotal = DUMMY_CATEGORIES.length;
+  const dashboardInfo = await getAdminDashboardInfo();
+
+  const userTotal = dashboardInfo?.stats?.totalUsers ?? 0;
+  const gearTotal = dashboardInfo?.stats?.activeGears ?? 0;
+  const rentalTotal = dashboardInfo?.stats?.totalRentals ?? 0;
+  const categoryTotal = dashboardInfo?.stats?.totalCategories ?? 0;
 
   const quickLinks = [
     {
