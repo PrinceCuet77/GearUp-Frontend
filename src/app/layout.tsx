@@ -5,7 +5,6 @@ import { Toaster } from 'sonner';
 import Footer from '@/components/footer';
 import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { CartProvider } from '@/contexts/CartContext';
 import { CartSidebar } from '@/components/cart/CartSidebar';
 import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
 import UserInitializer from '@/components/UserInitializer';
@@ -65,14 +64,12 @@ export default async function RootLayout({
         className='min-h-screen flex flex-col antialiased'
       >
         <ThemeProvider>
-          <CartProvider>
-            <UserInitializer initialProfile={initialProfile} />
-            <CartSidebar />
-            <Navbar />
-            <Toaster richColors closeButton />
-            <main className='flex-1 flex flex-col min-h-0'>{children}</main>
-            <Footer />
-          </CartProvider>
+          <UserInitializer initialProfile={initialProfile} />
+          <CartSidebar />
+          <Navbar />
+          <Toaster richColors closeButton />
+          <main className='flex-1 flex flex-col min-h-0'>{children}</main>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>

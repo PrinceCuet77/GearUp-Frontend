@@ -4,8 +4,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingCart, Star } from 'lucide-react';
-import { toast } from 'sonner';
-import { useCart } from '@/contexts/CartContext';
 import type { GearItem } from '@/lib/types';
 import { formatBDT, parseGearImages, calcAvgRating } from '@/lib/gear-utils';
 import AddToCartModal from './AddToCartModal';
@@ -52,18 +50,10 @@ function StockLabel({ stock }: { stock: number }) {
 }
 
 export default function GearCard({ gear }: { gear: GearItem }) {
-  const { addItem, openCart } = useCart();
   const [showModal, setShowModal] = useState(false);
 
   const images = parseGearImages(gear.images);
   const isUnavailable = !gear.isActive || gear.stock === 0;
-
-  const handleAdd = (qty: number, start: string, end: string) => {
-    addItem(gear, qty, start, end);
-    setShowModal(false);
-    toast.success(`${gear.name} added to cart!`);
-    openCart();
-  };
 
   return (
     <>
@@ -188,11 +178,7 @@ export default function GearCard({ gear }: { gear: GearItem }) {
       </article>
 
       {showModal && (
-        <AddToCartModal
-          gear={gear}
-          onClose={() => setShowModal(false)}
-          onAdd={handleAdd}
-        />
+        <AddToCartModal gear={gear} onClose={() => setShowModal(false)} />
       )}
     </>
   );

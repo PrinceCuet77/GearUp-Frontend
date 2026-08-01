@@ -14,8 +14,8 @@ import type { GearItem, Category } from '@/lib/types';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
 import { getAllGearsAction } from '../_actions/getAllGears';
 import { getAllCategoriesAction } from '../_actions/getAllCategories';
-import GearFilters from '../_components/GearFilters';
-import GearCard from '../_components/GearCard';
+import GearFilters from './GearFilters';
+import GearCard from './GearCard';
 import { toast } from 'sonner';
 import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/Skeleton';
 

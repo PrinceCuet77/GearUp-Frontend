@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ShoppingBag, Loader2 } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import type { GearItem } from '@/lib/types';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
+import { useCartStore } from '@/store/useCartStore';
 
 interface RentalCreateFormProps {
   gear: GearItem;
@@ -21,7 +22,8 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultEnd);
   const [qty, setQty] = useState(1);
-  const [loading, setLoading] = useState(false);
+
+  const addItem = useCartStore((s) => s.addItem);
 
   const days = Math.max(
     Math.ceil(
@@ -37,16 +39,14 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
     color: 'var(--foreground)',
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (new Date(endDate) <= new Date(startDate)) {
       toast.error('End date must be after start date.');
       return;
     }
-    setLoading(true);
-    // TODO: replace with real API call
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    toast.success('Rental order placed! Check your rentals for details.');
+
+    addItem(gear, qty, startDate, endDate);
+    toast.success(`${gear.name} added to cart!`);
     onSuccess();
   };
 
@@ -190,16 +190,11 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
 
       <button
         onClick={handleSubmit}
-        disabled={loading}
-        className='cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+        className='cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors'
         style={{ backgroundColor: 'var(--primary)' }}
       >
-        {loading ? (
-          <Loader2 className='h-4 w-4 animate-spin' />
-        ) : (
-          <ShoppingBag className='h-4 w-4' />
-        )}
-        {loading ? 'Placing Order…' : 'Confirm Rental'}
+        <ShoppingBag className='h-4 w-4' />
+        Add to Cart
       </button>
     </div>
   );

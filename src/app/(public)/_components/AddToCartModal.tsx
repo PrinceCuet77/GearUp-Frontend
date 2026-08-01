@@ -1,20 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ShoppingCart } from 'lucide-react';
+import { toast } from 'sonner';
 import type { GearItem } from '@/lib/types';
 import { formatBDT } from '@/lib/gear-utils';
+import { useCartStore } from '@/store/useCartStore';
 
 interface Props {
   gear: GearItem;
   onClose: () => void;
-  onAdd: (qty: number, startDate: string, endDate: string) => void;
 }
 
 const inputCls =
   'h-9 w-full rounded-lg border px-2 text-sm outline-none focus:ring-1 transition-colors';
 
-export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
+export default function AddToCartModal({ gear, onClose }: Props) {
   const today = new Date().toISOString().split('T')[0];
   const defaultEnd = new Date(Date.now() + 3 * 86_400_000)
     .toISOString()
@@ -23,6 +24,8 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
   const [qty, setQty] = useState(1);
   const [start, setStart] = useState(today);
   const [end, setEnd] = useState(defaultEnd);
+
+  const addItem = useCartStore((s) => s.addItem);
 
   const days = Math.max(
     Math.ceil(
@@ -37,6 +40,16 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
     backgroundColor: 'var(--input-bg)',
     borderColor: 'var(--input-border)',
     color: 'var(--foreground)',
+  };
+
+  const handleSubmit = () => {
+    if (new Date(end) <= new Date(start)) {
+      toast.error('End date must be after start date.');
+      return;
+    }
+    addItem(gear, qty, start, end);
+    toast.success(`${gear.name} added to cart!`);
+    onClose();
   };
 
   return (
@@ -187,8 +200,8 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
             Cancel
           </button>
           <button
-            onClick={() => onAdd(qty, start, end)}
-            className='cursor-pointer flex-1 h-10 rounded-xl text-sm font-bold text-white transition-colors'
+            onClick={handleSubmit}
+            className='cursor-pointer flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-bold text-white transition-colors'
             style={{ backgroundColor: 'var(--primary)' }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')
@@ -197,6 +210,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
               (e.currentTarget.style.backgroundColor = 'var(--primary)')
             }
           >
+            <ShoppingCart className='h-4 w-4' />
             Add to Cart
           </button>
         </div>

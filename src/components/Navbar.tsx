@@ -19,7 +19,7 @@ import {
   LayoutDashboard,
   Lock,
 } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
+import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 
 import {
@@ -50,7 +50,9 @@ export default function Navbar() {
   const clearUser = useAuthStore((s) => s.clearUser);
   const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const { toggleCart, itemCount } = useCart();
+  const toggleCart = useCartStore((s) => s.toggleCart);
+  const _hasHydrated = useCartStore((s) => s._hasHydrated);
+  const itemCount = useCartStore((s) => s.itemCount());
   const pathname = usePathname();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -236,7 +238,7 @@ export default function Navbar() {
                 }}
               >
                 <ShoppingCart className='h-4 w-4' />
-                {itemCount > 0 && (
+                {_hasHydrated && itemCount > 0 && (
                   <span
                     className='absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white'
                     style={{ backgroundColor: 'var(--primary)' }}
@@ -526,7 +528,7 @@ export default function Navbar() {
               style={{ color: 'var(--muted-foreground)' }}
             >
               <ShoppingCart className='h-4 w-4' />
-              {itemCount > 0 && (
+              {_hasHydrated && itemCount > 0 && (
                 <span
                   className='absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white'
                   style={{ backgroundColor: 'var(--primary)' }}

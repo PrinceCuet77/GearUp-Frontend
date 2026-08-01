@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import GearBrowseContent from './GearBrowseContent';
+import GearBrowseContent from '../_components/GearBrowseContent';
 
 function GearBrowseSkeleton() {
   return (

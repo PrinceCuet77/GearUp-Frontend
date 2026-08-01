@@ -11,8 +11,12 @@ import {
   Trash2,
   ArrowRight,
   ShoppingBag,
+  Loader2,
 } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { useCartStore } from '@/store/useCartStore';
+import { useRentalStore } from '@/store/useRentalStore';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 
 function daysBetween(start: string, end: string): number {
@@ -28,16 +32,16 @@ function formatDate(iso: string) {
 }
 
 export function CartSidebar() {
-  const {
-    items,
-    isOpen,
-    closeCart,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    subtotal,
-    itemCount,
-  } = useCart();
+  const items = useCartStore((s) => s.items);
+  const isOpen = useCartStore((s) => s.isOpen);
+  const closeCart = useCartStore((s) => s.closeCart);
+  const removeItem = useCartStore((s) => s.removeItem);
+  const updateQuantity = useCartStore((s) => s.updateQuantity);
+  const clearCart = useCartStore((s) => s.clearCart);
+  const subtotal = useCartStore((s) => s.subtotal());
+  const itemCount = useCartStore((s) => s.itemCount());
+  const { createOrder, isCreating } = useRentalStore();
+  const router = useRouter();
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -59,6 +63,45 @@ export function CartSidebar() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [closeCart]);
+
+  const handleCreateOrder = async () => {
+    if (items.length === 0) return;
+
+    // Find the earliest start date and latest end date across all items
+    const startDate = items.reduce(
+      (earliest, item) =>
+        item.startDate < earliest ? item.startDate : earliest,
+      items[0].startDate,
+    );
+    const endDate = items.reduce(
+      (latest, item) => (item.endDate > latest ? item.endDate : latest),
+      items[0].endDate,
+    );
+
+    const payload = {
+      startDate,
+      endDate,
+      items: items.map((item) => ({
+        gearItemId: item.gear.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    const success = await createOrder(payload);
+
+    if (success) {
+      // Read directly from store since React hasn't re-rendered yet
+      const orderId = useRentalStore.getState().lastCreatedOrder?.id;
+      toast.success('Rental order created successfully!');
+      clearCart();
+      closeCart();
+      if (orderId) {
+        router.push(`/customer/rental-orders/${orderId}`);
+      }
+    } else {
+      toast.error('Failed to create rental order. Please try again.');
+    }
+  };
 
   return (
     <>
@@ -114,7 +157,7 @@ export function CartSidebar() {
           <button
             onClick={closeCart}
             aria-label='Close cart'
-            className='flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
+            className='flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer'
             style={{ color: 'var(--muted-foreground)' }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = 'var(--muted)')
@@ -201,7 +244,7 @@ export function CartSidebar() {
                           <button
                             onClick={() => removeItem(item.gear.id)}
                             aria-label='Remove item'
-                            className='shrink-0 rounded p-1 transition-colors'
+                            className='shrink-0 rounded p-1 transition-colors cursor-pointer'
                             style={{ color: 'var(--muted-foreground)' }}
                             onMouseEnter={(e) =>
                               (e.currentTarget.style.color = '#ef4444')
@@ -244,7 +287,7 @@ export function CartSidebar() {
                                 updateQuantity(item.gear.id, item.quantity - 1)
                               }
                               disabled={item.quantity <= 1}
-                              className='flex h-7 w-7 items-center justify-center rounded-l-lg transition-colors disabled:opacity-40'
+                              className='flex h-7 w-7 items-center justify-center rounded-l-lg transition-colors disabled:opacity-40 cursor-pointer'
                               style={{ color: 'var(--foreground)' }}
                               onMouseEnter={(e) =>
                                 (e.currentTarget.style.backgroundColor =
@@ -268,7 +311,7 @@ export function CartSidebar() {
                                 updateQuantity(item.gear.id, item.quantity + 1)
                               }
                               disabled={item.quantity >= item.gear.stock}
-                              className='flex h-7 w-7 items-center justify-center rounded-r-lg transition-colors disabled:opacity-40'
+                              className='flex h-7 w-7 items-center justify-center rounded-r-lg transition-colors disabled:opacity-40 cursor-pointer'
                               style={{ color: 'var(--foreground)' }}
                               onMouseEnter={(e) =>
                                 (e.currentTarget.style.backgroundColor =
@@ -331,21 +374,32 @@ export function CartSidebar() {
             </div>
 
             {/* CTA */}
-            <Link
-              href='/customer/orders'
-              onClick={closeCart}
-              className='flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white transition-colors'
+            <button
+              onClick={handleCreateOrder}
+              disabled={isCreating}
+              className='flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-60 cursor-pointer'
               style={{ backgroundColor: 'var(--primary)' }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = 'var(--primary)')
-              }
+              onMouseEnter={(e) => {
+                if (!isCreating)
+                  e.currentTarget.style.backgroundColor =
+                    'var(--primary-hover)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--primary)';
+              }}
             >
-              Proceed to Checkout
-              <ArrowRight className='h-4 w-4' />
-            </Link>
+              {isCreating ? (
+                <>
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                  Creating Order…
+                </>
+              ) : (
+                <>
+                  Create Rental Order
+                  <ArrowRight className='h-4 w-4' />
+                </>
+              )}
+            </button>
 
             <button
               onClick={clearCart}
