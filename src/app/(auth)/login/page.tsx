@@ -34,8 +34,16 @@ export default function LoginPage() {
 
       if (result?.success) {
         toast.success(result.message || 'Login successful!');
-        router.push('/dashboard');
+        const role = result.data?.user?.role;
+        if (role === 'ADMIN') {
+          router.push('/admin');
+        } else if (role === 'CUSTOMER') {
+          router.push('/customer');
+        } else if (role === 'PROVIDER') {
+          router.push('/provider');
+        }
       } else {
+        ``;
         toast.error(result?.message || 'Login failed. Please try again.');
       }
     });

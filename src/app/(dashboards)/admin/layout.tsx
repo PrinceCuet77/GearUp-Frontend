@@ -1,4 +1,5 @@
-import { DUMMY_ADMIN } from '@/lib/dummy-data';
+import { redirect } from 'next/navigation';
+import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
 import {
   DashboardShell,
   type NavItem,
@@ -18,15 +19,8 @@ export default async function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // ── DEMO MODE: real auth commented out ──────────────────────────────────
-  // const user = await getCurrentUser();
-  // if (!user) redirect('/login');
-  const user = DUMMY_ADMIN;
-  // ─────────────────────────────────────────────────────────────────────────
+  const user = await getProfileAction();
+  if (!user) redirect('/login');
 
-  return (
-    <DashboardShell navItems={navItems} user={user}>
-      {children}
-    </DashboardShell>
-  );
+  return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
 }

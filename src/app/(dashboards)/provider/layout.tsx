@@ -1,4 +1,5 @@
-import { DUMMY_PROVIDER } from '@/lib/dummy-data';
+import { redirect } from 'next/navigation';
+import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
 import {
   DashboardShell,
   type NavItem,
@@ -16,11 +17,8 @@ export default async function ProviderDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = DUMMY_PROVIDER;
+  const user = await getProfileAction();
+  if (!user) redirect('/login');
 
-  return (
-    <DashboardShell navItems={navItems} user={user}>
-      {children}
-    </DashboardShell>
-  );
+  return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
 }

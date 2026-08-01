@@ -7,6 +7,8 @@ import Navbar from '@/components/Navbar';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { CartProvider } from '@/contexts/CartContext';
 import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
+import UserInitializer from '@/components/UserInitializer';
+import type { User } from '@/lib/types';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -46,7 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Fetch profile server-side to avoid auth flash on client
-  const initialProfile = await getProfileAction();
+  const initialProfile = (await getProfileAction()) as User | null;
 
   return (
     <html
@@ -63,7 +65,8 @@ export default async function RootLayout({
       >
         <ThemeProvider>
           <CartProvider>
-            <Navbar initialProfile={initialProfile} />
+            <UserInitializer initialProfile={initialProfile} />
+            <Navbar />
             <Toaster richColors closeButton />
             <main className='flex-1 flex flex-col min-h-0'>{children}</main>
             <Footer />

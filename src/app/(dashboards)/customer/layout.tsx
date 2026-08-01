@@ -1,4 +1,5 @@
-import { DUMMY_CUSTOMER } from '@/lib/dummy-data';
+import { redirect } from 'next/navigation';
+import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
 import {
   DashboardShell,
   type NavItem,
@@ -25,15 +26,8 @@ export default async function CustomerDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // ── DEMO MODE: real auth commented out ──────────────────────────────────
-  // const user = await getCurrentUser();
-  // if (!user) redirect('/login');
-  const user = DUMMY_CUSTOMER;
-  // ─────────────────────────────────────────────────────────────────────────
+  const user = await getProfileAction();
+  if (!user) redirect('/login');
 
-  return (
-    <DashboardShell navItems={navItems} user={user}>
-      {children}
-    </DashboardShell>
-  );
+  return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
 }

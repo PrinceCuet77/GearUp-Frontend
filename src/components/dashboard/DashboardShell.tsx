@@ -23,6 +23,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { logout } from '@/app/actions/auth';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
@@ -46,12 +47,6 @@ export interface NavItem {
 interface DashboardShellProps {
   children: React.ReactNode;
   navItems: NavItem[];
-  user: {
-    name?: string | null;
-    email: string;
-    role: string;
-    avatarUrl?: string | null;
-  } | null;
 }
 
 const ROLE_META: Record<
@@ -92,15 +87,12 @@ function getInitials(name?: string | null, email?: string): string {
   return (email?.[0] ?? 'U').toUpperCase();
 }
 
-export function DashboardShell({
-  children,
-  navItems,
-  user,
-}: DashboardShellProps) {
+export function DashboardShell({ children, navItems }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     setMounted(true);

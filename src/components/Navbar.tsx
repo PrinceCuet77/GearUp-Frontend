@@ -18,10 +18,7 @@ import {
   User,
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
-import {
-  getProfileAction,
-  type UserProfile,
-} from '@/app/(auth)/_actions/getProfileActions';
+import { useAuthStore } from '@/store/useAuthStore';
 
 import {
   PUBLIC_LINKS,
@@ -44,27 +41,17 @@ function getInitials(name?: string | null, email?: string) {
   return (email?.[0] ?? 'U').toUpperCase();
 }
 
-interface NavbarProps {
-  initialProfile?: UserProfile | null;
-}
-
-export default function Navbar({ initialProfile = null }: NavbarProps) {
+export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(
-    initialProfile,
-  );
+  const userProfile = useAuthStore((s) => s.user);
+  const clearUser = useAuthStore((s) => s.clearUser);
   const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { toggleCart, itemCount } = useCart();
   const pathname = usePathname();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Re-fetch on client to stay up-to-date
-    getProfileAction().then((profile) => setUserProfile(profile));
-  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -101,8 +88,8 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
 
   const handleLogout = async () => {
     await logoutAction();
+    clearUser();
     toast.success('Logged out successfully');
-    setUserProfile(null);
     setUserMenuOpen(false);
     setMobileOpen(false);
     router.push('/');
@@ -269,7 +256,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
                   {userProfile?.avatarUrl ? (
                     <img
                       src={userProfile.avatarUrl}
-                      alt={userProfile.name}
+                      alt={userProfile.name ?? undefined}
                       className='h-7 w-7 rounded-lg object-cover'
                     />
                   ) : (
@@ -312,7 +299,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
                         {userProfile?.avatarUrl ? (
                           <img
                             src={userProfile.avatarUrl}
-                            alt={userProfile.name}
+                            alt={userProfile.name ?? undefined}
                             className='h-10 w-10 rounded-xl object-cover'
                           />
                         ) : (
@@ -538,7 +525,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
                 {userProfile?.avatarUrl ? (
                   <img
                     src={userProfile.avatarUrl}
-                    alt={userProfile.name}
+                    alt={userProfile.name ?? undefined}
                     className='h-10 w-10 shrink-0 rounded-xl object-cover'
                   />
                 ) : (
