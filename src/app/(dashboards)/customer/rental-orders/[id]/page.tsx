@@ -66,8 +66,8 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const order = result.data;
 
-  const canPay = order.status === 'PLACED' || order.status === 'CONFIRMED';
-  const canCancel = order.status === 'PLACED' || order.status === 'CONFIRMED';
+  const canPay = order.status === 'CONFIRMED';
+  const canCancel = order.status === 'PLACED';
 
   return (
     <div className='mx-auto max-w-3xl'>
@@ -403,7 +403,8 @@ export default async function OrderDetailPage({ params }: Props) {
       )}
 
       {/* Actions */}
-      <div className='mt-6 flex flex-wrap gap-3'>
+      <div className='mt-6 flex flex-wrap justify-end gap-3'>
+        {canCancel && <CancelOrderButton orderId={order.id} />}
         {canPay && (
           <Link
             href={`/customer/orders/${order.id}/pay`}
@@ -414,7 +415,6 @@ export default async function OrderDetailPage({ params }: Props) {
             Pay Now
           </Link>
         )}
-        {canCancel && <CancelOrderButton orderId={order.id} />}
       </div>
     </div>
   );
