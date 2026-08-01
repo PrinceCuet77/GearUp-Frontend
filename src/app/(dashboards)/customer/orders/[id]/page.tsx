@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar, Package, CreditCard } from 'lucide-react';
-import { DUMMY_ORDERS } from '@/lib/dummy-data';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
 import { CancelOrderButton } from './CancelOrderButton';
+import { getSingleRentalOrder } from '../_actions/getSingleRentalOrder';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -25,15 +25,11 @@ function formatCurrency(amount: string | number) {
 export default async function OrderDetailPage({ params }: Props) {
   const { id } = await params;
 
-  // ── DEMO MODE: API call commented out ───────────────────────────────────────
-  // try {
-  //   const res = await serverFetch<RentalOrder>(`/api/rentals/${id}`);
-  //   order = res.data;
-  // } catch { notFound(); }
-  const order = DUMMY_ORDERS.find((o) => o.id === id) ?? null;
-  // ───────────────────────────────────────────────────────────────────────────
+  const result = await getSingleRentalOrder(id);
 
-  if (!order) notFound();
+  if (!result.success || !result.data) notFound();
+
+  const order = result.data;
 
   const canPay = order.status === 'CONFIRMED';
   const canCancel = order.status === 'PLACED' || order.status === 'CONFIRMED';
