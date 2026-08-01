@@ -1,11 +1,11 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type { RentalOrder, ApiMeta } from '@/lib/types';
+import type { Payment, ApiMeta } from '@/lib/types';
 
-export interface RentalOrdersResult {
+export interface PaymentsResult {
   success: boolean;
-  data: RentalOrder[];
+  data: Payment[];
   meta: ApiMeta | null;
   error: string | null;
 }
@@ -16,11 +16,11 @@ const statusMessages: Record<number, string> = {
   404: 'Rental orders not found.',
 };
 
-export const getAllRentalOrders = async (params?: {
+export const getAllPayments = async (params?: {
   page?: number;
   limit?: number;
   status?: string;
-}): Promise<RentalOrdersResult> => {
+}): Promise<PaymentsResult> => {
   try {
     const cookie = await cookies();
     const accessToken = cookie.get('accessToken')?.value;
@@ -40,7 +40,7 @@ export const getAllRentalOrders = async (params?: {
     if (params?.status) query.set('status', params.status);
 
     const queryString = query.toString();
-    const url = `${process.env.BACKEND_API_URL}/api/rentals${queryString ? `?${queryString}` : ''}`;
+    const url = `${process.env.BACKEND_API_URL}/api/paymentss${queryString ? `?${queryString}` : ''}`;
 
     const response = await fetch(url, {
       method: 'GET',
@@ -66,7 +66,7 @@ export const getAllRentalOrders = async (params?: {
     if (result.success) {
       return {
         success: true,
-        data: result.data as RentalOrder[],
+        data: result.data,
         meta: result.meta ?? null,
         error: null,
       };
