@@ -20,17 +20,30 @@ import { updateReview } from '../_actions/updateReview';
 
 const LIMIT = 10;
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({
+  rating,
+  interactive = false,
+  onChange,
+}: {
+  rating: number;
+  interactive?: boolean;
+  onChange?: (r: number) => void;
+}) {
+  const [hover, setHover] = useState(0);
+
   return (
     <div className='flex items-center gap-0.5'>
       {Array.from({ length: 5 }).map((_, i) => (
         <Star
           key={i}
-          className='h-3.5 w-3.5'
+          className={`h-4 w-4 ${interactive ? 'cursor-pointer' : ''}`}
           style={{
-            color: i < rating ? '#f59e0b' : 'var(--border)',
-            fill: i < rating ? '#f59e0b' : 'transparent',
+            color: i < (hover || rating) ? '#f59e0b' : 'var(--border)',
+            fill: i < (hover || rating) ? '#f59e0b' : 'transparent',
           }}
+          onMouseEnter={() => interactive && setHover(i + 1)}
+          onMouseLeave={() => interactive && setHover(0)}
+          onClick={() => interactive && onChange?.(i + 1)}
         />
       ))}
     </div>
@@ -71,6 +84,12 @@ export function ReviewsList({
   const [editRating, setEditRating] = useState(0);
   const [editComment, setEditComment] = useState('');
   const [savingEdit, setSavingEdit] = useState(false);
+
+  // Track if changes were made in the edit modal
+  const hasChanges =
+    editingReview != null &&
+    (editRating !== editingReview.rating ||
+      editComment.trim() !== editingReview.comment);
 
   const fetchReviews = useCallback(async (targetPage: number) => {
     setLoading(true);
@@ -261,56 +280,23 @@ export function ReviewsList({
                     <div className='flex shrink-0 items-center gap-1'>
                       <button
                         onClick={() => openEditModal(review)}
-                        className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-                        style={{ color: 'var(--muted-foreground)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#3b82f6';
-                          e.currentTarget.style.backgroundColor =
-                            'rgba(59,130,246,0.08)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color =
-                            'var(--muted-foreground)';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                        aria-label='Edit review'
+                        className='cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-muted'
+                        title='Edit review'
                       >
                         <Pencil className='h-4 w-4' />
                       </button>
                       <button
                         onClick={() => handleViewOrder(review.rentalOrderId)}
-                        className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-                        style={{ color: 'var(--muted-foreground)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#8b5cf6';
-                          e.currentTarget.style.backgroundColor =
-                            'rgba(139,92,246,0.08)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color =
-                            'var(--muted-foreground)';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                        aria-label='View order'
+                        className='cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-muted'
+                        title='View order'
                       >
                         <Eye className='h-4 w-4' />
                       </button>
                       <button
                         onClick={() => setConfirmDelete(review)}
                         disabled={deleting === review.id}
-                        className='cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors'
-                        style={{ color: 'var(--muted-foreground)' }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = '#ef4444';
-                          e.currentTarget.style.backgroundColor =
-                            'rgba(239,68,68,0.08)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color =
-                            'var(--muted-foreground)';
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                        }}
-                        aria-label='Delete review'
+                        className='cursor-pointer rounded-lg p-1.5 transition-colors hover:bg-muted'
+                        title='Delete review'
                       >
                         {deleting === review.id ? (
                           <Loader2 className='h-4 w-4 animate-spin' />
@@ -372,15 +358,35 @@ export function ReviewsList({
         open={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}
         title='Delete Review'
-        onSave={handleDelete}
-        saveLabel='Delete'
-        cancelLabel='Cancel'
-        saving={!!deleting}
-        footerRight
+        noFooter
       >
-        <p className='text-sm' style={{ color: 'var(--foreground)' }}>
-          Do you want to delete this review?
-        </p>
+        <div className='space-y-4'>
+          <p className='text-sm' style={{ color: 'var(--foreground)' }}>
+            Are you sure you want to delete this review? This action cannot be
+            undone.
+          </p>
+          <div className='flex justify-end gap-3'>
+            <button
+              onClick={() => setConfirmDelete(null)}
+              className='rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer'
+              style={{
+                backgroundColor: 'var(--muted)',
+                color: 'var(--foreground)',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={!!deleting}
+              className='inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 cursor-pointer'
+              style={{ backgroundColor: 'var(--destructive)' }}
+            >
+              {deleting && <Loader2 className='h-4 w-4 animate-spin' />}
+              Delete
+            </button>
+          </div>
+        </div>
       </Modal>
 
       {/* Edit review modal */}
@@ -388,85 +394,68 @@ export function ReviewsList({
         open={!!editingReview}
         onClose={() => setEditingReview(null)}
         title='Edit Review'
-        onSave={handleSaveEdit}
-        saveLabel='Update'
-        cancelLabel='Cancel'
-        saving={savingEdit}
-        footerRight
+        noFooter
       >
-        <div className='space-y-5'>
-          {/* Rating */}
+        <div className='space-y-4'>
           <div>
             <label
-              className='mb-1.5 block text-sm font-medium'
+              className='mb-2 block text-sm font-medium'
               style={{ color: 'var(--foreground)' }}
             >
               Rating
             </label>
-            <div className='flex items-center gap-1'>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <button
-                  key={i}
-                  type='button'
-                  onClick={() => setEditRating(i + 1)}
-                  className='cursor-pointer p-0.5 transition-transform hover:scale-110'
-                  aria-label={`Rate ${i + 1} star${i === 0 ? '' : 's'}`}
-                >
-                  <Star
-                    className='h-6 w-6 transition-colors'
-                    style={{
-                      color: i < editRating ? '#f59e0b' : 'var(--border)',
-                      fill: i < editRating ? '#f59e0b' : 'transparent',
-                    }}
-                  />
-                </button>
-              ))}
-              {editRating > 0 && (
-                <span
-                  className='ml-2 text-sm'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {editRating}/5
-                </span>
-              )}
-            </div>
+            <StarRating
+              rating={editRating}
+              interactive
+              onChange={setEditRating}
+            />
           </div>
-
-          {/* Comment */}
           <div>
-            <div className='mb-1.5 flex items-center justify-between'>
-              <label
-                className='text-sm font-medium'
-                style={{ color: 'var(--foreground)' }}
-              >
-                Comment
-              </label>
-              <span
-                className='text-xs'
-                style={{
-                  color:
-                    editComment.length > 100
-                      ? '#ef4444'
-                      : 'var(--muted-foreground)',
-                }}
-              >
-                {editComment.length}/100
-              </span>
-            </div>
+            <label
+              className='mb-2 block text-sm font-medium'
+              style={{ color: 'var(--foreground)' }}
+            >
+              Comment
+            </label>
             <textarea
               value={editComment}
               onChange={(e) => setEditComment(e.target.value)}
-              rows={4}
+              rows={3}
               maxLength={100}
-              placeholder='Write your review...'
-              className='w-full resize-none rounded-lg border px-3 py-2 text-sm outline-none transition-colors focus:ring-1 focus:ring-ring'
+              className='w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
               style={{
                 backgroundColor: 'var(--background)',
-                borderColor:
-                  editComment.length > 100 ? '#ef4444' : 'var(--border)',
+                borderColor: 'var(--border)',
                 color: 'var(--foreground)',
               }}
             />
+            <p
+              className='mt-1 text-xs'
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {editComment.length}/100 characters
+            </p>
+          </div>
+          <div className='flex justify-end gap-3'>
+            <button
+              onClick={() => setEditingReview(null)}
+              className='rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer'
+              style={{
+                backgroundColor: 'var(--muted)',
+                color: 'var(--foreground)',
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSaveEdit}
+              disabled={savingEdit || !hasChanges}
+              className='inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed'
+              style={{ backgroundColor: 'var(--primary)' }}
+            >
+              {savingEdit && <Loader2 className='h-4 w-4 animate-spin' />}
+              Save Changes
+            </button>
           </div>
         </div>
       </Modal>

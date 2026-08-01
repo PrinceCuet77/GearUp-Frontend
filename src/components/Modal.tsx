@@ -174,7 +174,7 @@ export default function Modal({
               <button
                 onClick={onSave}
                 disabled={saving || saveDisabled}
-                className='cursor-pointer flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+                className='cursor-pointer flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60'
                 style={{ backgroundColor: 'var(--primary)' }}
                 onMouseEnter={(e) => {
                   if (!saving && !saveDisabled)

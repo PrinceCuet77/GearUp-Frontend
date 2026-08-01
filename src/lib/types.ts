@@ -88,6 +88,7 @@ export interface RentalOrder {
   customer?: User;
   items?: RentalOrderItem[];
   payments?: Payment[];
+  reviews?: Review[];
   createdAt: string;
   updatedAt: string;
 }
