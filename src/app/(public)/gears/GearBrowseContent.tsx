@@ -42,7 +42,7 @@ function Pagination({
   }
 
   const btnBase =
-    'flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors';
+    'cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors';
 
   return (
     <nav
@@ -182,7 +182,7 @@ function EmptyState({
       {hasFilters && (
         <button
           onClick={onReset}
-          className='mt-5 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors'
+          className='cursor-pointer mt-5 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors'
           style={{ backgroundColor: 'var(--primary)' }}
         >
           Clear Filters
@@ -449,7 +449,7 @@ export default function GearBrowseContent() {
                 {/* Mobile filter button */}
                 <button
                   onClick={() => setMobileFiltersOpen(true)}
-                  className='inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors lg:hidden'
+                  className='cursor-pointer inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors lg:hidden'
                   style={{
                     borderColor: 'var(--border)',
                     color: 'var(--foreground)',
@@ -489,6 +489,7 @@ export default function GearBrowseContent() {
                     <button
                       onClick={chip.clear}
                       aria-label={`Remove ${chip.label} filter`}
+                      className='cursor-pointer'
                     >
                       <X className='h-3 w-3' />
                     </button>
@@ -496,7 +497,7 @@ export default function GearBrowseContent() {
                 ))}
                 <button
                   onClick={resetFilters}
-                  className='rounded-full px-3 py-1 text-xs font-medium transition-colors'
+                  className='cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors'
                   style={{
                     color: 'var(--muted-foreground)',
                     backgroundColor: 'var(--muted)',
@@ -582,7 +583,7 @@ export default function GearBrowseContent() {
               </h2>
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className='rounded-lg p-1.5 transition-colors'
+                className='cursor-pointer rounded-lg p-1.5 transition-colors'
                 style={{ color: 'var(--muted-foreground)' }}
                 aria-label='Close filters'
               >
@@ -594,7 +595,7 @@ export default function GearBrowseContent() {
 
             <button
               onClick={() => setMobileFiltersOpen(false)}
-              className='mt-6 h-11 w-full rounded-xl text-sm font-bold text-white transition-colors'
+              className='cursor-pointer mt-6 h-11 w-full rounded-xl text-sm font-bold text-white transition-colors'
               style={{ backgroundColor: 'var(--primary)' }}
             >
               Show {total} Result{total !== 1 ? 's' : ''}

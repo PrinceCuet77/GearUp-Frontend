@@ -32,7 +32,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
     <button
       onClick={handleCancel}
       disabled={loading}
-      className='inline-flex h-10 items-center gap-2 rounded-lg border px-5 text-sm font-semibold transition-colors disabled:opacity-60'
+      className='cursor-pointer inline-flex h-10 items-center gap-2 rounded-lg border px-5 text-sm font-semibold transition-colors disabled:opacity-60'
       style={{
         borderColor: 'var(--border)',
         color: 'var(--muted-foreground)',

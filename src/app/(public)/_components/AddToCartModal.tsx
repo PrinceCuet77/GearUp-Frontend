@@ -72,7 +72,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
           </div>
           <button
             onClick={onClose}
-            className='shrink-0 rounded-lg p-1.5 transition-colors'
+            className='cursor-pointer shrink-0 rounded-lg p-1.5 transition-colors'
             style={{ color: 'var(--muted-foreground)' }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = 'var(--muted)')
@@ -137,7 +137,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
               <button
                 onClick={() => setQty((q) => Math.max(1, q - 1))}
                 disabled={qty <= 1}
-                className='flex h-9 w-9 items-center justify-center transition-colors disabled:opacity-40'
+                className='cursor-pointer flex h-9 w-9 items-center justify-center transition-colors disabled:opacity-40'
                 style={{ color: 'var(--foreground)' }}
               >
                 −
@@ -151,7 +151,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
               <button
                 onClick={() => setQty((q) => Math.min(gear.stock, q + 1))}
                 disabled={qty >= gear.stock}
-                className='flex h-9 w-9 items-center justify-center transition-colors disabled:opacity-40'
+                className='cursor-pointer flex h-9 w-9 items-center justify-center transition-colors disabled:opacity-40'
                 style={{ color: 'var(--foreground)' }}
               >
                 +
@@ -177,7 +177,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
         <div className='flex gap-3'>
           <button
             onClick={onClose}
-            className='flex-1 h-10 rounded-xl border text-sm font-semibold transition-colors'
+            className='cursor-pointer flex-1 h-10 rounded-xl border text-sm font-semibold transition-colors'
             style={{
               borderColor: 'var(--border)',
               color: 'var(--foreground)',
@@ -188,7 +188,7 @@ export default function AddToCartModal({ gear, onClose, onAdd }: Props) {
           </button>
           <button
             onClick={() => onAdd(qty, start, end)}
-            className='flex-1 h-10 rounded-xl text-sm font-bold text-white transition-colors'
+            className='cursor-pointer flex-1 h-10 rounded-xl text-sm font-bold text-white transition-colors'
             style={{ backgroundColor: 'var(--primary)' }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.backgroundColor = 'var(--primary-hover)')

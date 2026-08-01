@@ -80,9 +80,7 @@ export default function GearCard({ gear }: { gear: GearItem }) {
           className='relative block aspect-4/3 overflow-hidden'
         >
           <Image
-            src={
-              images[0]
-            }
+            src={images[0]}
             alt={gear.name}
             fill
             sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
@@ -171,7 +169,7 @@ export default function GearCard({ gear }: { gear: GearItem }) {
                 if (!isUnavailable) setShowModal(true);
               }}
               disabled={isUnavailable}
-              className='inline-flex shrink-0 h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-bold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50'
+              className='inline-flex shrink-0 h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-bold text-white transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
               style={{ backgroundColor: 'var(--primary)' }}
               onMouseEnter={(e) => {
                 if (!e.currentTarget.disabled)

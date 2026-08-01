@@ -115,7 +115,11 @@ export default function AdminUsersPage() {
             style={{ color: 'var(--foreground)' }}
           />
           {searchInput && (
-            <button type='button' onClick={clearSearch}>
+            <button
+              type='button'
+              onClick={clearSearch}
+              className='cursor-pointer'
+            >
               <X
                 className='h-4 w-4'
                 style={{ color: 'var(--muted-foreground)' }}
@@ -125,7 +129,7 @@ export default function AdminUsersPage() {
         </div>
         <button
           type='submit'
-          className='rounded-lg px-4 py-2 text-sm font-semibold transition-colors'
+          className='cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors'
           style={{
             backgroundColor: 'var(--primary)',
             color: 'var(--primary-foreground)',
@@ -239,7 +243,7 @@ export default function AdminUsersPage() {
                           <button
                             onClick={() => toggleStatus(user.id, user.status)}
                             disabled={toggling === user.id}
-                            className='inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors disabled:opacity-50'
+                            className='cursor-pointer inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors disabled:opacity-50'
                             style={
                               user.status === 'ACTIVE'
                                 ? {
@@ -279,7 +283,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
@@ -290,7 +294,7 @@ export default function AdminUsersPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',

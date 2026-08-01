@@ -154,7 +154,7 @@ export default function CustomerReviewsPage() {
                     <button
                       onClick={() => handleDelete(review.id)}
                       disabled={deleting === review.id}
-                      className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors'
+                      className='cursor-pointer flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors'
                       style={{ color: 'var(--muted-foreground)' }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.color = '#ef4444';
@@ -193,7 +193,7 @@ export default function CustomerReviewsPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
@@ -204,7 +204,7 @@ export default function CustomerReviewsPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',

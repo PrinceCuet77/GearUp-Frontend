@@ -157,7 +157,7 @@ export default function ProviderGearPage() {
                         <button
                           onClick={() => handleDelete(gear.id, gear.name)}
                           disabled={deleting === gear.id}
-                          className='flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
+                          className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
                           style={{ color: 'var(--muted-foreground)' }}
                         >
                           {deleting === gear.id ? (
@@ -276,7 +276,7 @@ export default function ProviderGearPage() {
                           <button
                             onClick={() => handleDelete(gear.id, gear.name)}
                             disabled={deleting === gear.id}
-                            className='flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors disabled:opacity-50'
+                            className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors disabled:opacity-50'
                             style={{
                               backgroundColor: 'rgba(239,68,68,0.08)',
                               color: '#ef4444',
@@ -312,7 +312,7 @@ export default function ProviderGearPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
@@ -323,7 +323,7 @@ export default function ProviderGearPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',

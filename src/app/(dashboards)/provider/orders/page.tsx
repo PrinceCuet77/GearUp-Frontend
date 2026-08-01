@@ -71,7 +71,7 @@ export default function ProviderOrdersPage() {
               setStatusFilter(f.value);
               setPage(1);
             }}
-            className='rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all'
+            className='cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all'
             style={
               statusFilter === f.value
                 ? {
@@ -203,7 +203,7 @@ export default function ProviderOrdersPage() {
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
@@ -214,7 +214,7 @@ export default function ProviderOrdersPage() {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className='flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',

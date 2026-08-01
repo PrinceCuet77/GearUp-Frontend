@@ -264,7 +264,7 @@ export default function GearReviewsPage({ params }: Props) {
                     <button
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
-                      className='flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                      className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                       style={{
                         borderColor: 'var(--border)',
                         color: 'var(--foreground)',
@@ -278,7 +278,7 @@ export default function GearReviewsPage({ params }: Props) {
                         <button
                           key={n}
                           onClick={() => setPage(n)}
-                          className='flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors'
+                          className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors'
                           style={
                             n === page
                               ? {
@@ -302,7 +302,7 @@ export default function GearReviewsPage({ params }: Props) {
                         setPage((p) => Math.min(totalPages, p + 1))
                       }
                       disabled={page === totalPages}
-                      className='flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                      className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
                       style={{
                         borderColor: 'var(--border)',
                         color: 'var(--foreground)',

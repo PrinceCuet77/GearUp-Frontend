@@ -238,7 +238,7 @@ export function DashboardShell({
           <form action={logout}>
             <button
               type='submit'
-              className='flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150'
+              className='cursor-pointer flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150'
               style={{ color: 'var(--muted-foreground)' }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
@@ -266,7 +266,7 @@ export function DashboardShell({
         >
           <button
             onClick={() => setSidebarOpen(true)}
-            className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+            className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
             style={{ color: 'var(--foreground)' }}
             aria-label='Open navigation'
           >
@@ -281,7 +281,7 @@ export function DashboardShell({
           {mounted && (
             <button
               onClick={toggleTheme}
-              className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--foreground)' }}
               aria-label='Toggle theme'
             >

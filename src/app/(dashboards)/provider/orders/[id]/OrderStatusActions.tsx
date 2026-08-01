@@ -78,7 +78,7 @@ export function OrderStatusActions({
       <button
         onClick={handleUpdate}
         disabled={loading}
-        className='inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+        className='cursor-pointer inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
         style={{
           backgroundColor:
             action.color !== 'var(--muted-foreground)'

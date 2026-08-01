@@ -101,7 +101,7 @@ export default function PayOrderPage({ params: _params }: Props) {
         <button
           onClick={initiatePayment}
           disabled={loading}
-          className='flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-colors disabled:opacity-60'
+          className='cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-colors disabled:opacity-60'
           style={{ backgroundColor: 'var(--primary)' }}
         >
           {loading ? (

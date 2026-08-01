@@ -86,7 +86,7 @@ export default function AdminCategoriesPage() {
         action={
           <button
             onClick={openCreate}
-            className='inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition-colors'
+            className='inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition-colors cursor-pointer'
             style={{ backgroundColor: 'var(--primary)' }}
           >
             <PlusCircle className='h-4 w-4' />
@@ -112,7 +112,7 @@ export default function AdminCategoriesPage() {
             </h2>
             <button
               onClick={() => setShowForm(false)}
-              className='flex h-7 w-7 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer flex h-7 w-7 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--muted-foreground)' }}
             >
               <X className='h-4 w-4' />
@@ -158,7 +158,7 @@ export default function AdminCategoriesPage() {
             <button
               type='submit'
               disabled={saving}
-              className='inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+              className='inline-flex h-9 shrink-0 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60'
               style={{ backgroundColor: 'var(--primary)' }}
             >
               {saving ? (
@@ -216,7 +216,7 @@ export default function AdminCategoriesPage() {
                 </div>
                 <button
                   onClick={() => openEdit(cat)}
-                  className='flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors'
+                  className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors'
                   style={{
                     backgroundColor: 'var(--muted)',
                     color: 'var(--foreground)',

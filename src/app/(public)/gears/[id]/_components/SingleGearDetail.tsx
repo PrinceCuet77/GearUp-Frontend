@@ -46,9 +46,7 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
   };
 
   return (
-    <div
-      style={{ backgroundColor: 'var(--background)' }}
-    >
+    <div style={{ backgroundColor: 'var(--background)' }}>
       <div className='mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8'>
         {/* Back */}
         <Link
@@ -115,7 +113,7 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
                   <button
                     key={i}
                     onClick={() => openImage(src)}
-                    className='relative h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-colors'
+                    className='relative cursor-pointer h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-colors'
                     style={{
                       borderColor: i === 0 ? 'var(--primary)' : 'var(--border)',
                     }}

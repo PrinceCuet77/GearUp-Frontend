@@ -149,7 +149,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <button
               type='submit'
               disabled={saving}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60'
               style={{ backgroundColor: 'var(--primary)' }}
             >
               {saving ? (
@@ -238,7 +238,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <button
               type='submit'
               disabled={changingPassword}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60'
               style={{ backgroundColor: 'var(--primary)' }}
             >
               {changingPassword ? (

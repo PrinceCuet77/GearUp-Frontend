@@ -132,7 +132,7 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
         <div className='flex items-center gap-3'>
           <button
             onClick={() => setQty((q) => Math.max(1, q - 1))}
-            className='flex h-10 w-10 items-center justify-center rounded-lg border text-lg font-bold transition-colors'
+            className='cursor-pointer flex h-10 w-10 items-center justify-center rounded-lg border text-lg font-bold transition-colors'
             style={{
               borderColor: 'var(--border)',
               color: 'var(--foreground)',
@@ -149,7 +149,7 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
           </span>
           <button
             onClick={() => setQty((q) => Math.min(gear.stock, q + 1))}
-            className='flex h-10 w-10 items-center justify-center rounded-lg border text-lg font-bold transition-colors'
+            className='cursor-pointer flex h-10 w-10 items-center justify-center rounded-lg border text-lg font-bold transition-colors'
             style={{
               borderColor: 'var(--border)',
               color: 'var(--foreground)',
@@ -191,7 +191,7 @@ export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
       <button
         onClick={handleSubmit}
         disabled={loading}
-        className='flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+        className='cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-white transition-colors disabled:opacity-60'
         style={{ backgroundColor: 'var(--primary)' }}
       >
         {loading ? (

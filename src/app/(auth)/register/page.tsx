@@ -182,7 +182,7 @@ export default function RegisterPage() {
                 type='button'
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className='absolute right-3 top-1/2 -translate-y-1/2'
+                className='cursor-pointer absolute right-3 top-1/2 -translate-y-1/2'
                 style={{ color: 'var(--muted-foreground)' }}
               >
                 {showPassword ? (
@@ -270,7 +270,7 @@ export default function RegisterPage() {
           <button
             type='submit'
             // disabled={pending}
-            className='mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-70'
+            className='mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70'
             style={{ backgroundColor: 'var(--primary)' }}
             // onMouseEnter={(e) => {
             //   if (!pending)

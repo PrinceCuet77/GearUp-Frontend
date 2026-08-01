@@ -84,7 +84,7 @@ export default function GearFilters({
           {search && (
             <button
               onClick={() => onSearch('')}
-              className='absolute right-2.5 top-1/2 -translate-y-1/2'
+              className='cursor-pointer absolute right-2.5 top-1/2 -translate-y-1/2'
               style={{ color: 'var(--muted-foreground)' }}
               aria-label='Clear search'
             >
@@ -105,7 +105,7 @@ export default function GearFilters({
         <div className='flex flex-wrap gap-2'>
           <button
             onClick={() => onCategory('')}
-            className='rounded-full px-3 py-1 text-xs font-semibold transition-colors'
+            className='cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors'
             style={
               category === ''
                 ? { backgroundColor: 'var(--primary)', color: '#fff' }
@@ -121,7 +121,7 @@ export default function GearFilters({
             <button
               key={cat.id}
               onClick={() => onCategory(cat.name)}
-              className='rounded-full px-3 py-1 text-xs font-semibold transition-colors'
+              className='cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors'
               style={
                 category === cat.name
                   ? { backgroundColor: 'var(--primary)', color: '#fff' }
@@ -222,7 +222,7 @@ export default function GearFilters({
       {hasFilters && (
         <button
           onClick={onReset}
-          className='flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-colors'
+          className='cursor-pointer flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-colors'
           style={{
             color: 'var(--muted-foreground)',
             backgroundColor: 'var(--muted)',

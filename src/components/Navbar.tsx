@@ -196,7 +196,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
             <button
               onClick={toggleTheme}
               aria-label='Toggle theme'
-              className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--muted-foreground)' }}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.backgroundColor =
@@ -225,7 +225,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
               <button
                 onClick={toggleCart}
                 aria-label='Open cart'
-                className='relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+                className='cursor-pointer relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
                 style={{ color: 'var(--muted-foreground)' }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.backgroundColor =
@@ -257,7 +257,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
               <div className='relative' ref={userMenuRef}>
                 <button
                   onClick={() => setUserMenuOpen((o) => !o)}
-                  className='flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors'
+                  className='cursor-pointer flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors'
                   style={{
                     backgroundColor: userMenuOpen
                       ? 'var(--muted)'
@@ -481,7 +481,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
             <button
               onClick={toggleCart}
               aria-label='Open cart'
-              className='relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--muted-foreground)' }}
             >
               <ShoppingCart className='h-4 w-4' />
@@ -497,7 +497,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
             <button
               onClick={toggleTheme}
               aria-label='Toggle theme'
-              className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--muted-foreground)' }}
             >
               {!mounted ? (
@@ -511,7 +511,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
             <button
               onClick={() => setMobileOpen((o) => !o)}
               aria-label='Toggle menu'
-              className='flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
+              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
               style={{ color: 'var(--foreground)' }}
             >
               {mobileOpen ? (
@@ -613,7 +613,7 @@ export default function Navbar({ initialProfile = null }: NavbarProps) {
               {userProfile ? (
                 <button
                   onClick={handleLogout}
-                  className='flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium'
+                  className='cursor-pointer flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium'
                   style={{ color: '#ef4444' }}
                 >
                   <LogOut className='h-4 w-4' />

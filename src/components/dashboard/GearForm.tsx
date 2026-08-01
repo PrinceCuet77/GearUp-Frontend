@@ -233,7 +233,7 @@ export function GearForm({ gear }: GearFormProps) {
               <button
                 type='button'
                 onClick={() => setIsActive((v) => !v)}
-                className='relative inline-flex h-6 w-11 items-center rounded-full transition-colors'
+                className='relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors'
                 style={{
                   backgroundColor: isActive ? 'var(--primary)' : 'var(--muted)',
                 }}
@@ -266,7 +266,7 @@ export function GearForm({ gear }: GearFormProps) {
             <button
               type='submit'
               disabled={loading}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
+              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60'
               style={{ backgroundColor: 'var(--primary)' }}
             >
               {loading ? (
