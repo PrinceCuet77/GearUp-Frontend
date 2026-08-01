@@ -3,20 +3,33 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import { getAllPayments } from './_actions/getAllPayments';
 import { PaymentsTable } from './_components/PaymentsTable';
+import { PaymentResult } from './_components/PaymentResult';
 import { ErrorToast } from './_components/ErrorToast';
-
-export const dynamic = 'force-dynamic';
 
 const LIMIT = 10;
 
 export default async function PaymentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    status?: string;
+    orderId?: string;
+    tranId?: string;
+  }>;
 }) {
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const statusFilter = params.status ?? '';
+  const orderId = params.orderId;
+  const tranId = params.tranId;
+
+  // Handle payment result pages
+  if (['success', 'failed', 'cancelled'].includes(statusFilter)) {
+    return (
+      <PaymentResult status={statusFilter} orderId={orderId} tranId={tranId} />
+    );
+  }
 
   const result = await getAllPayments({
     page,

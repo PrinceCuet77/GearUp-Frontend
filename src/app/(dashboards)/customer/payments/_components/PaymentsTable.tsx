@@ -10,7 +10,7 @@ import type { Payment } from '@/lib/types';
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: '', label: 'All' },
   { value: 'PENDING', label: 'Pending' },
-  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'COMPLETED', label: 'Success' },
   { value: 'FAILED', label: 'Failed' },
 ];
 

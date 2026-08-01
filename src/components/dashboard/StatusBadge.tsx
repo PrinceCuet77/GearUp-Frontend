@@ -46,7 +46,7 @@ const PAYMENT_STATUS: Record<
     color: '#b45309',
   },
   COMPLETED: {
-    label: 'Completed',
+    label: 'Success',
     bg: 'rgba(34,197,94,0.14)',
     color: '#16a34a',
   },

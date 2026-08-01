@@ -59,7 +59,6 @@ export default function Modal({
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
-  /* ── Escape key ────────────────────────────────────────────────────────── */
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -69,7 +68,6 @@ export default function Modal({
     return () => document.removeEventListener('keydown', onKey);
   }, [open, saving, onClose]);
 
-  /* ── Body scroll lock ──────────────────────────────────────────────────── */
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';

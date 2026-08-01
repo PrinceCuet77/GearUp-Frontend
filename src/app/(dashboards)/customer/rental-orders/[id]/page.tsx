@@ -16,6 +16,7 @@ import {
   PaymentStatusBadge,
 } from '@/components/dashboard/StatusBadge';
 import { CancelOrderButton } from './_components/CancelOrderButton';
+import { PayButton } from './_components/PayButton';
 import { getSingleRentalOrder } from './_actions/getSingleRentalOrder';
 import { OrderReviews } from './_components/OrderReviews';
 
@@ -407,16 +408,7 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* Actions */}
       <div className='mt-6 flex flex-wrap justify-end gap-3'>
         {canCancel && <CancelOrderButton orderId={order.id} />}
-        {canPay && (
-          <Link
-            href={`/customer/orders/${order.id}/pay`}
-            className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors'
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
-            <CreditCard className='h-4 w-4' />
-            Pay Now
-          </Link>
-        )}
+        {canPay && <PayButton orderId={order.id} />}
       </div>
     </div>
   );
