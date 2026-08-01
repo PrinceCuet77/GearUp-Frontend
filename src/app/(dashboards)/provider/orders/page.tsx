@@ -26,6 +26,7 @@ function formatDate(d: string) {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'Asia/Dhaka',
   });
 }
 

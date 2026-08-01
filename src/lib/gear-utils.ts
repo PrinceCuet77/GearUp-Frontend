@@ -93,5 +93,6 @@ export function formatDate(iso: string): string {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'Asia/Dhaka',
   });
 }

@@ -173,6 +173,7 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric',
+                      timeZone: 'Asia/Dhaka',
                     })}
                     {review.updatedAt !== review.createdAt && ' (edited)'}
                   </p>

@@ -29,6 +29,7 @@ function formatDate(dateStr: string) {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'Asia/Dhaka',
   });
 }
 
@@ -39,6 +40,7 @@ function formatDateTime(dateStr: string) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'Asia/Dhaka',
   });
 }
 
