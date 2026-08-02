@@ -7,8 +7,8 @@ import {
 
 const navItems: NavItem[] = [
   { href: '/provider', label: 'Overview', icon: 'LayoutDashboard' },
-  { href: '/provider/gear', label: 'My Gear', icon: 'Package' },
-  { href: '/provider/orders', label: 'Orders', icon: 'ClipboardList' },
+  { href: '/provider/gears', label: 'My Gears', icon: 'Package' },
+  { href: '/provider/rental-orders', label: 'Rentals Orders', icon: 'ClipboardList' },
   { href: '/provider/profile', label: 'Profile', icon: 'User' },
   { href: '/provider/change-password', label: 'Change Password', icon: 'Lock' },
 ];
