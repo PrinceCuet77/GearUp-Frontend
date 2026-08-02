@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Star, Pencil, Trash2, MessageSquare, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
@@ -45,6 +46,7 @@ function StarRating({
 
 export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
   const user = useAuthStore((s) => s.user);
+  const router = useRouter();
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
@@ -111,7 +113,15 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
 
     if (res.success) {
       toast.success('Review deleted successfully.');
-      setReviews(reviews.filter((review) => review.id !== deletingReview.id));
+      const remaining = reviews.filter(
+        (review) => review.id !== deletingReview.id,
+      );
+      if (remaining.length === 0) {
+        // Last review deleted — refresh the server component to show the empty state
+        router.refresh();
+      } else {
+        setReviews(remaining);
+      }
       setDeletingReview(null);
     } else {
       toast.error(res.error ?? 'Failed to delete review.');

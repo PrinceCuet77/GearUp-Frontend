@@ -17,6 +17,7 @@ import {
 } from '@/components/dashboard/StatusBadge';
 import { CancelOrderButton } from './_components/CancelOrderButton';
 import { PayButton } from './_components/PayButton';
+import { WriteReviewButton } from './_components/WriteReviewButton';
 import { getSingleRentalOrder } from './_actions/getSingleRentalOrder';
 import { OrderReviews } from './_components/OrderReviews';
 
@@ -71,6 +72,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const canPay = order.status === 'CONFIRMED';
   const canCancel = order.status === 'PLACED';
+  const canReview = order.status === 'RETURNED';
 
   return (
     <div className='mx-auto max-w-3xl'>
@@ -101,6 +103,15 @@ export default async function OrderDetailPage({ params }: Props) {
           </p>
         </div>
         <RentalStatusBadge status={order.status} />
+      </div>
+
+      {/* Actions */}
+      <div className='mb-6 flex flex-wrap justify-end gap-3'>
+        {canCancel && <CancelOrderButton orderId={order.id} />}
+        {canPay && <PayButton orderId={order.id} />}
+        {canReview && (
+          <WriteReviewButton orderId={order.id} reviews={order.reviews ?? []} />
+        )}
       </div>
 
       {/* Summary cards */}
@@ -404,12 +415,6 @@ export default async function OrderDetailPage({ params }: Props) {
           </div>
         </div>
       )}
-
-      {/* Actions */}
-      <div className='mt-6 flex flex-wrap justify-end gap-3'>
-        {canCancel && <CancelOrderButton orderId={order.id} />}
-        {canPay && <PayButton orderId={order.id} />}
-      </div>
     </div>
   );
 }
