@@ -10,7 +10,6 @@ const navItems: NavItem[] = [
   { href: '/admin/users', label: 'Users', icon: 'Users' },
   { href: '/admin/gears', label: 'All Gears', icon: 'Package' },
   { href: '/admin/categories', label: 'Categories', icon: 'Tag' },
-  { href: '/admin/rentals', label: 'Rentals', icon: 'ClipboardList' },
   { href: '/admin/profile', label: 'Profile', icon: 'User' },
   { href: '/admin/change-password', label: 'Change Password', icon: 'Lock' },
 ];

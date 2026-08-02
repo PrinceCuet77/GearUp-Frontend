@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Tag, PlusCircle, Pencil, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import Modal from '@/components/Modal';
 import type { Category } from '@/lib/types';
 import {
@@ -16,12 +17,15 @@ import { updateCategory } from '../_actions/updateCategory';
 
 interface CategoriesContentProps {
   initialCategories: Category[];
+  initialError?: string | null;
 }
 
 export function CategoriesContent({
   initialCategories,
+  initialError = null,
 }: CategoriesContentProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [error] = useState<string | null>(initialError);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -119,6 +123,14 @@ export function CategoriesContent({
         title='Categories'
         description={`${categories.length} gear categor${categories.length !== 1 ? 'ies' : 'y'}`}
       />
+
+      {error && (
+        <ErrorBanner
+          message={error}
+          title='Could not load categories'
+          showToast={true}
+        />
+      )}
 
       <Modal
         open={showForm}

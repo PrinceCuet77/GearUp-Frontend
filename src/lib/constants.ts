@@ -38,6 +38,7 @@ export const ROLE_LINKS: Record<
   ],
   ADMIN: [
     { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/gears', label: 'All Gears', icon: Package },
     { href: '/admin/categories', label: 'Categories', icon: Tag },
   ],
 };
