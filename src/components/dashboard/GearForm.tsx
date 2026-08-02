@@ -5,8 +5,16 @@ import { useRouter } from 'next/navigation';
 import { Loader2, Save, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import type { GearItem, Category } from '@/lib/types';
 import { DUMMY_CATEGORIES } from '@/lib/dummy-data';
+import {
+  createGearSchema,
+  updateGearSchema,
+  type CreateGearValues,
+  type UpdateGearValues,
+} from '@/lib/validations/gear';
 
 interface GearFormProps {
   gear?: GearItem;
@@ -19,28 +27,32 @@ export function GearForm({ gear }: GearFormProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [name, setName] = useState(gear?.name ?? '');
-  const [description, setDescription] = useState(gear?.description ?? '');
-  const [price, setPrice] = useState(gear?.price ?? '');
-  const [stock, setStock] = useState(String(gear?.stock ?? 1));
-  const [images, setImages] = useState(gear?.images ?? '');
-  const [categoryId, setCategoryId] = useState(gear?.categoryId ?? '');
-  const [isActive, setIsActive] = useState(gear?.isActive ?? true);
-
   useEffect(() => {
     setCategories(DUMMY_CATEGORIES);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!categoryId) {
-      toast.error('Please select a category.');
-      return;
-    }
+  const form = useForm({
+    resolver: zodResolver(isEdit ? updateGearSchema : createGearSchema),
+    defaultValues: {
+      name: gear?.name ?? '',
+      description: gear?.description ?? '',
+      price: Number(gear?.price) || 0,
+      stock: Number(gear?.stock) || 0,
+      images: gear?.images ?? '',
+      categoryId: gear?.categoryId ?? '',
+      isActive: gear?.isActive ?? true,
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = form;
+
+  const onSubmit = async () => {
     setLoading(true);
-
     await new Promise((r) => setTimeout(r, 600));
-
     toast.success(
       isEdit
         ? 'Gear updated successfully. (demo)'
@@ -55,6 +67,8 @@ export function GearForm({ gear }: GearFormProps) {
     borderColor: 'var(--input-border)',
     color: 'var(--foreground)',
   };
+
+  const errorStyle = 'text-sm text-red-500 mt-1';
 
   return (
     <div className='mx-auto max-w-2xl'>
@@ -81,7 +95,7 @@ export function GearForm({ gear }: GearFormProps) {
           {isEdit ? 'Edit Gear' : 'Add New Gear'}
         </h1>
 
-        <form onSubmit={handleSubmit} className='space-y-5'>
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-5'>
           {/* Name */}
           <div>
             <label
@@ -92,13 +106,12 @@ export function GearForm({ gear }: GearFormProps) {
             </label>
             <input
               type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
+              {...register('name')}
               placeholder='e.g., Mountain Bike 26"'
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
               style={inputStyle}
             />
+            {errors.name && <p className={errorStyle}>{errors.name.message}</p>}
           </div>
 
           {/* Description */}
@@ -110,14 +123,15 @@ export function GearForm({ gear }: GearFormProps) {
               Description <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
+              {...register('description')}
               rows={4}
               placeholder='Describe the gear, its condition, and any special notes…'
               className='w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors resize-none'
               style={inputStyle}
             />
+            {errors.description && (
+              <p className={errorStyle}>{errors.description.message}</p>
+            )}
           </div>
 
           {/* Price + Stock row */}
@@ -131,15 +145,15 @@ export function GearForm({ gear }: GearFormProps) {
               </label>
               <input
                 type='number'
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                min='0.01'
                 step='0.01'
+                {...register('price', { valueAsNumber: true })}
                 placeholder='25.00'
                 className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
                 style={inputStyle}
               />
+              {errors.price && (
+                <p className={errorStyle}>{errors.price.message}</p>
+              )}
             </div>
             <div>
               <label
@@ -150,14 +164,14 @@ export function GearForm({ gear }: GearFormProps) {
               </label>
               <input
                 type='number'
-                value={stock}
-                onChange={(e) => setStock(e.target.value)}
-                required
-                min='0'
+                {...register('stock', { valueAsNumber: true })}
                 placeholder='1'
                 className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
                 style={inputStyle}
               />
+              {errors.stock && (
+                <p className={errorStyle}>{errors.stock.message}</p>
+              )}
             </div>
           </div>
 
@@ -170,9 +184,7 @@ export function GearForm({ gear }: GearFormProps) {
               Category <span style={{ color: '#ef4444' }}>*</span>
             </label>
             <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              required
+              {...register('categoryId')}
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
               style={inputStyle}
             >
@@ -183,6 +195,9 @@ export function GearForm({ gear }: GearFormProps) {
                 </option>
               ))}
             </select>
+            {errors.categoryId && (
+              <p className={errorStyle}>{errors.categoryId.message}</p>
+            )}
           </div>
 
           {/* Images */}
@@ -195,9 +210,7 @@ export function GearForm({ gear }: GearFormProps) {
             </label>
             <input
               type='url'
-              value={images}
-              onChange={(e) => setImages(e.target.value)}
-              required
+              {...register('images')}
               placeholder='https://example.com/gear-image.jpg'
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
               style={inputStyle}
@@ -208,75 +221,70 @@ export function GearForm({ gear }: GearFormProps) {
             >
               Provide a direct link to the gear image.
             </p>
+            {errors.images && (
+              <p className={errorStyle}>{errors.images.message}</p>
+            )}
           </div>
 
-          {/* Active toggle (edit only) */}
-          {isEdit && (
-            <div
-              className='flex items-center justify-between rounded-lg border px-4 py-3'
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <div>
-                <p
-                  className='text-sm font-medium'
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  Active Listing
-                </p>
-                <p
-                  className='text-xs'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Customers can browse and rent this gear when active.
-                </p>
-              </div>
-              <button
-                type='button'
-                onClick={() => setIsActive((v) => !v)}
-                className='relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors'
-                style={{
-                  backgroundColor: isActive ? 'var(--primary)' : 'var(--muted)',
-                }}
-                role='switch'
-                aria-checked={isActive}
+          {/* Active toggle */}
+          <div
+            className='flex items-center justify-between rounded-lg border px-4 py-3'
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <div>
+              <p
+                className='text-sm font-medium'
+                style={{ color: 'var(--foreground)' }}
               >
-                <span
-                  className='inline-block h-4 w-4 transform rounded-full bg-white transition-transform'
-                  style={{
-                    transform: isActive
-                      ? 'translateX(1.375rem)'
-                      : 'translateX(0.25rem)',
-                  }}
-                />
-              </button>
+                Active Listing
+              </p>
+              <p
+                className='text-xs'
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                Customers can browse and rent this gear when active.
+              </p>
             </div>
-          )}
-
-          <div className='flex justify-end gap-3 pt-2'>
-            <Link
-              href='/provider/gear'
-              className='inline-flex h-10 items-center rounded-lg border px-5 text-sm font-semibold transition-colors'
-              style={{
-                borderColor: 'var(--border)',
-                color: 'var(--foreground)',
-              }}
-            >
-              Cancel
-            </Link>
             <button
-              type='submit'
-              disabled={loading}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:opacity-60'
-              style={{ backgroundColor: 'var(--primary)' }}
+              type='button'
+              onClick={() =>
+                form.setValue('isActive', !form.getValues('isActive'))
+              }
+              className='relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors'
+              style={{
+                backgroundColor: form.watch('isActive')
+                  ? 'var(--primary)'
+                  : 'var(--muted)',
+              }}
+              role='switch'
+              aria-checked={form.watch('isActive')}
             >
-              {loading ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <Save className='h-4 w-4' />
-              )}
-              {isEdit ? 'Update Gear' : 'Add Gear'}
+              <span
+                className='inline-block h-4 w-4 transform rounded-full bg-white transition-transform'
+                style={{
+                  transform: form.watch('isActive')
+                    ? 'translateX(1.375rem)'
+                    : 'translateX(0.25rem)',
+                }}
+              />
             </button>
           </div>
+
+          <button
+            type='submit'
+            disabled={loading}
+            className='flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors'
+            style={{ backgroundColor: 'var(--primary)' }}
+          >
+            {loading ? (
+              <Loader2 className='h-4 w-4 animate-spin' />
+            ) : (
+              <>
+                <Save className='h-4 w-4' />
+                {isEdit ? 'Update Gear' : 'Add Gear'}
+              </>
+            )}
+          </button>
         </form>
       </div>
     </div>
