@@ -35,11 +35,23 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
   }, [modalOpen, user.name, user.avatarUrl]);
 
   const handleSave = useCallback(async () => {
+    const trimmedName = name.trim();
+    const trimmedAvatar = avatarUrl.trim();
+
+    if (trimmedName.length > 100) {
+      toast.error('Name must be 100 characters or fewer.');
+      return;
+    }
+    if (trimmedAvatar.length > 255) {
+      toast.error('Avatar URL must be 255 characters or fewer.');
+      return;
+    }
+
     setSaving(true);
 
     const result = await updateProfile({
-      name: name.trim(),
-      avatarUrl: avatarUrl.trim(),
+      name: trimmedName,
+      avatarUrl: trimmedAvatar || undefined,
     });
 
     if (result.success && result.data) {
@@ -113,10 +125,7 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
               </span>
             )}
             <div>
-              <p
-                className='text-sm font-semibold'
-                style={{ color: 'var(--foreground)' }}
-              >
+              <p style={{ color: 'var(--foreground)' }}>
                 {user.name ?? 'No name set'}
               </p>
               <p
@@ -160,7 +169,7 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
                 type='email'
                 value={user.email}
                 disabled
-                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60'
+                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60 cursor-not-allowed'
                 style={inputStyle}
               />
             </div>
@@ -175,7 +184,7 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
                 type='text'
                 value={user.name ?? ''}
                 disabled
-                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60'
+                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60 cursor-not-allowed'
                 style={inputStyle}
               />
             </div>
@@ -220,6 +229,7 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder='Your full name'
+              maxLength={100}
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors focus:ring-2'
               style={
                 {
@@ -228,6 +238,12 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
                 } as React.CSSProperties
               }
             />
+            <p
+              className='mt-1 text-right text-xs'
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {name.length}/100
+            </p>
           </div>
 
           <div>
@@ -248,9 +264,16 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               placeholder='https://example.com/avatar.jpg'
+              maxLength={255}
               className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
               style={inputStyle}
             />
+            <p
+              className='mt-1 text-right text-xs'
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              {avatarUrl.length}/255
+            </p>
             {avatarUrl && (
               <div className='mt-2 flex items-center gap-3'>
                 <img

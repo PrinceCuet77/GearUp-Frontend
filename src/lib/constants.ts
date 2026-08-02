@@ -29,7 +29,7 @@ export const ROLE_LINKS: Record<
     { href: '/customer/reviews', label: 'My Reviews', icon: Star },
   ],
   PROVIDER: [
-    { href: '/provider/gears', label: 'My Gear', icon: Package },
+    { href: '/provider/gears', label: 'My Gears', icon: Package },
     {
       href: '/provider/rental-orders',
       label: 'Rental Orders',

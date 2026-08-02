@@ -2,7 +2,23 @@
 
 import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
+import { z } from 'zod';
 import type { User } from '@/lib/types';
+
+const updateMyProfile = z.object({
+  name: z
+    .string()
+    .min(1, 'Name is required')
+    .max(100, 'Name must be 100 characters or fewer')
+    .optional(),
+  avatarUrl: z
+    .string()
+    .url('Avatar URL must be a valid URL')
+    .max(255, 'Avatar URL must be 255 characters or fewer')
+    .optional()
+    .or(z.literal(''))
+    .transform((v) => (v === '' ? undefined : v)),
+});
 
 export interface UpdateProfileResult {
   success: boolean;
@@ -16,11 +32,19 @@ const statusMessages: Record<number, string> = {
   404: 'User not found.',
 };
 
-export const updateProfile = async (payload: {
-  name: string;
-  avatarUrl: string;
-}): Promise<UpdateProfileResult> => {
+export const updateProfile = async (
+  payload: z.infer<typeof updateMyProfile>,
+): Promise<UpdateProfileResult> => {
   try {
+    const parsed = updateMyProfile.safeParse(payload);
+
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? 'Invalid input.';
+      return { success: false, data: null, error: message };
+    }
+
+    const { name, avatarUrl } = parsed.data;
+
     const cookie = await cookies();
     const accessToken = cookie.get('accessToken')?.value;
 
@@ -40,7 +64,7 @@ export const updateProfile = async (payload: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ name, avatarUrl }),
       cache: 'no-store',
     });
 

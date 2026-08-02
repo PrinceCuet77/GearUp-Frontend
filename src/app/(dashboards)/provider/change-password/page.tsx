@@ -6,7 +6,7 @@ export default function ProviderChangePasswordPage() {
     <div>
       <PageHeader
         title='Change Password'
-        description='Update your provider account password to keep your account secure.'
+        description='Update your account password to keep your account secure.'
       />
       <ChangePasswordForm />
     </div>
