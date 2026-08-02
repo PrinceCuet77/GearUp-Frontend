@@ -25,6 +25,12 @@ export default function OrderDetailLoading() {
         <Skeleton className='h-6 w-24 rounded-full' />
       </div>
 
+      {/* Actions skeleton */}
+      <div className='mb-6 flex flex-wrap justify-end gap-3'>
+        <Skeleton className='h-10 w-28 rounded-lg' />
+        <Skeleton className='h-10 w-32 rounded-lg' />
+      </div>
+
       {/* Cards grid skeleton */}
       <div className='grid gap-4 sm:grid-cols-2'>
         {/* Rental period card */}
@@ -138,7 +144,7 @@ export default function OrderDetailLoading() {
         ))}
       </div>
 
-      {/* Reviews skeleton */}
+      {/* Reviews skeleton — mirrors the "No reviews yet" empty state */}
       <div
         className='mt-4 rounded-xl border'
         style={{
@@ -150,20 +156,17 @@ export default function OrderDetailLoading() {
           className='flex items-center gap-2 border-b px-5 py-4'
           style={{ borderColor: 'var(--border)' }}
         >
-          <Skeleton className='h-4 w-4 rounded' />
+          <Receipt className='h-4 w-4' style={{ color: 'var(--primary)' }} />
           <Skeleton className='h-4 w-24 rounded' />
         </div>
-        <div className='px-5 py-4'>
+        <div className='flex flex-col items-center justify-center px-5 py-10'>
+          <Receipt
+            className='mb-3 h-10 w-10'
+            style={{ color: 'var(--muted-foreground)', opacity: 0.4 }}
+          />
           <Skeleton className='h-4 w-32 rounded' />
-          <Skeleton className='mt-2 h-3 w-full rounded' />
-          <Skeleton className='mt-1 h-3 w-3/4 rounded' />
+          <Skeleton className='mt-2 h-3 w-48 rounded' />
         </div>
-      </div>
-
-      {/* Actions skeleton */}
-      <div className='mt-6 flex flex-wrap gap-3'>
-        <Skeleton className='h-10 w-28 rounded-lg' />
-        <Skeleton className='h-10 w-32 rounded-lg' />
       </div>
     </div>
   );

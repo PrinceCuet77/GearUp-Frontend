@@ -26,7 +26,8 @@ export const getSingleRentalOrder = async (
       return {
         success: false,
         data: null,
-        error: 'You are not logged in. Please log in to view your rental order.',
+        error:
+          'You are not logged in. Please log in to view your rental order.',
       };
     }
 

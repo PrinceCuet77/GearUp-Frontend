@@ -246,12 +246,15 @@ export default async function OrderDetailPage({ params }: Props) {
                   {/* Details */}
                   <div className='flex flex-1 flex-col justify-between'>
                     <div>
-                      <p
-                        className='text-sm font-semibold'
+                      <Link
+                        href={`/gears/${gear?.id}`}
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='text-sm font-semibold transition-colors hover:underline'
                         style={{ color: 'var(--foreground)' }}
                       >
                         {gear?.name ?? `Gear #${item.gearItemId.slice(0, 8)}`}
-                      </p>
+                      </Link>
                       {gear?.description && (
                         <p
                           className='mt-0.5 text-xs line-clamp-2'

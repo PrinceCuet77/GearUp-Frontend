@@ -46,7 +46,7 @@ export interface GearReview {
   id: string;
   rating: number;
   comment: string;
-  customer?: Pick<User, 'id' | 'name'>;
+  customer?: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl'>;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +63,7 @@ export interface GearItem {
   categoryId: string;
   category?: Category;
   provider?: User;
+  customer?: Pick<User, 'id' | 'name' | 'email' | 'avatarUrl'>;
   reviews?: GearReview[];
   rentalOrderItems?: Array<{ id: string; quantity: number; price: string }>;
   createdAt: string;

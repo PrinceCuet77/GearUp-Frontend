@@ -126,13 +126,13 @@ export default function GearCard({ gear }: { gear: GearItem }) {
             {gear.description}
           </p>
 
-          {/* Provider + stock */}
+          {/* Customer + stock */}
           <div
             className='mt-2.5 flex items-center justify-between gap-2 text-xs'
             style={{ color: 'var(--muted-foreground)' }}
           >
             <span className='truncate'>
-              {gear.provider?.name ?? 'Provider'}
+              {gear.customer?.name ?? 'Customer'}
             </span>
             <StockLabel stock={gear.stock} />
           </div>

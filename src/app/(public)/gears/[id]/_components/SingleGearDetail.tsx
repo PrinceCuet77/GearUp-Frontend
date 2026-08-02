@@ -229,7 +229,7 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
             >
               <span className='flex items-center gap-1.5'>
                 <User className='h-4 w-4' />
-                {gear.provider?.name ?? 'Provider'}
+                {gear.customer?.name ?? 'Customer'}
               </span>
               <span className='flex items-center gap-1.5'>
                 <Package className='h-4 w-4' />
@@ -345,10 +345,24 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
                   <div className='flex items-start justify-between gap-4'>
                     <div className='flex items-center gap-3'>
                       <div
-                        className='flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white'
+                        className='relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-white'
                         style={{ backgroundColor: '#f97316' }}
                       >
-                        {(review.customer?.name ?? 'C')[0].toUpperCase()}
+                        {review.customer?.avatarUrl ? (
+                          <Image
+                            src={review.customer.avatarUrl}
+                            alt={review.customer?.name || 'Customer'}
+                            fill
+                            className='rounded-full object-cover'
+                            onError={(e) => {
+                              (
+                                e.currentTarget as HTMLImageElement
+                              ).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          (review.customer?.name ?? 'C')[0].toUpperCase()
+                        )}
                       </div>
                       <div>
                         <p
