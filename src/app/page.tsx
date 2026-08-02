@@ -11,11 +11,9 @@ import {
   Package,
   Repeat2,
 } from 'lucide-react';
-import { DUMMY_GEARS, DUMMY_CATEGORIES } from '@/lib/dummy-data';
+import { getAllCategoriesAction } from './(public)/_actions/getAllCategories';
+import { getAllGearsAction } from './(public)/_actions/getAllGears';
 import { formatBDT, parseGearImages, calcAvgRating } from '@/lib/gear-utils';
-
-const featuredGears = DUMMY_GEARS.slice(0, 6);
-const categories = DUMMY_CATEGORIES.slice(0, 4);
 
 const howItWorks = [
   {
@@ -65,7 +63,19 @@ const features = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [gearsResult, categoriesResult] = await Promise.all([
+    getAllGearsAction({ limit: 6 }),
+    getAllCategoriesAction(),
+  ]);
+
+  const featuredGears = gearsResult.success
+    ? (gearsResult.data ?? []).slice(0, 6)
+    : [];
+  const categories = categoriesResult.success
+    ? (categoriesResult.data ?? []).slice(0, 4)
+    : [];
+
   return (
     <div style={{ backgroundColor: 'var(--background)' }}>
       {/* Hero */}
@@ -374,7 +384,7 @@ export default function HomePage() {
 
       {/* Categories */}
       <section
-        className='px-4 pb-16 sm:px-6 lg:px-8'
+        className='px-4 pb-16 sm:px-6 lg:px-8 lg:pt-10'
         style={{ backgroundColor: 'var(--card)' }}
       >
         <div className='mx-auto max-w-5xl'>
