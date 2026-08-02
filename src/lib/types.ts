@@ -164,3 +164,61 @@ export interface GearsResult {
   meta: ApiMeta | null;
   error: string | null;
 }
+
+export interface CustomerRentalOrder {
+  id: string;
+  customerId: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  amount: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomerDashboardInfo {
+  stats: {
+    totalOrders: number;
+    activeRentals: number;
+    paymentsMade: number;
+    reviewsGiven: number;
+  };
+  recentOrders: CustomerRentalOrder[];
+}
+
+export interface CustomerDashboardResult {
+  success: boolean;
+  data: CustomerDashboardInfo | null;
+  error: string | null;
+}
+
+export interface ProviderRentalOrder {
+  id: string;
+  customerId: string;
+  customer: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  startDate: string;
+  endDate: string;
+  status: RentalStatus;
+  amount: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProviderDashboardInfo {
+  stats: {
+    totalGearListed: number;
+    totalOrders: number;
+    pendingOrders: number;
+  };
+  recentOrders: ProviderRentalOrder[];
+}
+
+export interface ProviderDashboardResult {
+  success: boolean;
+  data: ProviderDashboardInfo | null;
+  error: string | null;
+}

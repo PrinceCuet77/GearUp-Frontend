@@ -13,7 +13,12 @@ export default async function ReviewsPage() {
 
   return (
     <div>
-      {result.error && <ErrorBanner message={result.error} />}
+      {result.error && (
+        <ErrorBanner
+          title='Could not load reviews'
+          message={result.error}
+        />
+      )}
       <ReviewsList
         initialReviews={reviews}
         initialTotalPages={totalPages}

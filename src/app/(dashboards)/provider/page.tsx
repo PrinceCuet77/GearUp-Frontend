@@ -6,9 +6,10 @@ import {
   ArrowRight,
   PlusCircle,
 } from 'lucide-react';
-import { DUMMY_GEARS, DUMMY_ORDERS, DUMMY_PROVIDER } from '@/lib/dummy-data';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
+import { getProviderDashboardInfo } from './_actions/getProviderDashboardInfo';
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -19,15 +20,25 @@ function formatDate(dateStr: string) {
   });
 }
 
-export default async function ProviderOverviewPage() {
-  const gears = DUMMY_GEARS.filter((g) => g.providerId === DUMMY_PROVIDER.id);
-  const orders = DUMMY_ORDERS.slice(0, 5);
-  const pendingOrders = DUMMY_ORDERS.filter(
-    (o) => o.status === 'PLACED',
-  ).length;
+export default async function ProviderDashboardPage() {
+  const result = await getProviderDashboardInfo();
+
+  const stats = result.data?.stats ?? {
+    totalGearListed: 0,
+    totalOrders: 0,
+    pendingOrders: 0,
+  };
+  const orders = result.data?.recentOrders ?? [];
 
   return (
     <div>
+      {!result.success && result.error && (
+        <ErrorBanner
+          title='Could not load provider dashboard'
+          message={result.error}
+        />
+      )}
+
       <div className='mb-8'>
         <h1
           className='text-2xl font-bold tracking-tight'
@@ -57,20 +68,20 @@ export default async function ProviderOverviewPage() {
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <StatsCard
           title='Total Gear Listed'
-          value={gears.length}
+          value={stats.totalGearListed}
           icon={Package}
           description='In your inventory'
         />
         <StatsCard
           title='Total Orders'
-          value={orders.length}
+          value={stats.totalOrders}
           icon={ClipboardList}
           description='All incoming orders'
           accentColor='#7c3aed'
         />
         <StatsCard
           title='Pending Approval'
-          value={pendingOrders}
+          value={stats.pendingOrders}
           icon={Clock}
           description='Awaiting confirmation'
           accentColor='#f59e0b'
@@ -96,7 +107,7 @@ export default async function ProviderOverviewPage() {
             Recent Orders
           </h2>
           <Link
-            href='/provider/orders'
+            href='/provider/rental-orders'
             className='flex items-center gap-1 text-sm font-medium'
             style={{ color: 'var(--primary)' }}
           >
@@ -181,7 +192,7 @@ export default async function ProviderOverviewPage() {
                     </td>
                     <td className='px-6 py-4'>
                       <Link
-                        href={`/provider/orders/${order.id}`}
+                        href={`/provider/rental-orders/${order.id}`}
                         className='text-sm font-medium'
                         style={{ color: 'var(--primary)' }}
                       >

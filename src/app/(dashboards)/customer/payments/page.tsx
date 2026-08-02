@@ -48,7 +48,12 @@ export default async function PaymentsPage({
         description={`${total} transaction${total !== 1 ? 's' : ''}`}
       />
 
-      {result.error && <ErrorBanner message={result.error} />}
+      {result.error && (
+        <ErrorBanner
+          title='Could not load payment history'
+          message={result.error}
+        />
+      )}
 
       <Suspense fallback={<TableSkeleton rows={5} cols={5} />}>
         <PaymentsTable

@@ -35,7 +35,7 @@ export default async function RentalOrdersPage({
         description={`${total} total rental order${total !== 1 ? 's' : ''}`}
       />
 
-      {result.error && <ErrorBanner message={result.error} />}
+      {result.error && <ErrorBanner title='Could not load rental orders' message={result.error} />}
 
       <Suspense fallback={<TableSkeleton rows={5} cols={4} />}>
         <OrdersTable

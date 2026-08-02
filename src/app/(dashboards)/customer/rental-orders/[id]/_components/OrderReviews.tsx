@@ -155,19 +155,8 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
             <li key={review.id} className='px-5 py-4'>
               <div className='flex items-start justify-between gap-4'>
                 <div className='min-w-0 flex-1'>
-                  <div className='flex items-center gap-3'>
+                  <div>
                     <StarRating rating={review.rating} />
-                    {isMyReview && (
-                      <span
-                        className='rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide'
-                        style={{
-                          backgroundColor: 'var(--primary)',
-                          color: 'white',
-                        }}
-                      >
-                        Your Review
-                      </span>
-                    )}
                   </div>
                   <p
                     className='mt-2 text-sm'

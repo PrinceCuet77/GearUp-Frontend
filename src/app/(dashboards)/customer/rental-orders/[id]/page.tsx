@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import {
   ArrowLeft,
   Calendar,
@@ -20,6 +19,7 @@ import { PayButton } from './_components/PayButton';
 import { WriteReviewButton } from './_components/WriteReviewButton';
 import { getSingleRentalOrder } from './_actions/getSingleRentalOrder';
 import { OrderReviews } from './_components/OrderReviews';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -66,7 +66,24 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const result = await getSingleRentalOrder(id);
 
-  if (!result.success || !result.data) notFound();
+  if (!result.success || !result.data) {
+    return (
+      <div className='mx-auto max-w-3xl'>
+        <Link
+          href='/customer/rental-orders'
+          className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          <ArrowLeft className='h-4 w-4' />
+          Back to Rental Orders
+        </Link>
+        <ErrorBanner
+          message={result.error ?? 'Failed to load rental order.'}
+          title='Could not load rental order'
+        />
+      </div>
+    );
+  }
 
   const order = result.data;
 

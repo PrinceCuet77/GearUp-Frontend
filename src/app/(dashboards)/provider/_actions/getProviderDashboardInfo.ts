@@ -1,6 +1,6 @@
 'use server';
 
-import { CustomerDashboardInfo, CustomerDashboardResult } from '@/lib/types';
+import { ProviderDashboardInfo, ProviderDashboardResult } from '@/lib/types';
 import { cookies } from 'next/headers';
 
 const statusMessages: Record<number, string> = {
@@ -9,8 +9,8 @@ const statusMessages: Record<number, string> = {
   404: 'Dashboard data not found. Please try again later.',
 };
 
-export const getCustomerDashboardInfo =
-  async (): Promise<CustomerDashboardResult> => {
+export const getProviderDashboardInfo =
+  async (): Promise<ProviderDashboardResult> => {
     try {
       const cookie = await cookies();
       const accessToken = cookie.get('accessToken')?.value;
@@ -24,7 +24,7 @@ export const getCustomerDashboardInfo =
       }
 
       const response = await fetch(
-        `${process.env.BACKEND_API_URL}/api/user/dashboard`,
+        `${process.env.BACKEND_API_URL}/api/provider/dashboard`,
         {
           method: 'GET',
           headers: {
@@ -49,7 +49,7 @@ export const getCustomerDashboardInfo =
       if (result.success && result.data) {
         return {
           success: true,
-          data: result.data as CustomerDashboardInfo,
+          data: result.data as ProviderDashboardInfo,
           error: null,
         };
       }
