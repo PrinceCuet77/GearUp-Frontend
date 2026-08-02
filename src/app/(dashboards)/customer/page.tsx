@@ -4,7 +4,7 @@ import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
 import { getCustomerDashboardInfo } from './_actions/getCustomerDashboardInfo';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-import type { CustomerRentalOrder } from './_actions/getCustomerDashboardInfo';
+import type { CustomerRentalOrder } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
