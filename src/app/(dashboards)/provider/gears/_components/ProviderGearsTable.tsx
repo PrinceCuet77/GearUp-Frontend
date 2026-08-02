@@ -129,6 +129,7 @@ export function ProviderGearsTable({
                   <GearActions
                     gearId={gear.id}
                     gearName={gear.name}
+                    gear={gear}
                     onEdit={() => onEdit?.(gear)}
                   />
                 </div>
@@ -248,6 +249,7 @@ export function ProviderGearsTable({
                     <GearActions
                       gearId={gear.id}
                       gearName={gear.name}
+                      gear={gear}
                       onEdit={() => onEdit?.(gear)}
                     />
                   </td>
