@@ -16,6 +16,7 @@ import {
 } from '@/components/dashboard/StatusBadge';
 import { CancelOrderButton } from './_components/CancelOrderButton';
 import { PayButton } from './_components/PayButton';
+import { ReturnOrderButton } from './_components/ReturnOrderButton';
 import { WriteReviewButton } from './_components/WriteReviewButton';
 import { getSingleRentalOrder } from './_actions/getSingleRentalOrder';
 import { OrderReviews } from './_components/OrderReviews';
@@ -89,13 +90,14 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const canPay = order.status === 'CONFIRMED';
   const canCancel = order.status === 'PLACED';
+  const canReturn = order.status === 'PICKED_UP';
   const canReview = order.status === 'RETURNED';
 
   return (
     <div className='mx-auto max-w-3xl'>
       {/* Back link */}
       <Link
-        href='/customer/orders'
+        href='/customer/rental-orders'
         className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
         style={{ color: 'var(--muted-foreground)' }}
       >
@@ -126,6 +128,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <div className='mb-6 flex flex-wrap justify-end gap-3'>
         {canCancel && <CancelOrderButton orderId={order.id} />}
         {canPay && <PayButton orderId={order.id} />}
+        {canReturn && <ReturnOrderButton orderId={order.id} />}
         {canReview && (
           <WriteReviewButton orderId={order.id} reviews={order.reviews ?? []} />
         )}

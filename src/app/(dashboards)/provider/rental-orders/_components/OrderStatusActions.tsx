@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Loader2, CheckCircle, Truck, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import type { RentalStatus } from '@/lib/types';
+import { updateRentalOrderForProvider } from '../_actions/updateRentalOrderForProvider';
 
 interface Props {
   orderId: string;
@@ -37,10 +38,7 @@ const NEXT_ACTIONS: Partial<
   },
 };
 
-export function OrderStatusActions({
-  orderId: _orderId,
-  currentStatus,
-}: Props) {
+export function OrderStatusActions({ orderId, currentStatus }: Props) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -51,14 +49,21 @@ export function OrderStatusActions({
 
   const handleUpdate = async () => {
     setLoading(true);
-
-    await new Promise((r) => setTimeout(r, 600));
-
-    toast.success(
-      `Order status updated to ${action.status.replace('_', ' ')}. (demo)`,
-    );
-    setLoading(false);
-    router.push('/provider/orders');
+    try {
+      const result = await updateRentalOrderForProvider(orderId, action.status);
+      if (result.success) {
+        toast.success(
+          `Order status updated to ${action.status.replace('_', ' ')}.`,
+        );
+        router.refresh();
+      } else {
+        toast.error(result.error ?? 'Failed to update order status.');
+      }
+    } catch {
+      toast.error('An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

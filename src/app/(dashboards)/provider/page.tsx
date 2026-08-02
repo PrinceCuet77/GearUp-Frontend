@@ -54,16 +54,6 @@ export default async function ProviderDashboardPage() {
         </p>
       </div>
 
-      {/* Quick action */}
-      <Link
-        href='/provider/gear/new'
-        className='mb-6 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors'
-        style={{ backgroundColor: 'var(--primary)' }}
-      >
-        <PlusCircle className='h-4 w-4' />
-        Add New Gear
-      </Link>
-
       {/* Stats */}
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <StatsCard

@@ -9,9 +9,6 @@ export default function ProviderDashboardLoading() {
         <Skeleton className='h-4 w-72' />
       </div>
 
-      {/* Add New Gear button */}
-      <Skeleton className='mb-6 h-10 w-40 rounded-lg' />
-
       {/* Stats grid — 3 columns */}
       <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <StatsCardSkeleton />

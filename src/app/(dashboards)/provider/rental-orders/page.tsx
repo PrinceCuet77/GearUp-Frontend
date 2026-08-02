@@ -1,15 +1,13 @@
-'use client';
-
-import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { TableSkeleton } from '@/components/ui/Skeleton';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import type { RentalOrder } from '@/lib/types';
-import { DUMMY_ORDERS } from '@/lib/dummy-data';
+import { getAllRentalOrdersForProvider } from './_actions/getAllRentalOrdersForProvider';
+import { formatDate } from '@/lib/gear-utils';
+import { ManageOrderButton } from './_components/ManageOrderButton';
 
-const ALL_ORDERS = DUMMY_ORDERS;
 const LIMIT = 10;
 
 const STATUS_FILTERS = [
@@ -21,44 +19,42 @@ const STATUS_FILTERS = [
   { value: 'RETURNED', label: 'Returned' },
 ];
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Dhaka',
-  });
+function buildHref(page: number, status: string) {
+  const params = new URLSearchParams();
+  if (page > 1) params.set('page', String(page));
+  if (status) params.set('status', status);
+  const qs = params.toString();
+  return `/provider/rental-orders${qs ? `?${qs}` : ''}`;
 }
 
-export default function ProviderOrdersPage() {
-  const [orders, setOrders] = useState<RentalOrder[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
+export default async function ProviderOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; status?: string }>;
+}) {
+  const { page: rawPage, status: rawStatus } = await searchParams;
+  const currentStatus = rawStatus ?? '';
+  const currentPage = Math.max(1, parseInt(rawPage ?? '1', 10) || 1);
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
+  const result = await getAllRentalOrdersForProvider({
+    page: currentPage,
+    limit: LIMIT,
+    status: currentStatus || undefined,
+  });
 
-    await new Promise((r) => setTimeout(r, 200));
-    const filtered = statusFilter
-      ? ALL_ORDERS.filter((o) => o.status === statusFilter)
-      : ALL_ORDERS;
-    const start = (page - 1) * LIMIT;
-    setOrders(filtered.slice(start, start + LIMIT));
-    setTotalPages(Math.ceil(filtered.length / LIMIT));
-    setTotal(filtered.length);
-
-    setLoading(false);
-  }, [page, statusFilter]);
-
-  useEffect(() => {
-    void fetchOrders();
-  }, [fetchOrders]);
+  const orders: RentalOrder[] = result.success ? result.data : [];
+  const totalPages = result.meta?.totalPages ?? 1;
+  const total = result.meta?.total ?? 0;
 
   return (
     <div>
+      {result.error && (
+        <ErrorBanner
+          title='Could not load rental orders'
+          message={result.error}
+        />
+      )}
+
       <PageHeader
         title='Order Management'
         description={`${total} order${total !== 1 ? 's' : ''} received`}
@@ -66,15 +62,12 @@ export default function ProviderOrdersPage() {
 
       <div className='mb-6 flex flex-wrap gap-2'>
         {STATUS_FILTERS.map((f) => (
-          <button
+          <Link
             key={f.value}
-            onClick={() => {
-              setStatusFilter(f.value);
-              setPage(1);
-            }}
-            className='cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all'
+            href={buildHref(1, f.value)}
+            className='rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all'
             style={
-              statusFilter === f.value
+              currentStatus === f.value
                 ? {
                     backgroundColor: 'var(--primary)',
                     color: 'var(--primary-foreground)',
@@ -86,7 +79,7 @@ export default function ProviderOrdersPage() {
             }
           >
             {f.label}
-          </button>
+          </Link>
         ))}
       </div>
 
@@ -94,9 +87,7 @@ export default function ProviderOrdersPage() {
         className='rounded-xl border'
         style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        {loading ? (
-          <TableSkeleton rows={5} cols={5} />
-        ) : orders.length === 0 ? (
+        {orders.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20'>
             <ClipboardList
               className='mb-3 h-10 w-10 opacity-30'
@@ -136,13 +127,7 @@ export default function ProviderOrdersPage() {
                   {orders.map((order) => (
                     <tr
                       key={order.id}
-                      className='transition-colors'
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--muted)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
+                      className='transition-colors hover:bg-[var(--muted)]'
                     >
                       <td
                         className='px-6 py-4 font-mono text-sm'
@@ -162,26 +147,20 @@ export default function ProviderOrdersPage() {
                         className='px-6 py-4 text-sm'
                         style={{ color: 'var(--muted-foreground)' }}
                       >
-                        {formatDate(order.startDate)} \u2013{' '}
+                        {formatDate(order.startDate)} -{' '}
                         {formatDate(order.endDate)}
                       </td>
                       <td
                         className='px-6 py-4 text-sm font-semibold'
                         style={{ color: 'var(--foreground)' }}
                       >
-                        ${Number(order.amount).toFixed(2)}
+                        ৳{Number(order.amount).toFixed(2)}
                       </td>
                       <td className='px-6 py-4'>
                         <RentalStatusBadge status={order.status} />
                       </td>
                       <td className='px-6 py-4'>
-                        <Link
-                          href={`/provider/orders/${order.id}`}
-                          className='text-sm font-medium'
-                          style={{ color: 'var(--primary)' }}
-                        >
-                          Manage
-                        </Link>
+                        <ManageOrderButton order={order} />
                       </td>
                     </tr>
                   ))}
@@ -198,31 +177,45 @@ export default function ProviderOrdersPage() {
                   className='text-sm'
                   style={{ color: 'var(--muted-foreground)' }}
                 >
-                  Page {page} of {totalPages}
+                  Page {currentPage} of {totalPages}
                 </p>
                 <div className='flex items-center gap-2'>
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                  <Link
+                    href={buildHref(
+                      Math.max(1, currentPage - 1),
+                      currentStatus,
+                    )}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+                      currentPage === 1 ? 'pointer-events-none opacity-40' : ''
+                    }`}
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
                     }}
+                    aria-disabled={currentPage === 1}
+                    tabIndex={currentPage === 1 ? -1 : undefined}
                   >
                     <ChevronLeft className='h-4 w-4' />
-                  </button>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page === totalPages}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
+                  </Link>
+                  <Link
+                    href={buildHref(
+                      Math.min(totalPages, currentPage + 1),
+                      currentStatus,
+                    )}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-colors ${
+                      currentPage === totalPages
+                        ? 'pointer-events-none opacity-40'
+                        : ''
+                    }`}
                     style={{
                       borderColor: 'var(--border)',
                       color: 'var(--foreground)',
                     }}
+                    aria-disabled={currentPage === totalPages}
+                    tabIndex={currentPage === totalPages ? -1 : undefined}
                   >
                     <ChevronRight className='h-4 w-4' />
-                  </button>
+                  </Link>
                 </div>
               </div>
             )}
