@@ -2,6 +2,7 @@
 
 import { useActionState, useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Dumbbell,
   Eye,
@@ -13,7 +14,7 @@ import {
   Check,
 } from 'lucide-react';
 import { toast } from 'sonner';
-// import { register } from '@/app/actions/auth';
+import { registerAction } from '@/app/(auth)/_actions/registerActions';
 
 type Role = 'CUSTOMER' | 'PROVIDER';
 
@@ -38,15 +39,20 @@ const roles: {
 ];
 
 export default function RegisterPage() {
-  // const [state, action, pending] = useActionState(register, undefined);
+  const [state, action, pending] = useActionState(registerAction, undefined);
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role>('CUSTOMER');
+  const router = useRouter();
 
-  // useEffect(() => {
-  //   if (state?.message) {
-  //     toast.error(state.message);
-  //   }
-  // }, [state?.message]);
+  useEffect(() => {
+    if (state && !state.success && state.message) {
+      toast.error(state.message);
+    }
+    if (state && state.success) {
+      toast.success('Account created successfully!');
+      router.push('/login');
+    }
+  }, [state, router]);
 
   return (
     <div className='w-full max-w-md'>
@@ -81,7 +87,7 @@ export default function RegisterPage() {
         </div>
 
         {/* Error banner */}
-        {/* {state?.message && (
+        {state && !state.success && state.message && (
           <div
             className='flex items-center gap-2 rounded-lg px-4 py-3 mb-5 text-sm'
             style={{
@@ -93,10 +99,10 @@ export default function RegisterPage() {
             <AlertCircle className='h-4 w-4 shrink-0' />
             {state.message}
           </div>
-        )} */}
+        )}
 
         {/* Form */}
-        <form className='flex flex-col gap-5'>
+        <form action={action} className='flex flex-col gap-5'>
           {/* Hidden role field */}
           <input type='hidden' name='role' value={selectedRole} />
 
@@ -269,28 +275,22 @@ export default function RegisterPage() {
           {/* Submit */}
           <button
             type='submit'
-            // disabled={pending}
+            disabled={pending}
             className='mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold text-white transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70'
             style={{ backgroundColor: 'var(--primary)' }}
-            // onMouseEnter={(e) => {
-            //   if (!pending)
-            //     (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-            //       'var(--primary-hover)';
-            // }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLButtonElement).style.backgroundColor =
                 'var(--primary)';
             }}
           >
-            {/* {pending ? (
+            {pending ? (
               <>
                 <Loader2 className='h-4 w-4 animate-spin' />
                 Creating account…
               </>
             ) : (
               'Create Account'
-            )} */}
-            Create Account
+            )}
           </button>
         </form>
 

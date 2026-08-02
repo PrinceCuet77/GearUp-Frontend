@@ -18,7 +18,7 @@ export const getAllCategoriesAction = async (): Promise<CategoriesResult> => {
     const accessToken = cookie.get('accessToken')?.value;
 
     const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/categoriess`,
+      `${process.env.BACKEND_API_URL}/api/categories`,
       {
         method: 'GET',
         headers: {
