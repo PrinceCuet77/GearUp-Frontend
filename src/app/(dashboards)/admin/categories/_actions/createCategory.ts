@@ -1,29 +1,52 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import type {
-  Category,
-  CategoriesResult,
-} from '@/lib/types';
+
+export interface CategoryData {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCategoryResult {
+  success: boolean;
+  data: CategoryData | null;
+  error: string | null;
+}
 
 const statusMessages: Record<number, string> = {
   401: 'Your session has expired. Please log in again.',
-  403: 'You do not have permission to view categories.',
-  404: 'Categories not found. Please try again later.',
+  403: 'You do not have permission to create categories.',
+  409: 'A category with this name already exists.',
 };
 
-export const getAllCategoriesAction = async (): Promise<CategoriesResult> => {
+export const createCategory = async (
+  name: string,
+  description: string,
+): Promise<CreateCategoryResult> => {
   try {
     const cookie = await cookies();
     const accessToken = cookie.get('accessToken')?.value;
 
+    if (!accessToken) {
+      return {
+        success: false,
+        data: null,
+        error: 'You are not logged in. Please log in to continue.',
+      };
+    }
+
     const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/categories`,
+      `${process.env.BACKEND_API_URL}/api/admin/categories`,
       {
-        method: 'GET',
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           Cookie: `accessToken=${accessToken}`,
         },
+        body: JSON.stringify({ name, description }),
         cache: 'no-store',
       },
     );
@@ -43,7 +66,7 @@ export const getAllCategoriesAction = async (): Promise<CategoriesResult> => {
     if (result.success && result.data) {
       return {
         success: true,
-        data: result.data as Category[],
+        data: result.data as CategoryData,
         error: null,
       };
     }
@@ -51,7 +74,7 @@ export const getAllCategoriesAction = async (): Promise<CategoriesResult> => {
     return {
       success: false,
       data: null,
-      error: result.message ?? 'Failed to load categories.',
+      error: result.message ?? 'Failed to create category.',
     };
   } catch {
     return {

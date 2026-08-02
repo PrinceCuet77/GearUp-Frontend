@@ -6,7 +6,7 @@ export default function AdminChangePasswordPage() {
     <div>
       <PageHeader
         title='Change Password'
-        description='Update your admin account password to keep your account secure.'
+        description='Update your account password to keep your account secure.'
       />
       <ChangePasswordForm />
     </div>
