@@ -1,15 +1,16 @@
 import Link from 'next/link';
 import { Users, Package, ClipboardList, Tag, ArrowRight } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import { getAdminDashboardInfo } from './_actions/getAdminDashboardInfo';
 
 export default async function AdminOverviewPage() {
-  const dashboardInfo = await getAdminDashboardInfo();
+  const { success, data, error } = await getAdminDashboardInfo();
 
-  const userTotal = dashboardInfo?.stats?.totalUsers ?? 0;
-  const gearTotal = dashboardInfo?.stats?.activeGears ?? 0;
-  const rentalTotal = dashboardInfo?.stats?.totalRentals ?? 0;
-  const categoryTotal = dashboardInfo?.stats?.totalCategories ?? 0;
+  const userTotal = data?.stats?.totalUsers ?? 0;
+  const gearTotal = data?.stats?.activeGears ?? 0;
+  const rentalTotal = data?.stats?.totalRentals ?? 0;
+  const categoryTotal = data?.stats?.totalCategories ?? 0;
 
   const quickLinks = [
     {
@@ -34,8 +35,8 @@ export default async function AdminOverviewPage() {
       color: '#22c55e',
     },
     {
-      href: '/admin/rentals',
-      label: 'All Rentals',
+      href: '/admin/rental-orders',
+      label: 'All Rental Orders',
       description: 'Oversee all platform rental orders.',
       icon: ClipboardList,
       color: '#7c3aed',
@@ -44,6 +45,7 @@ export default async function AdminOverviewPage() {
 
   return (
     <div>
+      {error && <ErrorBanner message={error} />}
       <div className='mb-8'>
         <h1
           className='text-2xl font-bold tracking-tight'

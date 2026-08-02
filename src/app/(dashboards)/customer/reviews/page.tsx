@@ -1,5 +1,6 @@
 import { getAllReviews } from './_actions/getAllReviews';
 import { ReviewsList } from './_components/ReviewsList';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
 const LIMIT = 10;
 
@@ -11,10 +12,13 @@ export default async function ReviewsPage() {
   const total = result.success ? (result.meta?.total ?? result.data.length) : 0;
 
   return (
-    <ReviewsList
-      initialReviews={reviews}
-      initialTotalPages={totalPages}
-      initialTotal={total}
-    />
+    <div>
+      {result.error && <ErrorBanner message={result.error} />}
+      <ReviewsList
+        initialReviews={reviews}
+        initialTotalPages={totalPages}
+        initialTotal={total}
+      />
+    </div>
   );
 }

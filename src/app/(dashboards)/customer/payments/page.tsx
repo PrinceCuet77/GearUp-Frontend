@@ -4,7 +4,7 @@ import { TableSkeleton } from '@/components/ui/Skeleton';
 import { getAllPayments } from './_actions/getAllPayments';
 import { PaymentsTable } from './_components/PaymentsTable';
 import { PaymentResult } from './_components/PaymentResult';
-import { ErrorToast } from './_components/ErrorToast';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
 const LIMIT = 10;
 
@@ -48,22 +48,7 @@ export default async function PaymentsPage({
         description={`${total} transaction${total !== 1 ? 's' : ''}`}
       />
 
-      {result.error && (
-        <>
-          <ErrorToast message={result.error} />
-          <div
-            className='mb-6 flex items-start gap-3 rounded-xl border-2 p-4'
-            style={{
-              backgroundColor: 'color-mix(in srgb, #f97316 10%, transparent)',
-              borderColor: 'color-mix(in srgb, #f97316 40%, transparent)',
-            }}
-          >
-            <p className='text-sm' style={{ color: '#9a3412' }}>
-              {result.error}
-            </p>
-          </div>
-        </>
-      )}
+      {result.error && <ErrorBanner message={result.error} />}
 
       <Suspense fallback={<TableSkeleton rows={5} cols={5} />}>
         <PaymentsTable

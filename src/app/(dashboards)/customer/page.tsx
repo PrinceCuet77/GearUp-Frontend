@@ -3,7 +3,7 @@ import { ShoppingBag, CreditCard, Star, Clock, ArrowRight } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
 import { getCustomerDashboardInfo } from './_actions/getCustomerDashboardInfo';
-import { DashboardErrorBanner } from './_components/DashboardErrorBanner';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import type { CustomerRentalOrder } from './_actions/getCustomerDashboardInfo';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export default async function CustomerOverviewPage() {
     <div>
       {/* Error banner */}
       {!result.success && result.error && (
-        <DashboardErrorBanner error={result.error} />
+        <ErrorBanner message={result.error} />
       )}
 
       {/* Welcome */}

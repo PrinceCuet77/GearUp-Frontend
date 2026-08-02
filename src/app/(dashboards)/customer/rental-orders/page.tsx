@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/dashboard/PageHeader';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import { getAllRentalOrders } from './_actions/getAllRentalOrders';
 import { OrdersTable } from './_components/OrdersTable';
-import { ErrorToast } from './_components/ErrorToast';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,22 +35,7 @@ export default async function RentalOrdersPage({
         description={`${total} total rental order${total !== 1 ? 's' : ''}`}
       />
 
-      {result.error && (
-        <>
-          <ErrorToast message={result.error} />
-          <div
-            className='mb-6 flex items-start gap-3 rounded-xl border-2 p-4'
-            style={{
-              backgroundColor: 'color-mix(in srgb, #f97316 10%, transparent)',
-              borderColor: 'color-mix(in srgb, #f97316 40%, transparent)',
-            }}
-          >
-            <p className='text-sm' style={{ color: '#9a3412' }}>
-              {result.error}
-            </p>
-          </div>
-        </>
-      )}
+      {result.error && <ErrorBanner message={result.error} />}
 
       <Suspense fallback={<TableSkeleton rows={5} cols={4} />}>
         <OrdersTable

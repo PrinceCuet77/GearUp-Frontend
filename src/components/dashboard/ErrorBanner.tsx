@@ -4,10 +4,22 @@ import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function DashboardErrorBanner({ error }: { error: string }) {
+interface ErrorBannerProps {
+  message: string;
+  title?: string;
+  showToast?: boolean;
+}
+
+export function ErrorBanner({
+  message,
+  title = 'Could not load dashboard',
+  showToast = true,
+}: ErrorBannerProps) {
   useEffect(() => {
-    toast.error('Dashboard load failed', { description: error });
-  }, [error]);
+    if (showToast) {
+      toast.error(message);
+    }
+  }, [message, showToast]);
 
   return (
     <div
@@ -23,10 +35,10 @@ export function DashboardErrorBanner({ error }: { error: string }) {
       />
       <div className='flex-1'>
         <p className='text-sm font-semibold' style={{ color: '#9a3412' }}>
-          Could not load dashboard
+          {title}
         </p>
         <p className='mt-0.5 text-sm' style={{ color: '#9a3412' }}>
-          {error}
+          {message}
         </p>
       </div>
     </div>

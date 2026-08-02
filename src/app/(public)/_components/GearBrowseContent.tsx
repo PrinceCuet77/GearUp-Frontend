@@ -18,6 +18,7 @@ import GearFilters from './GearFilters';
 import GearCard from './GearCard';
 import { toast } from 'sonner';
 import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/Skeleton';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
 function Pagination({
   page,
@@ -539,7 +540,10 @@ export default function GearBrowseContent() {
             {loading ? (
               <GearGridSkeleton count={6} />
             ) : error ? (
-              <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
+              <>
+                <ErrorBanner message={error} />
+                <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
+              </>
             ) : gears.length === 0 ? (
               <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
             ) : (
