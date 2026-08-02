@@ -27,8 +27,12 @@ export default async function CustomerDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getProfileAction();
-  if (!user) redirect('/login');
+  try {
+    const result = await getProfileAction();
+    if (!result.success || !result.data) redirect('/login');
+  } catch {
+    redirect('/login');
+  }
 
   return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
 }

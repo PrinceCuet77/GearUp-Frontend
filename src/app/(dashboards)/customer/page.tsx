@@ -132,7 +132,7 @@ export default async function CustomerOverviewPage() {
               Browse gear to place your first rental.
             </p>
             <Link
-              href='/gear'
+              href='/gears'
               className='mt-4 inline-flex h-9 items-center rounded-lg px-4 text-sm font-semibold text-white transition-colors'
               style={{ backgroundColor: 'var(--primary)' }}
             >

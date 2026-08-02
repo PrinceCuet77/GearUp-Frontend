@@ -1,48 +1,66 @@
 'use server';
 
 import { cookies } from 'next/headers';
+import type { UserProfile, ProfileResult } from '@/lib/types';
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  role: 'ADMIN' | 'CUSTOMER' | 'PROVIDER';
-  status: 'ACTIVE' | 'INACTIVE';
-  avatarUrl?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+const statusMessages: Record<number, string> = {
+  401: 'Your session has expired. Please log in again.',
+  403: 'You do not have permission to view this profile.',
+  404: 'Profile not found. Please try again later.',
+};
 
-export const getProfileAction = async (): Promise<UserProfile | null> => {
+export const getProfileAction = async (): Promise<ProfileResult> => {
   try {
     const cookie = await cookies();
     const accessToken = cookie.get('accessToken')?.value;
 
     if (!accessToken) {
-      return null;
+      return {
+        success: false,
+        data: null,
+        error: 'You are not logged in. Please log in to view your profile.',
+      };
     }
 
     const response = await fetch(`${process.env.BACKEND_API_URL}/api/user/me`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Cookie: `accessToken=${accessToken}`,
       },
-      cache: 'force-cache',
-      next: { revalidate: 60 * 60 * 24, tags: ['user-profile'] },
+      cache: 'no-store',
     });
 
     if (!response.ok) {
-      return null;
+      return {
+        success: false,
+        data: null,
+        error:
+          statusMessages[response.status] ??
+          `Something went wrong (error ${response.status}). Please try again later.`,
+      };
     }
 
     const result = await response.json();
 
     if (result.success && result.data) {
-      return result.data as UserProfile;
+      return {
+        success: true,
+        data: result.data as UserProfile,
+        error: null,
+      };
     }
 
-    return null;
+    return {
+      success: false,
+      data: null,
+      error: result.message ?? 'Failed to load profile data.',
+    };
   } catch {
-    return null;
+    return {
+      success: false,
+      data: null,
+      error:
+        'Unable to connect to the server. Please check your connection and try again.',
+    };
   }
 };

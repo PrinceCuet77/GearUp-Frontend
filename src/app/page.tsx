@@ -113,7 +113,7 @@ export default function HomePage() {
 
           <div className='flex flex-col items-center justify-center gap-4 sm:flex-row'>
             <Link
-              href='/gear'
+              href='/gears'
               className='inline-flex h-12 items-center gap-2 rounded-xl px-8 text-base font-bold text-white transition-colors'
               style={{ backgroundColor: 'var(--primary)' }}
             >
@@ -455,7 +455,7 @@ export default function HomePage() {
                 Create Free Account
               </Link>
               <Link
-                href='/gear'
+                href='/gears'
                 className='w-full rounded-xl border border-white/30 px-8 py-3 text-sm font-semibold text-white transition-colors sm:w-auto'
               >
                 Browse Gear First

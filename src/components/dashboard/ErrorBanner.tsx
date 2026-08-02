@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,8 +15,11 @@ export function ErrorBanner({
   title = 'Could not load dashboard',
   showToast = true,
 }: ErrorBannerProps) {
+  const lastMessageRef = useRef<string>('');
+
   useEffect(() => {
-    if (showToast) {
+    if (showToast && message !== lastMessageRef.current) {
+      lastMessageRef.current = message;
       toast.error(message);
     }
   }, [message, showToast]);

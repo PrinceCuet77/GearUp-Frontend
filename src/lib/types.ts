@@ -24,6 +24,23 @@ export type RentalStatus =
   | 'CANCELLED';
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: 'ADMIN' | 'CUSTOMER' | 'PROVIDER';
+  status: 'ACTIVE' | 'INACTIVE';
+  avatarUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProfileResult {
+  success: boolean;
+  data: UserProfile | null;
+  error: string | null;
+}
+
 export interface User {
   id: string;
   name: string | null;
@@ -118,4 +135,32 @@ export interface Review {
   rentalOrder?: Pick<RentalOrder, 'id' | 'status'>;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CategoriesApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: Category[];
+}
+
+export interface CategoriesResult {
+  success: boolean;
+  data: Category[] | null;
+  error: string | null;
+}
+
+export interface GearsApiResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: GearItem[];
+  meta: ApiMeta;
+}
+
+export interface GearsResult {
+  success: boolean;
+  data: GearItem[] | null;
+  meta: ApiMeta | null;
+  error: string | null;
 }

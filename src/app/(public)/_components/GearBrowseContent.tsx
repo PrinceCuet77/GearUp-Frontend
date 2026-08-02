@@ -16,7 +16,6 @@ import { getAllGearsAction } from '../_actions/getAllGears';
 import { getAllCategoriesAction } from '../_actions/getAllCategories';
 import GearFilters from './GearFilters';
 import GearCard from './GearCard';
-import { toast } from 'sonner';
 import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/Skeleton';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
@@ -205,6 +204,7 @@ export default function GearBrowseContent() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const search = searchParams.get('search') ?? '';
@@ -236,12 +236,13 @@ export default function GearBrowseContent() {
           setGears(result.data || []);
           setTotalPages(result.meta?.totalPages || 1);
           setTotal(result.meta?.total || 0);
+          setError(null);
         } else {
+          setError(result.error || 'Failed to load gears');
           setGears([]);
         }
       } catch {
-        setError('An error occurred');
-        toast.error('Failed to fetch gears');
+        setError('An unexpected error occurred');
         setGears([]);
       } finally {
         setLoading(false);
@@ -254,13 +255,16 @@ export default function GearBrowseContent() {
   useEffect(() => {
     const fetchCategories = async () => {
       setCategoriesLoading(true);
+      setCategoriesError(null);
       try {
         const result = await getAllCategoriesAction();
-        if (result?.success) {
-          setCategories(result.data || []);
+        if (result.success && result.data) {
+          setCategories(result.data);
+        } else if (result.error) {
+          setCategoriesError(result.error);
         }
       } catch {
-        toast.error('Failed to fetch categories');
+        setCategoriesError('Failed to fetch categories');
       } finally {
         setCategoriesLoading(false);
       }
@@ -393,6 +397,12 @@ export default function GearBrowseContent() {
               </div>
               {categoriesLoading ? (
                 <GearFiltersSkeleton />
+              ) : categoriesError ? (
+                <ErrorBanner
+                  message={categoriesError}
+                  title='Could not load categories'
+                  showToast={false}
+                />
               ) : (
                 <GearFilters {...filterProps} />
               )}
@@ -541,7 +551,7 @@ export default function GearBrowseContent() {
               <GearGridSkeleton count={6} />
             ) : error ? (
               <>
-                <ErrorBanner message={error} />
+                <ErrorBanner message={error} title='Could not load gears' />
                 <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
               </>
             ) : gears.length === 0 ? (

@@ -48,7 +48,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   // Fetch profile server-side to avoid auth flash on client
-  const initialProfile = (await getProfileAction()) as User | null;
+  let initialProfile: User | null = null;
+  try {
+    const result = await getProfileAction();
+    initialProfile = result.success ? (result.data as User | null) : null;
+  } catch {
+    initialProfile = null;
+  }
 
   return (
     <html

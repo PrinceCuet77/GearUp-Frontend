@@ -30,10 +30,10 @@ export const useAuthStore = create<AuthState>()(
         }
         set({ isLoading: true });
         try {
-          const profile = await getProfileAction();
-          if (profile) {
+          const result = await getProfileAction();
+          if (result.success && result.data) {
             set({
-              user: profile as User,
+              user: result.data as User,
               isAuthenticated: true,
               isLoading: false,
             });

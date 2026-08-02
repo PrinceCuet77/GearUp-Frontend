@@ -4,9 +4,14 @@ import { ProfileContentClient } from './ProfileContentClient';
 import type { User, UserStatus } from '@/lib/types';
 
 export async function ProfileContent() {
-  const profile = await getProfileAction();
-
-  if (!profile) {
+  let profile;
+  try {
+    const result = await getProfileAction();
+    if (!result.success || !result.data) {
+      redirect('/login');
+    }
+    profile = result.data!;
+  } catch {
     redirect('/login');
   }
 
