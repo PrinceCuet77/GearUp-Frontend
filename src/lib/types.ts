@@ -212,7 +212,8 @@ export interface ProviderDashboardInfo {
   stats: {
     totalGearListed: number;
     totalOrders: number;
-    pendingOrders: number;
+    needsConfirmation: number;
+    readyForPickup: number;
   };
   recentOrders: ProviderRentalOrder[];
 }

@@ -4,21 +4,12 @@ import {
   ClipboardList,
   Clock,
   ArrowRight,
-  PlusCircle,
+  KeyRound,
+  UserCog,
 } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import { getProviderDashboardInfo } from './_actions/getProviderDashboardInfo';
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Dhaka',
-  });
-}
 
 export default async function ProviderDashboardPage() {
   const result = await getProviderDashboardInfo();
@@ -26,18 +17,44 @@ export default async function ProviderDashboardPage() {
   const stats = result.data?.stats ?? {
     totalGearListed: 0,
     totalOrders: 0,
-    pendingOrders: 0,
+    needsConfirmation: 0,
+    readyForPickup: 0,
   };
-  const orders = result.data?.recentOrders ?? [];
+
+  const quickLinks = [
+    {
+      href: '/provider/gears',
+      label: 'My Gears',
+      description: 'View and manage your listed gear inventory.',
+      icon: Package,
+      color: 'var(--primary)',
+    },
+    {
+      href: '/provider/rental-orders',
+      label: 'Rental Orders',
+      description: 'Review and manage incoming rental requests.',
+      icon: ClipboardList,
+      color: '#7c3aed',
+    },
+    {
+      href: '/provider/profile',
+      label: 'Profile Settings',
+      description: 'Update your provider profile and preferences.',
+      icon: UserCog,
+      color: '#22c55e',
+    },
+    {
+      href: '/provider/change-password',
+      label: 'Change Password',
+      description: 'Update your account security credentials.',
+      icon: KeyRound,
+      color: '#f59e0b',
+    },
+  ];
 
   return (
     <div>
-      {!result.success && result.error && (
-        <ErrorBanner
-          title='Could not load provider dashboard'
-          message={result.error}
-        />
-      )}
+      {result.error && <ErrorBanner message={result.error} />}
 
       <div className='mb-8'>
         <h1
@@ -55,12 +72,13 @@ export default async function ProviderDashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+      <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <StatsCard
           title='Total Gear Listed'
           value={stats.totalGearListed}
           icon={Package}
           description='In your inventory'
+          accentColor='var(--primary)'
         />
         <StatsCard
           title='Total Orders'
@@ -70,131 +88,72 @@ export default async function ProviderDashboardPage() {
           accentColor='#7c3aed'
         />
         <StatsCard
-          title='Pending Approval'
-          value={stats.pendingOrders}
+          title='Needs Confirmation'
+          value={stats.needsConfirmation}
           icon={Clock}
-          description='Awaiting confirmation'
+          description='Awaiting your confirmation'
           accentColor='#f59e0b'
+        />
+        <StatsCard
+          title='Ready for Pickup'
+          value={stats.readyForPickup}
+          icon={Package}
+          description='Confirmed and waiting'
+          accentColor='#22c55e'
         />
       </div>
 
-      {/* Recent orders */}
-      <div
-        className='rounded-xl border'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+      {/* Quick links */}
+      <h2
+        className='mb-4 text-base font-semibold'
+        style={{ color: 'var(--foreground)' }}
       >
-        <div
-          className='flex items-center justify-between border-b px-6 py-4'
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <h2
-            className='text-base font-semibold'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Recent Orders
-          </h2>
-          <Link
-            href='/provider/rental-orders'
-            className='flex items-center gap-1 text-sm font-medium'
-            style={{ color: 'var(--primary)' }}
-          >
-            View all <ArrowRight className='h-3.5 w-3.5' />
-          </Link>
-        </div>
-
-        {orders.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-16'>
-            <ClipboardList
-              className='mb-3 h-10 w-10 opacity-30'
-              style={{ color: 'var(--muted-foreground)' }}
-            />
-            <p
-              className='text-sm font-medium'
-              style={{ color: 'var(--muted-foreground)' }}
+        Quick Actions
+      </h2>
+      <div className='grid gap-4 sm:grid-cols-2'>
+        {quickLinks.map((link) => {
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className='group flex items-start gap-4 rounded-xl border p-5 transition-all hover:shadow-md'
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+              }}
             >
-              No orders yet
-            </p>
-            <p
-              className='mt-1 text-xs'
-              style={{ color: 'var(--muted-foreground)', opacity: 0.7 }}
-            >
-              Add gear to start receiving rental orders.
-            </p>
-          </div>
-        ) : (
-          <div className='overflow-x-auto'>
-            <table className='w-full'>
-              <thead>
-                <tr
-                  className='border-b text-left text-xs font-semibold uppercase tracking-wide'
-                  style={{
-                    borderColor: 'var(--border)',
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
-                  <th className='px-6 py-3'>Order ID</th>
-                  <th className='px-6 py-3'>Customer</th>
-                  <th className='px-6 py-3'>Dates</th>
-                  <th className='px-6 py-3'>Amount</th>
-                  <th className='px-6 py-3'>Status</th>
-                  <th className='px-6 py-3'></th>
-                </tr>
-              </thead>
-              <tbody
-                className='divide-y'
-                style={{ borderColor: 'var(--border)' }}
+              <div
+                className='mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg'
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${link.color} 14%, transparent)`,
+                }}
               >
-                {orders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className='transition-colors hover:bg-muted'
+                <Icon className='h-5 w-5' style={{ color: link.color }} />
+              </div>
+              <div className='min-w-0 flex-1'>
+                <div className='flex items-center justify-between'>
+                  <p
+                    className='text-sm font-semibold'
+                    style={{ color: 'var(--foreground)' }}
                   >
-                    <td
-                      className='px-6 py-4 font-mono text-sm'
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      #{order.id.slice(0, 8)}
-                    </td>
-                    <td
-                      className='px-6 py-4 text-sm'
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      {order.customer?.name ?? order.customer?.email ?? '—'}
-                    </td>
-                    <td
-                      className='px-6 py-4 text-sm'
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      {formatDate(order.startDate)} –{' '}
-                      {formatDate(order.endDate)}
-                    </td>
-                    <td
-                      className='px-6 py-4 text-sm font-semibold'
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      ${Number(order.amount).toFixed(2)}
-                    </td>
-                    <td className='px-6 py-4'>
-                      <RentalStatusBadge status={order.status} />
-                    </td>
-                    <td className='px-6 py-4'>
-                      <Link
-                        href={`/provider/rental-orders/${order.id}`}
-                        className='text-sm font-medium'
-                        style={{ color: 'var(--primary)' }}
-                      >
-                        Manage
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                    {link.label}
+                  </p>
+                  <ArrowRight
+                    className='h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100'
+                    style={{ color: 'var(--muted-foreground)' }}
+                  />
+                </div>
+                <p
+                  className='mt-0.5 text-sm'
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  {link.description}
+                </p>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

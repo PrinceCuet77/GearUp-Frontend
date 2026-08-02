@@ -38,7 +38,7 @@ export const getAdminDashboardInfo =
       }
 
       const response = await fetch(
-        `${process.env.BACKEND_API_URL}/api/admin/dashboards`,
+        `${process.env.BACKEND_API_URL}/api/admin/dashboard`,
         {
           method: 'GET',
           headers: {
