@@ -194,7 +194,7 @@ export default async function CustomerOverviewPage() {
                     </td>
                     <td className='px-6 py-4'>
                       <Link
-                        href={`/customer/orders/${order.id}`}
+                        href={`/customer/rental-orders/${order.id}`}
                         className='text-sm font-medium transition-colors'
                         style={{ color: 'var(--primary)' }}
                       >
