@@ -50,15 +50,32 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // If the refresh token is invalid/expired, redirect to login
-  if (decodedRefreshToken?.success === false) {
+  const isPublic = PUBLIC_ROUTES.some((route) => {
+    if (route === '/') return pathname === '/';
+    return pathname === route || pathname.startsWith(route + '/');
+  });
+  const isAuthRoute = AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(route),
+  );
+
+  // If the refresh token is invalid/expired or missing, redirect to login (only for protected routes)
+  if (
+    !isPublic &&
+    !isAuthRoute &&
+    (!decodedRefreshToken || decodedRefreshToken.success === false)
+  ) {
     cookie.delete('accessToken');
     cookie.delete('refreshToken');
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // If access token exists but is still invalid after refresh attempt, redirect to login
-  if (accessToken && !decodedAccessToken?.success) {
+  // If access token exists but is still invalid after refresh attempt, redirect to login (only for protected routes)
+  if (
+    !isPublic &&
+    !isAuthRoute &&
+    accessToken &&
+    !decodedAccessToken?.success
+  ) {
     cookie.delete('accessToken');
     cookie.delete('refreshToken');
     return NextResponse.redirect(new URL('/login', request.url));
@@ -82,12 +99,6 @@ export async function proxy(request: NextRequest) {
   }
 
   // PROXY-2: Authentication check: If the user is not authenticated and trying to access a protected route, redirect them to the login page.
-  const isPublic = PUBLIC_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route),
-  );
-  const isAuthRoute = AUTH_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(route),
-  );
   if (!accessToken && !isPublic && !isAuthRoute) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
