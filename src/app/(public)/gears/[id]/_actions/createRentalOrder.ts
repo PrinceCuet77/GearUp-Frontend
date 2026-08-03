@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface RentalOrderItemInput {
@@ -49,16 +50,7 @@ export const createRentalOrder = async (
   payload: CreateRentalOrderPayload,
 ): Promise<CreateRentalOrderResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error: 'You are not logged in. Please log in to create a rental order.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     if (!payload.items.length) {
       return {

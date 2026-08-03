@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import type { RentalOrder } from '@/lib/types';
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 
 export interface RentalOrderResult {
   success: boolean;
@@ -19,17 +20,7 @@ export const returnRentalOrder = async (
   rentalId: string,
 ): Promise<RentalOrderResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error:
-          'You are not logged in. Please log in to return your rental order.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/rentals/${rentalId}/return`;
 

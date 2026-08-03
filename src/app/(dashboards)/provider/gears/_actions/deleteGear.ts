@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface DeleteGearResult {
@@ -15,15 +16,7 @@ const statusMessages: Record<number, string> = {
 
 export const deleteGear = async (gearId: string): Promise<DeleteGearResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        error: 'You are not logged in. Please log in again.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/provider/gears/${gearId}`;
 

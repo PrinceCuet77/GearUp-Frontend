@@ -345,7 +345,7 @@ export function GearFormModal({
 
         {/* Active toggle */}
         <div
-          className='flex items-center justify-between rounded-lg border px-4 py-3'
+          className='flex flex-col gap-3 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0'
           style={{ borderColor: 'var(--border)' }}
         >
           <div>
@@ -362,7 +362,7 @@ export function GearFormModal({
           <button
             type='button'
             onClick={() => setIsActive((v) => !v)}
-            className='relative cursor-pointer inline-flex h-6 w-11 items-center rounded-full transition-colors'
+            className='relative cursor-pointer inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors'
             style={{
               backgroundColor: isActive ? 'var(--primary)' : 'var(--muted)',
             }}

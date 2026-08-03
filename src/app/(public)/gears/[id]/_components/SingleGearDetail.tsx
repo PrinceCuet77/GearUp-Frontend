@@ -7,7 +7,6 @@ import {
   ArrowLeft,
   Star,
   Package,
-  User,
   Calendar,
   ShoppingBag,
   ZoomIn,
@@ -222,15 +221,66 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
               </div>
             </div>
 
-            {/* Meta */}
+            {/* Provider Info */}
+            <div
+              className='flex items-center gap-4 rounded-xl border p-4'
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+              }}
+            >
+              <div
+                className='relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-white'
+                style={{ backgroundColor: '#2563eb' }}
+              >
+                {gear.provider?.avatarUrl ? (
+                  <Image
+                    src={gear.provider.avatarUrl}
+                    alt={gear.provider?.name || 'Provider'}
+                    fill
+                    className='rounded-full object-cover'
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display =
+                        'none';
+                    }}
+                  />
+                ) : (
+                  (gear.provider?.name ?? 'P')[0].toUpperCase()
+                )}
+              </div>
+              <div className='min-w-0 flex-1'>
+                <div className='flex items-center gap-2'>
+                  <p
+                    className='text-sm font-semibold truncate'
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    {gear.provider?.name ?? 'Unknown Provider'}
+                  </p>
+                  <span
+                    className='inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider'
+                    style={{
+                      backgroundColor: 'rgba(37,99,235,0.10)',
+                      color: '#2563eb',
+                    }}
+                  >
+                    Provider
+                  </span>
+                </div>
+                <p
+                  className='mt-0.5 text-xs'
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  Member since{' '}
+                  {formatDate(gear.provider?.createdAt ?? gear.createdAt)}
+                </p>
+              </div>
+            </div>
+
+            {/* Stock & date */}
             <div
               className='flex flex-wrap gap-4 text-sm'
               style={{ color: 'var(--muted-foreground)' }}
             >
-              <span className='flex items-center gap-1.5'>
-                <User className='h-4 w-4' />
-                {gear.customer?.name ?? 'Customer'}
-              </span>
               <span className='flex items-center gap-1.5'>
                 <Package className='h-4 w-4' />
                 {gear.stock > 0

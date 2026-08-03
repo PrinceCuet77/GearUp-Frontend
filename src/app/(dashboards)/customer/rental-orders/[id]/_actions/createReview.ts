@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import type { Review } from '@/lib/types';
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 
 export interface CreateReviewResult {
   success: boolean;
@@ -42,16 +43,7 @@ export const createReview = async (payload: {
   }
 
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error: 'You are not logged in. Please log in to create a review.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/reviews`;
 

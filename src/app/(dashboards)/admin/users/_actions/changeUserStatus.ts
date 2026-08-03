@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface ToggleStatusResult {
@@ -12,15 +13,7 @@ export const changeUserStatus = async (
   status: 'SUSPENDED' | 'ACTIVE',
 ): Promise<ToggleStatusResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        message: 'You are not logged in.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const response = await fetch(
       `${process.env.BACKEND_API_URL}/api/admin/user/${userId}/status`,

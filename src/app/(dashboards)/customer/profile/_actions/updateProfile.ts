@@ -4,6 +4,7 @@ import { revalidateTag } from 'next/cache';
 import { cookies } from 'next/headers';
 import { z } from 'zod';
 import type { User } from '@/lib/types';
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 
 const updateMyProfile = z.object({
   name: z
@@ -45,16 +46,7 @@ export const updateProfile = async (
 
     const { name, avatarUrl } = parsed.data;
 
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error: 'You are not logged in. Please log in to update your profile.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/user/me`;
 

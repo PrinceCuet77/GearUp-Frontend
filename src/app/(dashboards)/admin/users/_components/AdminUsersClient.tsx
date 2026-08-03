@@ -192,7 +192,7 @@ export function AdminUsersClient({
                       color: 'var(--muted-foreground)',
                     }}
                   >
-                    <th className='px-6 py-3'>User</th>
+                    <th className='px-6 py-3'>Email</th>
                     <th className='px-6 py-3'>Role</th>
                     <th className='px-6 py-3'>Status</th>
                     <th className='px-6 py-3'>Joined</th>
@@ -231,14 +231,12 @@ export function AdminUsersClient({
                             {user.avatarUrl ? (
                               <img
                                 src={user.avatarUrl}
-                                alt={`${user.name}'s avatar`}
+                                alt={`${user.email}'s avatar`}
                                 className='h-full w-full object-cover'
                               />
                             ) : (
                               <span className='text-xs font-bold text-white'>
-                                {(
-                                  user.name?.[0] ?? user.email[0]
-                                ).toUpperCase()}
+                                {user.email[0].toUpperCase()}
                               </span>
                             )}
                           </div>
@@ -247,7 +245,7 @@ export function AdminUsersClient({
                               className='truncate text-sm font-medium'
                               style={{ color: 'var(--foreground)' }}
                             >
-                              {user.name ?? 'No name'}
+                              {user.name ?? '-'}
                             </p>
                             <p
                               className='truncate text-xs'

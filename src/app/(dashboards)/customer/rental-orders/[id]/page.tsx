@@ -106,22 +106,24 @@ export default async function OrderDetailPage({ params }: Props) {
       </Link>
 
       {/* Header */}
-      <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-        <div>
+      <div className='mb-6'>
+        <div className='flex flex-wrap items-center gap-3'>
           <h1
             className='text-2xl font-bold tracking-tight'
             style={{ color: 'var(--foreground)' }}
           >
             Rental Order #{order.id.slice(0, 8)}
           </h1>
-          <p
-            className='mt-1 text-sm'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            Placed on {formatDate(order.createdAt)}
-          </p>
+          <div className='w-fit'>
+            <RentalStatusBadge status={order.status} />
+          </div>
         </div>
-        <RentalStatusBadge status={order.status} />
+        <p
+          className='mt-1 text-sm'
+          style={{ color: 'var(--muted-foreground)' }}
+        >
+          Placed on {formatDate(order.createdAt)}
+        </p>
       </div>
 
       {/* Actions */}

@@ -3,11 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTheme } from '@/components/ThemeProvider';
 import {
   Menu,
-  Sun,
-  Moon,
   LogOut,
   ChevronRight,
   LayoutDashboard,
@@ -91,14 +88,9 @@ function getInitials(name?: string | null, email?: string): string {
 
 export function DashboardShell({ children, navItems }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const { theme, toggleTheme } = useTheme();
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
@@ -272,20 +264,6 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
           >
             {meta.label} Dashboard
           </span>
-          {mounted && (
-            <button
-              onClick={toggleTheme}
-              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
-              style={{ color: 'var(--foreground)' }}
-              aria-label='Toggle theme'
-            >
-              {theme === 'dark' ? (
-                <Sun className='h-4 w-4' />
-              ) : (
-                <Moon className='h-4 w-4' />
-              )}
-            </button>
-          )}
         </div>
         <main className='flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8'>
           {children}

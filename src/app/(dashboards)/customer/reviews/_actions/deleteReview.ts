@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface DeleteReviewResult {
@@ -17,15 +18,7 @@ export const deleteReview = async (
   reviewId: string,
 ): Promise<DeleteReviewResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        error: 'You are not logged in. Please log in to delete your review.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/reviews/${reviewId}`;
 

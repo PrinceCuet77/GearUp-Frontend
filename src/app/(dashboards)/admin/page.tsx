@@ -35,9 +35,9 @@ export default async function AdminOverviewPage() {
       color: '#22c55e',
     },
     {
-      href: '/admin/rental-orders',
-      label: 'All Rental Orders',
-      description: 'Oversee all platform rental orders.',
+      href: '/admin/change-password',
+      label: 'Change Password',
+      description: 'Update your account password.',
       icon: ClipboardList,
       color: '#7c3aed',
     },

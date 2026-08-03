@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface PaymentResult {
@@ -19,17 +20,7 @@ export const createPayment = async (
   rentalId: string,
 ): Promise<PaymentResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        gatewayPageURL: null,
-        transactionId: null,
-        error: 'You are not logged in. Please log in to make a payment.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/payments/create`;
 

@@ -14,11 +14,12 @@ import {
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-import { TableSkeleton } from '@/components/Skeleton';
+// import { TableSkeleton } from '@/components/Skeleton';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 import type { GearItem, Category } from '@/lib/types';
 import { getAllGearsForAdmin } from './_actions/getAllGearsForAdmin';
 import { getAllCategoriesAction } from '@/app/(public)/_actions/getAllCategories';
+import { TableSkeleton } from '@/components/Skeleton';
 
 const LIMIT = 10;
 
@@ -170,7 +171,7 @@ export default function AdminGearsPage() {
       />
 
       {/* Search + Filter Toggle */}
-      <div className='mb-4 flex gap-2'>
+      <div className='mb-4 flex flex-col gap-2 sm:flex-row'>
         <form onSubmit={handleSearch} className='flex flex-1 gap-2'>
           <div
             className='flex flex-1 items-center gap-2 rounded-lg border px-3'
@@ -206,7 +207,7 @@ export default function AdminGearsPage() {
           </div>
           <button
             type='submit'
-            className='cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors'
+            className='cursor-pointer shrink-0 rounded-lg px-4 py-2 text-sm font-semibold transition-colors'
             style={{
               backgroundColor: 'var(--primary)',
               color: 'var(--primary-foreground)',
@@ -228,7 +229,7 @@ export default function AdminGearsPage() {
             }
             setShowFilters(!showFilters);
           }}
-          className='cursor-pointer flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors'
+          className='cursor-pointer flex shrink-0 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:justify-start'
           style={{
             backgroundColor: showFilters ? 'var(--primary)' : 'var(--card)',
             borderColor: showFilters ? 'var(--primary)' : 'var(--border)',
@@ -241,7 +242,7 @@ export default function AdminGearsPage() {
           Filters
           {hasActiveFilters && (
             <span
-              className='ml-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold'
+              className='flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold'
               style={{
                 backgroundColor: showFilters
                   ? 'var(--primary-foreground)'

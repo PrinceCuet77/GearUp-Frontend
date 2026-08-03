@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface CategoryData {
@@ -42,16 +43,7 @@ export const updateCategory = async (
   description: string,
 ): Promise<UpdateCategoryResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error: 'You are not logged in. Please log in to continue.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const response = await fetch(
       `${process.env.BACKEND_API_URL}/api/admin/categories/${categoryId}`,

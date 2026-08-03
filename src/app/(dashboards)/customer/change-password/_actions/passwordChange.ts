@@ -1,5 +1,6 @@
 'use server';
 
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 import { cookies } from 'next/headers';
 
 export interface ChangePasswordResult {
@@ -18,15 +19,7 @@ export const changePassword = async (payload: {
   newPassword: string;
 }): Promise<ChangePasswordResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        error: 'You are not logged in. Please log in to change your password.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/user/me/password`;
 

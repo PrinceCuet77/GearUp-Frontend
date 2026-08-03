@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 import type { GearItem } from '@/lib/types';
+import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 
 export interface CreateGearResult {
   success: boolean;
@@ -24,16 +25,7 @@ export const createGear = async (params: {
   categoryId: string;
 }): Promise<CreateGearResult> => {
   try {
-    const cookie = await cookies();
-    const accessToken = cookie.get('accessToken')?.value;
-
-    if (!accessToken) {
-      return {
-        success: false,
-        data: null,
-        error: 'You are not logged in. Please log in again.',
-      };
-    }
+    const accessToken = await isAccessTokenExist();
 
     const url = `${process.env.BACKEND_API_URL}/api/provider/gears`;
 
