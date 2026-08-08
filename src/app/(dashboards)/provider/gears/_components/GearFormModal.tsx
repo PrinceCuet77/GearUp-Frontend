@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
@@ -50,29 +50,23 @@ export function GearFormModal({
   const [errors, setErrors] = useState<FormErrors>({});
   const [saving, setSaving] = useState(false);
 
-  // Populate form when editing or reset when adding
-  useEffect(() => {
+  // Populate the form when editing, or clear it when adding. Adjusting during
+  // render means the modal's first painted frame already holds the right
+  // listing — an effect would flash the previously edited gear for one frame.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
-      if (gear) {
-        setName(gear.name);
-        setDescription(gear.description);
-        setPrice(String(gear.price));
-        setStock(String(gear.stock));
-        setImages(gear.images);
-        setCategoryId(gear.categoryId);
-        setIsActive(gear.isActive ?? true);
-      } else {
-        setName('');
-        setDescription('');
-        setPrice('');
-        setStock('1');
-        setImages('');
-        setCategoryId('');
-        setIsActive(true);
-      }
+      setName(gear?.name ?? '');
+      setDescription(gear?.description ?? '');
+      setPrice(gear ? String(gear.price) : '');
+      setStock(gear ? String(gear.stock) : '1');
+      setImages(gear?.images ?? '');
+      setCategoryId(gear?.categoryId ?? '');
+      setIsActive(gear?.isActive ?? true);
       setErrors({});
     }
-  }, [open, gear]);
+  }
 
   const validate = (): boolean => {
     const schema = isEdit ? updateGearSchema : createGearSchema;

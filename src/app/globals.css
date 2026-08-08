@@ -1,60 +1,216 @@
 @import 'tailwindcss';
 
+/* ==========================================================================
+   GearUp Design System
+   --------------------------------------------------------------------------
+   Brand palette is limited to THREE colours plus a neutral ramp:
+     1. Primary   — Ember Orange   (brand identity, primary actions)
+     2. Secondary — Deep Teal      (trust, availability, positive states)
+     3. Accent    — Indigo         (data, highlights, secondary emphasis)
+     N. Neutral   — Slate          (surfaces, text, borders)
+
+   `--danger` / `--warning` are *state* colours, not brand colours. They are
+   reserved exclusively for destructive and cautionary UI feedback.
+
+   Every colour below is declared in BOTH themes so no utility ever resolves
+   to an undefined variable.
+   ========================================================================== */
+
 /* Class-based dark mode — toggled via .dark class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
   --background: #f8fafc;
+  --background-subtle: #f1f5f9;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
+  --card-hover: #fdfdfe;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
   --border: #e2e8f0;
+  --border-strong: #cbd5e1;
   --input-bg: #ffffff;
   --input-border: #cbd5e1;
-  --primary: #f97316;
-  --primary-hover: #ea6c0a;
+  --overlay: rgba(15, 23, 42, 0.55);
+
+  /* ── 1. Primary — Ember Orange ─────────────────────────────────────── */
+  --primary: #ea580c;
+  --primary-hover: #c2410c;
   --primary-foreground: #ffffff;
-  --ring: #f97316;
-  --nav-bg: rgba(255, 255, 255, 0.85);
+  --primary-soft: #fff1e7;
+  --primary-soft-foreground: #9a3412;
+
+  /* ── 2. Secondary — Deep Teal ──────────────────────────────────────── */
+  --secondary: #0d9488;
+  --secondary-hover: #0f766e;
+  --secondary-foreground: #ffffff;
+  --secondary-soft: #e6fffa;
+  --secondary-soft-foreground: #115e59;
+
+  /* ── 3. Accent — Indigo ────────────────────────────────────────────── */
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-foreground: #ffffff;
+  --accent-soft: #eef2ff;
+  --accent-soft-foreground: #3730a3;
+
+  /* ── State colours (feedback only, never decorative) ───────────────── */
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --danger-foreground: #ffffff;
+  --danger-soft: #fef2f2;
+  --danger-soft-foreground: #991b1b;
+
+  --warning: #d97706;
+  --warning-soft: #fffbeb;
+  --warning-soft-foreground: #92400e;
+
+  /* ── Focus ring ────────────────────────────────────────────────────── */
+  --ring: #ea580c;
+
+  /* ── Chrome ────────────────────────────────────────────────────────── */
+  --nav-bg: rgba(255, 255, 255, 0.88);
   --nav-border: #e2e8f0;
+
+  /* ── Elevation — one scale, used everywhere ────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.05);
+  --shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.14);
 }
 
 .dark {
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --card: #1e293b;
-  --card-foreground: #f1f5f9;
-  --muted: #1e293b;
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  --background: #0b1220;
+  --background-subtle: #0f172a;
+  --foreground: #e2e8f0;
+  --card: #131c2e;
+  --card-foreground: #e2e8f0;
+  --card-hover: #182238;
+  --muted: #1c2740;
   --muted-foreground: #94a3b8;
-  --border: #334155;
-  --input-bg: #1e293b;
-  --input-border: #475569;
-  --primary: #f97316;
-  --primary-hover: #fb923c;
-  --primary-foreground: #ffffff;
-  --ring: #f97316;
-  --nav-bg: rgba(15, 23, 42, 0.85);
-  --nav-border: #334155;
+  --border: #253148;
+  --border-strong: #35455f;
+  --input-bg: #131c2e;
+  --input-border: #35455f;
+  --overlay: rgba(2, 6, 16, 0.7);
+
+  /* ── 1. Primary — Ember Orange (lifted for contrast on dark) ───────── */
+  --primary: #fb923c;
+  --primary-hover: #fdba74;
+  --primary-foreground: #1a0d02;
+  --primary-soft: rgba(251, 146, 60, 0.14);
+  --primary-soft-foreground: #fdba74;
+
+  /* ── 2. Secondary — Deep Teal ──────────────────────────────────────── */
+  --secondary: #2dd4bf;
+  --secondary-hover: #5eead4;
+  --secondary-foreground: #042f2a;
+  --secondary-soft: rgba(45, 212, 191, 0.14);
+  --secondary-soft-foreground: #5eead4;
+
+  /* ── 3. Accent — Indigo ────────────────────────────────────────────── */
+  --accent: #818cf8;
+  --accent-hover: #a5b4fc;
+  --accent-foreground: #101034;
+  --accent-soft: rgba(129, 140, 248, 0.16);
+  --accent-soft-foreground: #a5b4fc;
+
+  /* ── State colours ─────────────────────────────────────────────────── */
+  --danger: #f87171;
+  --danger-hover: #fca5a5;
+  --danger-foreground: #2b0707;
+  --danger-soft: rgba(248, 113, 113, 0.14);
+  --danger-soft-foreground: #fca5a5;
+
+  --warning: #fbbf24;
+  --warning-soft: rgba(251, 191, 36, 0.14);
+  --warning-soft-foreground: #fcd34d;
+
+  --ring: #fb923c;
+
+  --nav-bg: rgba(11, 18, 32, 0.88);
+  --nav-border: #253148;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.55), 0 4px 8px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.6);
 }
 
+/* ==========================================================================
+   Tailwind theme bridge — exposes every token as a utility
+   (bg-primary, text-muted-foreground, border-border, shadow-md, rounded-card…)
+   ========================================================================== */
 @theme inline {
   --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-card-hover: var(--card-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input-bg: var(--input-bg);
+  --color-input-border: var(--input-border);
+
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-foreground: var(--primary-soft-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-secondary-soft-foreground: var(--secondary-soft-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-foreground: var(--accent-soft-foreground);
+
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-foreground: var(--danger-foreground);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-foreground: var(--danger-soft-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-soft-foreground: var(--warning-soft-foreground);
+
   --color-ring: var(--ring);
+
+  /* Single radius scale — `rounded-card` is THE card radius, project-wide. */
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
+
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.6s ease-in-out infinite;
 }
 
+/* ==========================================================================
+   Base
+   ========================================================================== */
 *,
 *::before,
 *::after {
@@ -75,9 +231,232 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth transitions for theme switching */
 html {
+  scroll-behavior: smooth;
   transition:
     color 0.2s,
     background-color 0.2s;
+}
+
+/* Consistent, visible focus for keyboard users on every interactive element */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+::selection {
+  background-color: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+/* Themed scrollbar so the chrome matches the surface it sits on */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: 9999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ==========================================================================
+   Keyframes
+   ========================================================================== */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.55;
+  }
+}
+
+/* ==========================================================================
+   Component classes — the single source of truth for shared visual style.
+   Components compose these instead of re-declaring padding/radius/colour.
+   ========================================================================== */
+@layer components {
+  /* Page shell ---------------------------------------------------------- */
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Surface ------------------------------------------------------------- */
+  .surface-card {
+    @apply rounded-card border border-border bg-card shadow-sm;
+  }
+
+  .surface-card-interactive {
+    @apply rounded-card border border-border bg-card shadow-sm transition-all duration-300;
+  }
+  .surface-card-interactive:hover {
+    @apply -translate-y-1 border-primary/40 shadow-lg;
+  }
+
+  /* Buttons — every button in the app derives from `.btn` ---------------- */
+  .btn {
+    @apply inline-flex shrink-0 cursor-pointer items-center justify-center gap-2
+      rounded-control font-semibold whitespace-nowrap transition-all duration-200
+      disabled:pointer-events-none disabled:opacity-55;
+  }
+  .btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--secondary-hover);
+  }
+  .btn-accent {
+    background-color: var(--accent);
+    color: var(--accent-foreground);
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-accent:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+  }
+  .btn-outline {
+    border: 1px solid var(--border-strong);
+    background-color: transparent;
+    color: var(--foreground);
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: var(--muted);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--muted-foreground);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--muted);
+    color: var(--foreground);
+  }
+  .btn-danger {
+    background-color: var(--danger);
+    color: var(--danger-foreground);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background-color: var(--danger-hover);
+  }
+
+  /* Form controls ------------------------------------------------------- */
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-foreground;
+  }
+  .field-input {
+    @apply w-full rounded-control border px-3.5 py-2.5 text-sm transition-colors
+      outline-none placeholder:text-muted-foreground/70;
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--foreground);
+  }
+  .field-input:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+    outline: none;
+  }
+  .field-input[aria-invalid='true'] {
+    border-color: var(--danger);
+  }
+  .field-input[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent);
+  }
+  .field-error {
+    @apply mt-1.5 flex items-center gap-1.5 text-xs font-medium;
+    color: var(--danger);
+  }
+  .field-hint {
+    @apply mt-1.5 text-xs text-muted-foreground;
+  }
+
+  /* Section rhythm — identical vertical spacing on every landing section - */
+  .section-y {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  /* Eyebrow / pill label above section headings -------------------------- */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5
+      text-xs font-bold tracking-wide uppercase;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+@utility text-gradient-brand {
+  background-image: linear-gradient(
+    100deg,
+    var(--primary),
+    color-mix(in srgb, var(--primary) 55%, var(--accent))
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Fades a scrolling row out at both edges (used by the marquee strip) */
+@utility mask-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8%,
+    black 92%,
+    transparent
+  );
+}
+
+/* ==========================================================================
+   Motion preferences — honour the OS setting for everyone
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

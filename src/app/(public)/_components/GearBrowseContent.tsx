@@ -2,22 +2,29 @@
 
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
-  SlidersHorizontal,
-  Filter,
-  Package,
   ChevronLeft,
   ChevronRight,
+  Filter,
+  Package,
+  SlidersHorizontal,
   X,
 } from 'lucide-react';
+
 import type { GearItem, Category } from '@/lib/types';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
+import { cn } from '@/lib/cn';
 import { getAllGearsAction } from '../_actions/getAllGears';
 import { getAllCategoriesAction } from '../_actions/getAllCategories';
 import GearFilters from './GearFilters';
 import GearCard from './GearCard';
-import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/Skeleton';
+import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/ui/Skeleton';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+
+const PAGE_SIZE = 9;
 
 function Pagination({
   page,
@@ -30,9 +37,9 @@ function Pagination({
 }) {
   if (totalPages <= 1) return null;
 
-  // Show at most 5 page buttons centred around current page
-  const range: number[] = [];
+  // At most 5 page buttons, centred on the current page.
   const delta = 2;
+  const range: number[] = [];
   for (
     let i = Math.max(1, page - delta);
     i <= Math.min(totalPages, page + delta);
@@ -41,23 +48,18 @@ function Pagination({
     range.push(i);
   }
 
-  const btnBase =
-    'cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-semibold transition-colors';
+  const base =
+    'flex h-10 w-10 cursor-pointer items-center justify-center rounded-control border border-border bg-card text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-40';
 
   return (
     <nav
-      className='mt-10 flex items-center justify-center gap-1.5'
+      className='mt-12 flex items-center justify-center gap-1.5'
       aria-label='Pagination'
     >
       <button
         onClick={() => onPage(page - 1)}
         disabled={page === 1}
-        className={`${btnBase} disabled:opacity-40`}
-        style={{
-          borderColor: 'var(--border)',
-          color: 'var(--foreground)',
-          backgroundColor: 'var(--card)',
-        }}
+        className={base}
         aria-label='Previous page'
       >
         <ChevronLeft className='h-4 w-4' />
@@ -65,22 +67,11 @@ function Pagination({
 
       {range[0] > 1 && (
         <>
-          <button
-            onClick={() => onPage(1)}
-            className={btnBase}
-            style={{
-              borderColor: 'var(--border)',
-              color: 'var(--foreground)',
-              backgroundColor: 'var(--card)',
-            }}
-          >
+          <button onClick={() => onPage(1)} className={base}>
             1
           </button>
           {range[0] > 2 && (
-            <span
-              className='flex h-9 w-6 items-center justify-center text-sm'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            <span className='flex h-10 w-6 items-center justify-center text-sm text-muted-foreground'>
               …
             </span>
           )}
@@ -91,21 +82,12 @@ function Pagination({
         <button
           key={n}
           onClick={() => onPage(n)}
-          className={btnBase}
-          style={
-            n === page
-              ? {
-                  backgroundColor: 'var(--primary)',
-                  borderColor: 'var(--primary)',
-                  color: '#fff',
-                }
-              : {
-                  borderColor: 'var(--border)',
-                  color: 'var(--foreground)',
-                  backgroundColor: 'var(--card)',
-                }
-          }
           aria-current={n === page ? 'page' : undefined}
+          className={cn(
+            base,
+            n === page &&
+              '!border-primary !bg-primary !text-primary-foreground hover:!text-primary-foreground',
+          )}
         >
           {n}
         </button>
@@ -114,22 +96,11 @@ function Pagination({
       {range[range.length - 1] < totalPages && (
         <>
           {range[range.length - 1] < totalPages - 1 && (
-            <span
-              className='flex h-9 w-6 items-center justify-center text-sm'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            <span className='flex h-10 w-6 items-center justify-center text-sm text-muted-foreground'>
               …
             </span>
           )}
-          <button
-            onClick={() => onPage(totalPages)}
-            className={btnBase}
-            style={{
-              borderColor: 'var(--border)',
-              color: 'var(--foreground)',
-              backgroundColor: 'var(--card)',
-            }}
-          >
+          <button onClick={() => onPage(totalPages)} className={base}>
             {totalPages}
           </button>
         </>
@@ -138,12 +109,7 @@ function Pagination({
       <button
         onClick={() => onPage(page + 1)}
         disabled={page === totalPages}
-        className={`${btnBase} disabled:opacity-40`}
-        style={{
-          borderColor: 'var(--border)',
-          color: 'var(--foreground)',
-          backgroundColor: 'var(--card)',
-        }}
+        className={base}
         aria-label='Next page'
       >
         <ChevronRight className='h-4 w-4' />
@@ -152,43 +118,33 @@ function Pagination({
   );
 }
 
-function EmptyState({
-  hasFilters,
-  onReset,
+function SortSelect({
+  sortBy,
+  sortOrder,
+  onChange,
+  className,
 }: {
-  hasFilters: boolean;
-  onReset: () => void;
+  sortBy: SortBy;
+  sortOrder: SortOrder;
+  onChange: (by: SortBy, order: SortOrder) => void;
+  className?: string;
 }) {
   return (
-    <div
-      className='flex flex-col items-center justify-center rounded-2xl border py-20 text-center'
-      style={{ borderColor: 'var(--border)' }}
+    <select
+      aria-label='Sort gear'
+      value={`${sortBy}:${sortOrder}`}
+      onChange={(e) => {
+        const [by, order] = e.target.value.split(':') as [SortBy, SortOrder];
+        onChange(by, order);
+      }}
+      className={cn('field-input h-10 cursor-pointer py-0', className)}
     >
-      <Package
-        className='mb-3 h-12 w-12 opacity-25'
-        style={{ color: 'var(--muted-foreground)' }}
-      />
-      <p
-        className='text-base font-semibold'
-        style={{ color: 'var(--foreground)' }}
-      >
-        No gear found
-      </p>
-      <p className='mt-1 text-sm' style={{ color: 'var(--muted-foreground)' }}>
-        {hasFilters
-          ? 'Try adjusting your filters or search query.'
-          : 'No gear is currently available.'}
-      </p>
-      {hasFilters && (
-        <button
-          onClick={onReset}
-          className='cursor-pointer mt-5 rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors'
-          style={{ backgroundColor: 'var(--primary)' }}
-        >
-          Clear Filters
-        </button>
-      )}
-    </div>
+      {SORT_OPTIONS.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -227,13 +183,13 @@ export default function GearBrowseContent() {
           maxPrice: maxPrice ? Number(maxPrice) : undefined,
           search: search || undefined,
           page,
-          limit: 9,
+          limit: PAGE_SIZE,
           sortBy,
           sortOrder,
         });
 
         if (result?.success) {
-          setGears(result.data || []);
+          setGears(result.data ?? []);
           setTotalPages(result.meta?.totalPages || 1);
           setTotal(result.meta?.total || 0);
           setError(null);
@@ -273,14 +229,22 @@ export default function GearBrowseContent() {
     fetchCategories();
   }, []);
 
+  // Lock scroll behind the mobile filter sheet.
+  useEffect(() => {
+    document.body.style.overflow = mobileFiltersOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileFiltersOpen]);
+
   const updateParams = useCallback(
     (updates: Record<string, string>, resetPage = true) => {
       const params = new URLSearchParams(searchParams.toString());
-      Object.entries(updates).forEach(([k, v]) => {
-        if (v) {
-          params.set(k, v);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, value);
         } else {
-          params.delete(k);
+          params.delete(key);
         }
       });
       if (resetPage) params.delete('page');
@@ -294,21 +258,16 @@ export default function GearBrowseContent() {
   }, [router, pathname]);
 
   const setPage = useCallback(
-    (n: number) => {
-      updateParams({ page: n === 1 ? '' : String(n) }, false);
-    },
+    (n: number) => updateParams({ page: n === 1 ? '' : String(n) }, false),
     [updateParams],
   );
 
   const hasFilters = Boolean(search || category || minPrice || maxPrice);
-  const currentSortLabel =
-    SORT_OPTIONS.find((o) => o.sortBy === sortBy && o.sortOrder === sortOrder)
-      ?.label ?? 'Newest First';
 
   const activeChips: Array<{ label: string; clear: () => void }> = [];
   if (search)
     activeChips.push({
-      label: `"${search}"`,
+      label: `“${search}”`,
       clear: () => updateParams({ search: '' }),
     });
   if (category)
@@ -346,55 +305,33 @@ export default function GearBrowseContent() {
   };
 
   return (
-    <div
-      className='min-h-screen'
-      style={{ backgroundColor: 'var(--background)' }}
-    >
+    <div className='min-h-screen bg-background'>
       {/* Page header */}
-      <div
-        className='border-b'
-        style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
-      >
-        <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
-          <h1
-            className='text-3xl font-extrabold tracking-tight'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Browse Gear
+      <div className='border-b border-border bg-card'>
+        <div className='container-page py-10 sm:py-12'>
+          <h1 className='text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl'>
+            Browse gear
           </h1>
-          <p
-            className='mt-1.5 text-sm'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            Rent premium sports &amp; outdoor equipment — from mountain bikes to
-            camping kits
+          <p className='mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base'>
+            Rent premium sports and outdoor equipment from verified providers —
+            filter by category, price and rating, then book the days you need.
           </p>
         </div>
       </div>
 
-      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='container-page py-8 lg:py-10'>
         <div className='flex gap-8'>
           {/* Desktop filter sidebar */}
           <aside className='hidden w-64 shrink-0 lg:block'>
-            <div
-              className='sticky top-24 rounded-2xl border p-5'
-              style={{
-                backgroundColor: 'var(--card)',
-                borderColor: 'var(--border)',
-              }}
-            >
+            <div className='surface-card sticky top-24 p-5'>
               <div className='mb-5 flex items-center gap-2'>
                 <SlidersHorizontal
-                  className='h-4 w-4'
-                  style={{ color: 'var(--primary)' }}
+                  className='h-4 w-4 text-primary'
+                  aria-hidden='true'
                 />
-                <h2
-                  className='text-sm font-bold'
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  Filters
-                </h2>
+                <h2 className='text-sm font-bold text-foreground'>Filters</h2>
               </div>
+
               {categoriesLoading ? (
                 <GearFiltersSkeleton />
               ) : categoriesError ? (
@@ -409,98 +346,60 @@ export default function GearBrowseContent() {
             </div>
           </aside>
 
-          {/* Main content */}
+          {/* Results */}
           <div className='min-w-0 flex-1'>
-            {/* Top bar: results count + sort + mobile filter btn */}
             <div className='mb-5 flex flex-wrap items-center gap-3'>
-              {/* Results count */}
-              <p
-                className='text-sm'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                <span
-                  className='font-semibold'
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  {total}
-                </span>{' '}
-                item{total !== 1 ? 's' : ''} found
+              <p className='text-sm text-muted-foreground'>
+                {loading ? (
+                  'Loading listings…'
+                ) : (
+                  <>
+                    <span className='font-bold text-foreground'>{total}</span>{' '}
+                    item{total === 1 ? '' : 's'} found
+                  </>
+                )}
               </p>
 
               <div className='ml-auto flex items-center gap-2'>
-                {/* Sort dropdown (desktop, visible always) */}
-                <div className='hidden sm:block'>
-                  <select
-                    value={`${sortBy}:${sortOrder}`}
-                    onChange={(e) => {
-                      const [by, order] = e.target.value.split(':') as [
-                        SortBy,
-                        SortOrder,
-                      ];
-                      updateParams({ sortBy: by, sortOrder: order });
-                    }}
-                    className='h-9 cursor-pointer rounded-lg border px-3 text-sm outline-none transition-colors appearance-none pr-8'
-                    style={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 8px center',
-                    }}
-                  >
-                    {SORT_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <SortSelect
+                  sortBy={sortBy}
+                  sortOrder={sortOrder}
+                  onChange={(by, order) =>
+                    updateParams({ sortBy: by, sortOrder: order })
+                  }
+                  className='hidden w-48 sm:block'
+                />
 
-                {/* Mobile filter button */}
-                <button
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='h-10 lg:hidden'
+                  leadingIcon={<Filter className='h-4 w-4' />}
                   onClick={() => setMobileFiltersOpen(true)}
-                  className='cursor-pointer inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors lg:hidden'
-                  style={{
-                    borderColor: 'var(--border)',
-                    color: 'var(--foreground)',
-                    backgroundColor: 'var(--card)',
-                  }}
                 >
-                  <Filter className='h-4 w-4' />
                   Filters
                   {hasFilters && (
-                    <span
-                      className='flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white'
-                      style={{ backgroundColor: 'var(--primary)' }}
-                    >
+                    <span className='flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground'>
                       {activeChips.length}
                     </span>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
-            {/* Active filter chips */}
+            {/* Active filters */}
             {activeChips.length > 0 && (
-              <div className='mb-4 flex flex-wrap gap-2'>
+              <div className='mb-5 flex flex-wrap gap-2'>
                 {activeChips.map((chip) => (
                   <span
                     key={chip.label}
-                    className='inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium'
-                    style={{
-                      borderColor:
-                        'color-mix(in srgb, var(--primary) 40%, transparent)',
-                      backgroundColor:
-                        'color-mix(in srgb, var(--primary) 8%, transparent)',
-                      color: 'var(--primary)',
-                    }}
+                    className='inline-flex items-center gap-1.5 rounded-full border border-primary/35 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary-soft-foreground'
                   >
                     {chip.label}
                     <button
                       onClick={chip.clear}
                       aria-label={`Remove ${chip.label} filter`}
-                      className='cursor-pointer'
+                      className='cursor-pointer transition-opacity hover:opacity-70'
                     >
                       <X className='h-3 w-3' />
                     </button>
@@ -508,115 +407,130 @@ export default function GearBrowseContent() {
                 ))}
                 <button
                   onClick={resetFilters}
-                  className='cursor-pointer rounded-full px-3 py-1 text-xs font-medium transition-colors'
-                  style={{
-                    color: 'var(--muted-foreground)',
-                    backgroundColor: 'var(--muted)',
-                  }}
+                  className='cursor-pointer rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground'
                 >
                   Clear all
                 </button>
               </div>
             )}
 
-            {/* Mobile sort row */}
-            <div className='mb-4 block sm:hidden'>
-              <select
-                value={`${sortBy}:${sortOrder}`}
-                onChange={(e) => {
-                  const [by, order] = e.target.value.split(':') as [
-                    SortBy,
-                    SortOrder,
-                  ];
-                  updateParams({ sortBy: by, sortOrder: order });
-                }}
-                className='h-9 w-full cursor-pointer rounded-lg border px-3 text-sm outline-none transition-colors'
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--border)',
-                  color: 'var(--foreground)',
-                }}
-                aria-label='Sort gear'
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    Sort: {opt.label}
-                  </option>
-                ))}
-              </select>
+            {/* Mobile sort */}
+            <div className='mb-5 sm:hidden'>
+              <SortSelect
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onChange={(by, order) =>
+                  updateParams({ sortBy: by, sortOrder: order })
+                }
+                className='w-full'
+              />
             </div>
 
-            {/* Gear grid / empty state */}
             {loading ? (
-              <GearGridSkeleton count={6} />
+              <GearGridSkeleton count={PAGE_SIZE} />
             ) : error ? (
-              <>
+              <div className='space-y-5'>
                 <ErrorBanner message={error} title='Could not load gears' />
-                <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
-              </>
+                <EmptyState
+                  icon={Package}
+                  title='Nothing to show right now'
+                  description='We could not reach the catalogue. Check your connection and try again.'
+                  action={
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      onClick={() => router.refresh()}
+                    >
+                      Retry
+                    </Button>
+                  }
+                />
+              </div>
             ) : gears.length === 0 ? (
-              <EmptyState hasFilters={hasFilters} onReset={resetFilters} />
+              <EmptyState
+                icon={Package}
+                title='No gear matches those filters'
+                description={
+                  hasFilters
+                    ? 'Try widening your price range, clearing the search term, or picking another category.'
+                    : 'No gear is available right now. Check back soon — providers add listings regularly.'
+                }
+                action={
+                  hasFilters ? (
+                    <Button size='sm' onClick={resetFilters}>
+                      Clear all filters
+                    </Button>
+                  ) : undefined
+                }
+              />
             ) : (
-              <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3'>
-                {gears.map((gear) => (
-                  <GearCard key={gear.id} gear={gear} />
+              <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+                {gears.map((gear, index) => (
+                  <GearCard
+                    key={gear.id}
+                    gear={gear}
+                    priority={index < 3}
+                    imageSizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 30vw'
+                  />
                 ))}
               </div>
             )}
 
-            {/* Pagination */}
             <Pagination page={page} totalPages={totalPages} onPage={setPage} />
           </div>
         </div>
       </div>
 
-      {/* Mobile filter drawer */}
-      {mobileFiltersOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className='fixed inset-0 z-40 lg:hidden'
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-            onClick={() => setMobileFiltersOpen(false)}
-          />
-
-          {/* Sheet */}
-          <div
-            className='fixed bottom-0 left-0 right-0 z-50 max-h-[88vh] overflow-y-auto rounded-t-2xl p-6 lg:hidden'
-            style={{
-              backgroundColor: 'var(--card)',
-              borderTop: '1px solid var(--border)',
-            }}
-          >
-            <div className='mb-5 flex items-center justify-between'>
-              <h2
-                className='text-base font-bold'
-                style={{ color: 'var(--foreground)' }}
-              >
-                Filters &amp; Sort
-              </h2>
-              <button
-                onClick={() => setMobileFiltersOpen(false)}
-                className='cursor-pointer rounded-lg p-1.5 transition-colors'
-                style={{ color: 'var(--muted-foreground)' }}
-                aria-label='Close filters'
-              >
-                <X className='h-5 w-5' />
-              </button>
-            </div>
-
-            <GearFilters {...filterProps} />
-
-            <button
+      {/* Mobile filter sheet */}
+      <AnimatePresence>
+        {mobileFiltersOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               onClick={() => setMobileFiltersOpen(false)}
-              className='cursor-pointer mt-6 h-11 w-full rounded-xl text-sm font-bold text-white transition-colors'
-              style={{ backgroundColor: 'var(--primary)' }}
+              className='fixed inset-0 z-50 lg:hidden'
+              style={{ backgroundColor: 'var(--overlay)' }}
+            />
+
+            <motion.div
+              role='dialog'
+              aria-modal='true'
+              aria-label='Filters and sort'
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className='fixed inset-x-0 bottom-0 z-50 max-h-[88dvh] overflow-y-auto rounded-t-card border-t border-border bg-card p-6 lg:hidden'
             >
-              Show {total} Result{total !== 1 ? 's' : ''}
-            </button>
-          </div>
-        </>
-      )}
+              <div className='mb-5 flex items-center justify-between'>
+                <h2 className='text-base font-bold text-foreground'>
+                  Filters &amp; sort
+                </h2>
+                <button
+                  onClick={() => setMobileFiltersOpen(false)}
+                  aria-label='Close filters'
+                  className='flex h-9 w-9 cursor-pointer items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
+                >
+                  <X className='h-5 w-5' />
+                </button>
+              </div>
+
+              <GearFilters {...filterProps} />
+
+              <Button
+                fullWidth
+                size='lg'
+                className='mt-6'
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                Show {total} result{total === 1 ? '' : 's'}
+              </Button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

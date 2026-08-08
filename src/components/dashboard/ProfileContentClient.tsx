@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Pencil, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,13 +26,17 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
   const originalAvatar = user.avatarUrl ?? '';
   const hasChanges = name !== originalName || avatarUrl !== originalAvatar;
 
-  /* Reset form when modal opens */
-  useEffect(() => {
+  /* Reset the draft fields each time the modal opens. Adjusting during render
+     keeps the first painted frame correct — an effect would briefly show the
+     previously edited (and discarded) values. */
+  const [wasOpen, setWasOpen] = useState(modalOpen);
+  if (modalOpen !== wasOpen) {
+    setWasOpen(modalOpen);
     if (modalOpen) {
-      setName(user.name ?? '');
-      setAvatarUrl(user.avatarUrl ?? '');
+      setName(originalName);
+      setAvatarUrl(originalAvatar);
     }
-  }, [modalOpen, user.name, user.avatarUrl]);
+  }
 
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();

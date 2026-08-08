@@ -56,23 +56,45 @@ export function formatBDT(amount: string | number): string {
 }
 
 /**
+ * Local fallback shown when a gear item has no usable image.
+ * Kept local (rather than a remote placeholder service) so it renders offline
+ * and needs no entry in `next.config.ts` → `images.remotePatterns`.
+ */
+export const GEAR_IMAGE_FALLBACK = '/gear-placeholder.svg';
+
+/**
+ * A source `next/image` can actually render here: an app-local path, or an
+ * HTTPS URL (the only remote protocol allowed in `next.config.ts`). Plain
+ * `http://` is excluded deliberately — the optimizer rejects it and browsers
+ * block it as mixed content, so it would render as a broken image either way.
+ */
+function isRenderableImageSrc(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    (value.startsWith('https://') || value.startsWith('/'))
+  );
+}
+
+/**
  * Parse the `images` field from the API.
  * The API stores images as a JSON-stringified array; this function handles
  * both that format and plain URL strings for backward compatibility.
  *
- * @returns An array of at least one image URL.
+ * @returns An array of at least one renderable image source, falling back to
+ *          the local placeholder when the record holds nothing usable.
  */
 export function parseGearImages(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw) as unknown;
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed as string[];
+    if (Array.isArray(parsed)) {
+      const urls = parsed.filter(isRenderableImageSrc);
+      if (urls.length > 0) return urls;
     }
   } catch {
     // not JSON — fall through
   }
-  if (raw?.startsWith('http')) return [raw];
-  return ['https://placehold.co/400x300/e2e8f0/94a3b8?text=Gear'];
+  if (isRenderableImageSrc(raw)) return [raw];
+  return [GEAR_IMAGE_FALLBACK];
 }
 
 /**
@@ -95,4 +117,33 @@ export function formatDate(iso: string): string {
     year: 'numeric',
     timeZone: 'Asia/Dhaka',
   });
+}
+
+/**
+ * Compact date for dense UI such as card meta rows.
+ * @example formatShortDate("2024-06-15T00:00:00.000Z") → "15 Jun 2024"
+ */
+export function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'Asia/Dhaka',
+  });
+}
+
+/**
+ * Availability of a gear item, derived from the two fields that gate renting.
+ * Centralised so the card, the detail page and the cart agree.
+ */
+export type GearAvailability = 'available' | 'low-stock' | 'out-of-stock' | 'inactive';
+
+export function getGearAvailability(gear: {
+  isActive: boolean;
+  stock: number;
+}): GearAvailability {
+  if (!gear.isActive) return 'inactive';
+  if (gear.stock <= 0) return 'out-of-stock';
+  if (gear.stock <= 3) return 'low-stock';
+  return 'available';
 }

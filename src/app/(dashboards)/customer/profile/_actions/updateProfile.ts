@@ -1,7 +1,6 @@
 'use server';
 
 import { revalidateTag } from 'next/cache';
-import { cookies } from 'next/headers';
 import { z } from 'zod';
 import type { User } from '@/lib/types';
 import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';

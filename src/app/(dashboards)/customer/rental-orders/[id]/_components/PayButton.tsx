@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { CreditCard, Shield, Loader2 } from 'lucide-react';
+import { CreditCard, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
 import { createPayment } from '../_actions/createPayment';

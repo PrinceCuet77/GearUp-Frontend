@@ -547,7 +547,7 @@ export function ReviewsList({
                   color: 'var(--foreground)',
                 }}
               >
-                "{viewingReview.comment}"
+                &ldquo;{viewingReview.comment}&rdquo;
               </div>
             </div>
 

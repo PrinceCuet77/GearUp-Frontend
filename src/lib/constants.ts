@@ -10,10 +10,11 @@ import {
 
 export type AvailableRole = 'CUSTOMER' | 'PROVIDER' | 'ADMIN';
 
-export const PUBLIC_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/gears', label: 'Browse Gear' },
-];
+/**
+ * Public navigation lives in `@/lib/site` alongside the rest of the marketing
+ * content. Re-exported here so existing imports keep working.
+ */
+export { PUBLIC_LINKS } from './site';
 
 export const ROLE_LINKS: Record<
   AvailableRole,

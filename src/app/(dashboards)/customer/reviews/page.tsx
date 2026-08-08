@@ -2,8 +2,6 @@ import { getAllReviews } from './_actions/getAllReviews';
 import { ReviewsList } from './_components/ReviewsList';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 
-const LIMIT = 10;
-
 export default async function ReviewsPage() {
   const result = await getAllReviews();
 

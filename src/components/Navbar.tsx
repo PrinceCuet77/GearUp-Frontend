@@ -1,100 +1,151 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTheme } from '@/components/ThemeProvider';
+import { AnimatePresence, motion } from 'motion/react';
 import {
-  Dumbbell,
-  Sun,
-  Moon,
-  Menu,
-  X,
-  ShoppingCart,
-  LogIn,
-  UserPlus,
   ChevronDown,
-  LogOut,
-  User,
   LayoutDashboard,
   Lock,
+  LogIn,
+  LogOut,
+  Menu,
+  Moon,
+  Mountain,
+  ShoppingCart,
+  Sun,
+  User as UserIcon,
+  UserPlus,
+  X,
 } from 'lucide-react';
-import { useCartStore } from '@/store/useCartStore';
-import { useAuthStore } from '@/store/useAuthStore';
-
-import {
-  PUBLIC_LINKS,
-  ROLE_LINKS,
-  ROLE_COLORS,
-  type AvailableRole,
-} from '@/lib/constants';
-import { logoutAction } from '@/app/(auth)/_actions/logoutActions';
 import { toast } from 'sonner';
 
+import { useTheme } from '@/components/ThemeProvider';
+import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { ROLE_LINKS, ROLE_COLORS, type AvailableRole } from '@/lib/constants';
+import { PUBLIC_LINKS } from '@/lib/site';
+import { logoutAction } from '@/app/(auth)/_actions/logoutActions';
+import { cn } from '@/lib/cn';
+import { useIsClient, useScrolledPast } from '@/lib/hooks';
+import { Button, ButtonLink } from '@/components/ui/Button';
+
 function getInitials(name?: string | null, email?: string) {
-  if (name)
+  if (name) {
     return name
       .trim()
       .split(/\s+/)
       .slice(0, 2)
-      .map((n) => n[0])
+      .map((part) => part[0])
       .join('')
       .toUpperCase();
+  }
   return (email?.[0] ?? 'U').toUpperCase();
+}
+
+/** Dashboard root for a role — also the prefix for profile/password routes. */
+function dashboardRoot(role?: AvailableRole | null) {
+  if (role === 'ADMIN') return '/admin';
+  if (role === 'PROVIDER') return '/provider';
+  return '/customer';
+}
+
+function Avatar({
+  src,
+  name,
+  email,
+  color,
+  className,
+}: {
+  src?: string | null;
+  name?: string | null;
+  email?: string;
+  color?: string;
+  className?: string;
+}) {
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={name ?? 'Profile photo'}
+        width={40}
+        height={40}
+        className={cn('object-cover', className)}
+        unoptimized
+      />
+    );
+  }
+  return (
+    <span
+      className={cn(
+        'flex items-center justify-center font-bold text-white',
+        className,
+      )}
+      style={{ backgroundColor: color ?? 'var(--primary)' }}
+      aria-hidden='true'
+    >
+      {getInitials(name, email)}
+    </span>
+  );
 }
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const mounted = useIsClient();
+  const scrolled = useScrolledPast(8);
+
   const userProfile = useAuthStore((s) => s.user);
   const clearUser = useAuthStore((s) => s.clearUser);
-  const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const toggleCart = useCartStore((s) => s.toggleCart);
-  const _hasHydrated = useCartStore((s) => s._hasHydrated);
+  const cartHydrated = useCartStore((s) => s._hasHydrated);
   const itemCount = useCartStore((s) => s.itemCount());
+
   const pathname = usePathname();
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
     if (!userMenuOpen) return;
     const handle = (e: MouseEvent) => {
-      if (
-        userMenuRef.current &&
-        !userMenuRef.current.contains(e.target as Node)
-      )
+      if (!userMenuRef.current?.contains(e.target as Node)) {
         setUserMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setUserMenuOpen(false);
     };
     document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handle);
+      document.removeEventListener('keydown', handleEsc);
+    };
   }, [userMenuOpen]);
 
+  // Lock body scroll while the mobile drawer is open.
   useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname.startsWith(href);
+  const isActive = (href: string) => {
+    if (href.startsWith('/#')) return false;
+    return href === '/' ? pathname === '/' : pathname.startsWith(href);
+  };
 
-  const roleLinks =
-    userProfile?.role && userProfile.role in ROLE_LINKS
-      ? ROLE_LINKS[userProfile.role as AvailableRole]
-      : [];
-  const roleColors =
-    userProfile?.role && userProfile.role in ROLE_COLORS
-      ? ROLE_COLORS[userProfile.role as AvailableRole]
-      : null;
-  const rolePath =
-    userProfile?.role === 'ADMIN'
-      ? '/admin'
-      : userProfile?.role === 'PROVIDER'
-        ? '/provider'
-        : '/customer';
+  const role = userProfile?.role as AvailableRole | undefined;
+  const roleLinks = role && role in ROLE_LINKS ? ROLE_LINKS[role] : [];
+  const roleColors = role && role in ROLE_COLORS ? ROLE_COLORS[role] : null;
+  const rolePath = dashboardRoot(role);
+
+  const closeUserMenu = useCallback(() => setUserMenuOpen(false), []);
+  const closeMobileMenu = useCallback(() => setMobileOpen(false), []);
 
   const handleLogout = async () => {
     await logoutAction();
@@ -105,435 +156,237 @@ export default function Navbar() {
     router.push('/');
   };
 
+  const iconButton =
+    'flex h-10 w-10 cursor-pointer items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-muted hover:text-foreground';
+
   return (
     <header
-      className='sticky top-0 z-40 w-full border-b backdrop-blur-md'
+      className={cn(
+        'sticky top-0 z-50 w-full border-b transition-shadow duration-300',
+        scrolled ? 'shadow-sm' : 'shadow-none',
+      )}
       style={{
-        backgroundColor: 'var(--nav-bg)',
+        backgroundColor: scrolled ? 'var(--nav-bg)' : 'var(--card)',
         borderColor: 'var(--nav-border)',
+        backdropFilter: scrolled ? 'blur(12px)' : undefined,
       }}
     >
-      <nav className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
-        <div className='flex h-16 items-center justify-between gap-4'>
+      <nav
+        className='container-page'
+        aria-label='Primary'
+      >
+        <div className='flex h-16 items-center justify-between gap-4 lg:h-18'>
           {/* Logo */}
           <Link
             href='/'
-            className='flex shrink-0 items-center gap-2.5 font-bold text-xl tracking-tight'
+            className='flex shrink-0 items-center gap-2.5 text-xl font-extrabold tracking-tight'
           >
-            <span
-              className='flex h-9 w-9 items-center justify-center rounded-xl'
-              style={{ backgroundColor: 'var(--primary)' }}
-            >
-              <Dumbbell className='h-5 w-5 text-white' />
+            <span className='flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-sm'>
+              <Mountain
+                className='h-5 w-5 text-primary-foreground'
+                aria-hidden='true'
+              />
             </span>
-            <span style={{ color: 'var(--foreground)' }}>
-              Gear<span style={{ color: 'var(--primary)' }}>Up</span>
+            <span className='text-foreground'>
+              Gear<span className='text-primary'>Up</span>
             </span>
           </Link>
 
-          {/* Desktop nav links */}
-          <div className='hidden md:flex items-center gap-0.5 flex-1'>
-            {PUBLIC_LINKS.map((link) => (
+          {/* Desktop nav */}
+          <div className='hidden flex-1 items-center gap-1 md:flex'>
+            {[...PUBLIC_LINKS, ...roleLinks].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className='px-3 py-2 rounded-lg text-sm font-medium transition-colors'
-                style={{
-                  color: isActive(link.href)
-                    ? 'var(--primary)'
-                    : 'var(--muted-foreground)',
-                  backgroundColor: isActive(link.href)
-                    ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
-                    : 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive(link.href)) {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'var(--muted)';
-                    (e.currentTarget as HTMLAnchorElement).style.color =
-                      'var(--foreground)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive(link.href)) {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'transparent';
-                    (e.currentTarget as HTMLAnchorElement).style.color =
-                      'var(--muted-foreground)';
-                  }
-                }}
-              >
-                {link.label}
-              </Link>
-            ))}
-            {roleLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className='px-3 py-2 rounded-lg text-sm font-medium transition-colors'
-                style={{
-                  color: isActive(link.href)
-                    ? 'var(--primary)'
-                    : 'var(--muted-foreground)',
-                  backgroundColor: isActive(link.href)
-                    ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
-                    : 'transparent',
-                }}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                className={cn(
+                  'rounded-control px-3 py-2 text-sm font-semibold transition-colors',
+                  isActive(link.href)
+                    ? 'bg-primary-soft text-primary-soft-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          {/* Right actions - shared cart + theme for all devices */}
-          <div className='flex items-center gap-2'>
-            {/* Cart */}
+          {/* Actions */}
+          <div className='flex items-center gap-1.5'>
             {userProfile && (
               <button
                 onClick={toggleCart}
-                aria-label='Open cart'
-                className='cursor-pointer relative flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
-                style={{ color: 'var(--muted-foreground)' }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    'var(--muted)';
-                  (e.currentTarget as HTMLButtonElement).style.color =
-                    'var(--foreground)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    'transparent';
-                  (e.currentTarget as HTMLButtonElement).style.color =
-                    'var(--muted-foreground)';
-                }}
+                aria-label={`Open cart${cartHydrated && itemCount > 0 ? `, ${itemCount} item${itemCount === 1 ? '' : 's'}` : ''}`}
+                className={cn(iconButton, 'relative')}
               >
-                <ShoppingCart className='h-4 w-4' />
-                {_hasHydrated && itemCount > 0 && (
-                  <span
-                    className='absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-0.5 text-[10px] font-bold text-white'
-                    style={{ backgroundColor: 'var(--primary)' }}
-                  >
+                <ShoppingCart className='h-[18px] w-[18px]' />
+                {cartHydrated && itemCount > 0 && (
+                  <span className='absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground'>
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>
                 )}
               </button>
             )}
 
-            {/* Theme toggle - visible on all devices */}
             <button
               onClick={toggleTheme}
-              aria-label='Toggle theme'
-              className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
-              style={{ color: 'var(--muted-foreground)' }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  'var(--muted)';
-                (e.currentTarget as HTMLButtonElement).style.color =
-                  'var(--foreground)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  'transparent';
-                (e.currentTarget as HTMLButtonElement).style.color =
-                  'var(--muted-foreground)';
-              }}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className={iconButton}
             >
               {!mounted ? (
-                <div className='h-4 w-4' />
+                <span className='h-[18px] w-[18px]' />
               ) : theme === 'dark' ? (
-                <Sun className='h-4 w-4' />
+                <Sun className='h-[18px] w-[18px]' />
               ) : (
-                <Moon className='h-4 w-4' />
+                <Moon className='h-[18px] w-[18px]' />
               )}
             </button>
 
-            {/* Desktop only: Auth / User menu */}
-            <div className='hidden md:flex items-center gap-2'>
+            {/* Desktop auth */}
+            <div className='hidden items-center gap-2 md:flex'>
               {userProfile ? (
                 <div className='relative' ref={userMenuRef}>
                   <button
-                    onClick={() => setUserMenuOpen((o) => !o)}
-                    className='cursor-pointer flex items-center gap-2 rounded-xl border px-3 py-1.5 text-sm font-medium transition-colors'
-                    style={{
-                      backgroundColor: userMenuOpen
-                        ? 'var(--muted)'
-                        : 'transparent',
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    {userProfile?.avatarUrl ? (
-                      <img
-                        src={userProfile.avatarUrl}
-                        alt={userProfile.name ?? undefined}
-                        className='h-7 w-7 rounded-lg object-cover'
-                      />
-                    ) : (
-                      <span
-                        className='flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold text-white'
-                        style={{
-                          backgroundColor:
-                            roleColors?.color ?? 'var(--primary)',
-                        }}
-                      >
-                        {getInitials(userProfile?.name, userProfile?.email)}
-                      </span>
+                    onClick={() => setUserMenuOpen((open) => !open)}
+                    aria-expanded={userMenuOpen}
+                    aria-haspopup='menu'
+                    className={cn(
+                      'flex cursor-pointer items-center gap-2 rounded-control border border-border px-2.5 py-1.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted',
+                      userMenuOpen && 'bg-muted',
                     )}
-                    <span className='hidden lg:block max-w-25 truncate'>
-                      {userProfile?.name ?? userProfile?.email.split('@')[0]}
+                  >
+                    <Avatar
+                      src={userProfile.avatarUrl}
+                      name={userProfile.name}
+                      email={userProfile.email}
+                      color={roleColors?.color}
+                      className='h-7 w-7 rounded-lg text-xs'
+                    />
+                    <span className='hidden max-w-28 truncate lg:block'>
+                      {userProfile.name ?? userProfile.email.split('@')[0]}
                     </span>
                     <ChevronDown
-                      className='h-3.5 w-3.5'
-                      style={{
-                        transform: userMenuOpen ? 'rotate(180deg)' : 'none',
-                        color: 'var(--muted-foreground)',
-                        transition: 'transform 0.15s',
-                      }}
+                      className={cn(
+                        'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200',
+                        userMenuOpen && 'rotate-180',
+                      )}
+                      aria-hidden='true'
                     />
                   </button>
 
-                  {userMenuOpen && (
-                    <div
-                      className='absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-2xl border shadow-2xl z-50'
-                      style={{
-                        backgroundColor: 'var(--card)',
-                        borderColor: 'var(--border)',
-                      }}
-                    >
-                      {/* User info */}
-                      <div
-                        className='border-b px-4 py-3'
-                        style={{ borderColor: 'var(--border)' }}
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <motion.div
+                        role='menu'
+                        initial={{ opacity: 0, y: -8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                        transition={{ duration: 0.16, ease: 'easeOut' }}
+                        className='surface-card absolute right-0 top-full z-50 mt-2 w-68 overflow-hidden shadow-lg'
                       >
-                        <div className='flex items-center gap-3'>
-                          {userProfile?.avatarUrl ? (
-                            <img
+                        <div className='border-b border-border p-4'>
+                          <div className='flex items-center gap-3'>
+                            <Avatar
                               src={userProfile.avatarUrl}
-                              alt={userProfile.name ?? undefined}
-                              className='h-10 w-10 rounded-xl object-cover'
+                              name={userProfile.name}
+                              email={userProfile.email}
+                              color={roleColors?.color}
+                              className='h-10 w-10 rounded-xl text-sm'
                             />
-                          ) : (
+                            <div className='min-w-0'>
+                              <p className='truncate text-sm font-bold text-foreground'>
+                                {userProfile.name ?? 'User'}
+                              </p>
+                              <p className='truncate text-xs text-muted-foreground'>
+                                {userProfile.email}
+                              </p>
+                            </div>
+                          </div>
+                          {roleColors && (
                             <span
-                              className='flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white'
+                              className='mt-3 inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-bold'
                               style={{
-                                backgroundColor:
-                                  roleColors?.color ?? 'var(--primary)',
+                                backgroundColor: roleColors.bg,
+                                color: roleColors.color,
                               }}
                             >
-                              {getInitials(
-                                userProfile?.name,
-                                userProfile?.email,
-                              )}
+                              {userProfile.role}
                             </span>
                           )}
-                          <div className='min-w-0'>
-                            <p
-                              className='truncate text-sm font-semibold'
-                              style={{ color: 'var(--foreground)' }}
-                            >
-                              {userProfile?.name ?? 'User'}
-                            </p>
-                            <p
-                              className='truncate text-xs'
-                              style={{ color: 'var(--muted-foreground)' }}
-                            >
-                              {userProfile?.email}
-                            </p>
-                          </div>
                         </div>
-                        {roleColors && (
-                          <span
-                            className='mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold'
-                            style={{
-                              backgroundColor: roleColors.bg,
-                              color: roleColors.color,
-                            }}
-                          >
-                            {userProfile?.role ?? userProfile?.role}
-                          </span>
-                        )}
-                      </div>
 
-                      {/* Quick links */}
-                      <div className='py-1'>
-                        {userProfile?.role && (
-                          <Link
+                        <div className='py-1.5'>
+                          <MenuLink
                             href={rolePath}
-                            onClick={() => setUserMenuOpen(false)}
-                            className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
-                            style={{ color: 'var(--foreground)' }}
-                            onMouseEnter={(e) => {
-                              (
-                                e.currentTarget as HTMLAnchorElement
-                              ).style.backgroundColor = 'var(--muted)';
-                            }}
-                            onMouseLeave={(e) => {
-                              (
-                                e.currentTarget as HTMLAnchorElement
-                              ).style.backgroundColor = 'transparent';
-                            }}
-                          >
-                            <LayoutDashboard
-                              className='h-4 w-4'
-                              style={{ color: 'var(--muted-foreground)' }}
-                            />
-                            Dashboard
-                          </Link>
-                        )}
-                        {roleLinks.map((link) => {
-                          const Icon = link.icon;
-                          return (
-                            <Link
+                            icon={LayoutDashboard}
+                            label='Dashboard'
+                            onNavigate={closeUserMenu}
+                          />
+                          {roleLinks.map((link) => (
+                            <MenuLink
                               key={link.href}
                               href={link.href}
-                              onClick={() => setUserMenuOpen(false)}
-                              className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
-                              style={{ color: 'var(--foreground)' }}
-                              onMouseEnter={(e) => {
-                                (
-                                  e.currentTarget as HTMLAnchorElement
-                                ).style.backgroundColor = 'var(--muted)';
-                              }}
-                              onMouseLeave={(e) => {
-                                (
-                                  e.currentTarget as HTMLAnchorElement
-                                ).style.backgroundColor = 'transparent';
-                              }}
-                            >
-                              <Icon
-                                className='h-4 w-4'
-                                style={{ color: 'var(--muted-foreground)' }}
-                              />
-                              {link.label}
-                            </Link>
-                          );
-                        })}
-                        <Link
-                          href={`${rolePath}/profile`}
-                          onClick={() => setUserMenuOpen(false)}
-                          className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
-                          style={{ color: 'var(--foreground)' }}
-                          onMouseEnter={(e) => {
-                            (
-                              e.currentTarget as HTMLAnchorElement
-                            ).style.backgroundColor = 'var(--muted)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (
-                              e.currentTarget as HTMLAnchorElement
-                            ).style.backgroundColor = 'transparent';
-                          }}
-                        >
-                          <User
-                            className='h-4 w-4'
-                            style={{ color: 'var(--muted-foreground)' }}
+                              icon={link.icon}
+                              label={link.label}
+                              onNavigate={closeUserMenu}
+                            />
+                          ))}
+                          <MenuLink
+                            href={`${rolePath}/profile`}
+                            icon={UserIcon}
+                            label='My Profile'
+                            onNavigate={closeUserMenu}
                           />
-                          My Profile
-                        </Link>
-                        <Link
-                          href={`${rolePath}/change-password`}
-                          onClick={() => setUserMenuOpen(false)}
-                          className='flex items-center gap-3 px-4 py-2.5 text-sm transition-colors'
-                          style={{ color: 'var(--foreground)' }}
-                          onMouseEnter={(e) => {
-                            (
-                              e.currentTarget as HTMLAnchorElement
-                            ).style.backgroundColor = 'var(--muted)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (
-                              e.currentTarget as HTMLAnchorElement
-                            ).style.backgroundColor = 'transparent';
-                          }}
-                        >
-                          <Lock
-                            className='h-4 w-4'
-                            style={{ color: 'var(--muted-foreground)' }}
+                          <MenuLink
+                            href={`${rolePath}/change-password`}
+                            icon={Lock}
+                            label='Change Password'
+                            onNavigate={closeUserMenu}
                           />
-                          Change Password
-                        </Link>
-                      </div>
+                        </div>
 
-                      {/* Logout */}
-                      <div
-                        className='border-t py-1'
-                        style={{ borderColor: 'var(--border)' }}
-                      >
-                        <button
-                          onClick={handleLogout}
-                          className='flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors cursor-pointer'
-                          style={{ color: '#ef4444' }}
-                          onMouseEnter={(e) => {
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.backgroundColor = 'rgba(239,68,68,0.08)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (
-                              e.currentTarget as HTMLButtonElement
-                            ).style.backgroundColor = 'transparent';
-                          }}
-                        >
-                          <LogOut className='h-4 w-4' />
-                          Log Out
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                        <div className='border-t border-border py-1.5'>
+                          <button
+                            onClick={handleLogout}
+                            role='menuitem'
+                            className='flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-sm font-medium text-danger transition-colors hover:bg-danger-soft'
+                          >
+                            <LogOut className='h-4 w-4' aria-hidden='true' />
+                            Log Out
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              ) : pathname === '/login' ? (
-                <Link
-                  href='/register'
-                  className='flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors'
-                  style={{ backgroundColor: 'var(--primary)' }}
-                  onMouseEnter={(e) => {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'var(--primary-hover)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'var(--primary)';
-                  }}
-                >
-                  <UserPlus className='h-4 w-4' />
-                  Register
-                </Link>
               ) : (
-                <Link
-                  href='/login'
-                  className='flex items-center gap-1.5 rounded-lg border px-4 py-2 text-sm font-medium transition-colors'
-                  style={{
-                    color: 'var(--foreground)',
-                    borderColor: 'var(--border)',
-                    backgroundColor: 'transparent',
-                  }}
-                  onMouseEnter={(e) => {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'var(--muted)';
-                  }}
-                  onMouseLeave={(e) => {
-                    (
-                      e.currentTarget as HTMLAnchorElement
-                    ).style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <LogIn className='h-4 w-4' />
-                  Login
-                </Link>
+                <>
+                  <ButtonLink
+                    href='/login'
+                    variant='ghost'
+                    size='sm'
+                    leadingIcon={<LogIn className='h-4 w-4' />}
+                  >
+                    Sign In
+                  </ButtonLink>
+                  <ButtonLink
+                    href='/register'
+                    variant='primary'
+                    size='sm'
+                    leadingIcon={<UserPlus className='h-4 w-4' />}
+                  >
+                    Get Started
+                  </ButtonLink>
+                </>
               )}
             </div>
 
-            {/* Mobile only: Hamburger menu */}
+            {/* Mobile toggle */}
             <button
-              onClick={() => setMobileOpen((o) => !o)}
-              aria-label='Toggle menu'
-              className='cursor-pointer flex md:hidden h-9 w-9 items-center justify-center rounded-lg transition-colors'
-              style={{ color: 'var(--foreground)' }}
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+              className={cn(iconButton, 'text-foreground md:hidden')}
             >
               {mobileOpen ? (
                 <X className='h-5 w-5' />
@@ -543,134 +396,184 @@ export default function Navbar() {
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Mobile menu */}
+      {/* Mobile drawer */}
+      <AnimatePresence>
         {mobileOpen && (
-          <div
-            className='md:hidden border-t pb-4'
-            style={{ borderColor: 'var(--border)' }}
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className='overflow-hidden border-t border-border bg-card md:hidden'
           >
-            {/* User strip */}
-            {userProfile && (
-              <div
-                className='mt-3 mb-2 flex items-center gap-3 rounded-xl px-4 py-3'
-                style={{ backgroundColor: 'var(--muted)' }}
-              >
-                {userProfile?.avatarUrl ? (
-                  <img
+            <div className='container-page max-h-[calc(100dvh-4rem)] overflow-y-auto py-4'>
+              {userProfile && (
+                <div className='mb-4 flex items-center gap-3 rounded-card bg-muted p-3'>
+                  <Avatar
                     src={userProfile.avatarUrl}
-                    alt={userProfile.name ?? undefined}
-                    className='h-10 w-10 shrink-0 rounded-xl object-cover'
+                    name={userProfile.name}
+                    email={userProfile.email}
+                    color={roleColors?.color}
+                    className='h-10 w-10 shrink-0 rounded-xl text-sm'
                   />
-                ) : (
-                  <span
-                    className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white'
-                    style={{
-                      backgroundColor: roleColors?.color ?? 'var(--primary)',
-                    }}
-                  >
-                    {getInitials(userProfile.name, userProfile.email)}
-                  </span>
-                )}
-                <div className='min-w-0 flex-1'>
-                  <p
-                    className='truncate text-sm font-semibold'
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {userProfile.name ?? 'User'}
-                  </p>
-                  <p
-                    className='truncate text-xs'
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    {userProfile.email}
-                  </p>
+                  <div className='min-w-0 flex-1'>
+                    <p className='truncate text-sm font-bold text-foreground'>
+                      {userProfile.name ?? 'User'}
+                    </p>
+                    <p className='truncate text-xs text-muted-foreground'>
+                      {userProfile.email}
+                    </p>
+                  </div>
+                  {roleColors && (
+                    <span
+                      className='shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold'
+                      style={{
+                        backgroundColor: roleColors.bg,
+                        color: roleColors.color,
+                      }}
+                    >
+                      {userProfile.role}
+                    </span>
+                  )}
                 </div>
-                {roleColors && (
-                  <span
-                    className='shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold'
-                    style={{
-                      backgroundColor: roleColors.bg,
-                      color: roleColors.color,
-                    }}
-                  >
-                    {userProfile.role}
-                  </span>
+              )}
+
+              <div className='flex flex-col gap-1'>
+                {PUBLIC_LINKS.map((link) => (
+                  <MobileLink
+                    key={link.href}
+                    href={link.href}
+                    label={link.label}
+                    active={isActive(link.href)}
+                      onNavigate={closeMobileMenu}
+                  />
+                ))}
+
+                {userProfile && (
+                  <>
+                    <p className='mt-4 mb-1 px-3 text-[11px] font-bold tracking-wider text-muted-foreground uppercase'>
+                      My Account
+                    </p>
+                    <MobileLink
+                      href={rolePath}
+                      label='Dashboard'
+                      active={pathname === rolePath}
+                      onNavigate={closeMobileMenu}
+                    />
+                    {roleLinks.map((link) => (
+                      <MobileLink
+                        key={link.href}
+                        href={link.href}
+                        label={link.label}
+                        active={isActive(link.href)}
+                      onNavigate={closeMobileMenu}
+                      />
+                    ))}
+                    <MobileLink
+                      href={`${rolePath}/profile`}
+                      label='My Profile'
+                      active={isActive(`${rolePath}/profile`)}
+                      onNavigate={closeMobileMenu}
+                    />
+                    <MobileLink
+                      href={`${rolePath}/change-password`}
+                      label='Change Password'
+                      active={isActive(`${rolePath}/change-password`)}
+                      onNavigate={closeMobileMenu}
+                    />
+                  </>
                 )}
               </div>
-            )}
 
-            <div className='flex flex-col gap-0.5 pt-1'>
-              {[
-                ...PUBLIC_LINKS,
-                ...(userProfile
-                  ? [
-                      { href: `${rolePath}/profile`, label: 'My Profile' },
-                      ...roleLinks,
-                    ]
-                  : []),
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className='rounded-lg px-4 py-2.5 text-sm font-medium transition-colors'
-                  style={{
-                    color: isActive(link.href)
-                      ? 'var(--primary)'
-                      : 'var(--foreground)',
-                    backgroundColor: isActive(link.href)
-                      ? 'color-mix(in srgb, var(--primary) 10%, transparent)'
-                      : 'transparent',
-                  }}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              <div className='mt-4 border-t border-border pt-4'>
+                {userProfile ? (
+                  <Button
+                    onClick={handleLogout}
+                    variant='outline'
+                    fullWidth
+                    leadingIcon={<LogOut className='h-4 w-4' />}
+                    className='!border-danger/40 !text-danger hover:!bg-danger-soft'
+                  >
+                    Log Out
+                  </Button>
+                ) : (
+                  <div className='flex flex-col gap-2'>
+                    <ButtonLink
+                      href='/register'
+                      fullWidth
+                      leadingIcon={<UserPlus className='h-4 w-4' />}
+                    >
+                      Create Free Account
+                    </ButtonLink>
+                    <ButtonLink
+                      href='/login'
+                      variant='outline'
+                      fullWidth
+                      leadingIcon={<LogIn className='h-4 w-4' />}
+                    >
+                      Sign In
+                    </ButtonLink>
+                  </div>
+                )}
+              </div>
             </div>
-
-            {/* Logout / login */}
-            <div
-              className='mt-2 border-t pt-2'
-              style={{ borderColor: 'var(--border)' }}
-            >
-              {userProfile ? (
-                <button
-                  onClick={handleLogout}
-                  className='cursor-pointer flex w-full items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium'
-                  style={{ color: '#ef4444' }}
-                >
-                  <LogOut className='h-4 w-4' />
-                  Log Out
-                </button>
-              ) : pathname === '/login' ? (
-                <Link
-                  href='/register'
-                  onClick={() => setMobileOpen(false)}
-                  className='flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-medium text-white mx-4'
-                  style={{ backgroundColor: 'var(--primary)' }}
-                >
-                  <UserPlus className='h-4 w-4' />
-                  Register
-                </Link>
-              ) : (
-                <Link
-                  href='/login'
-                  onClick={() => setMobileOpen(false)}
-                  className='flex items-center justify-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-medium mx-4'
-                  style={{
-                    color: 'var(--foreground)',
-                    borderColor: 'var(--border)',
-                  }}
-                >
-                  <LogIn className='h-4 w-4' />
-                  Login
-                </Link>
-              )}
-            </div>
-          </div>
+          </motion.div>
         )}
-      </nav>
+      </AnimatePresence>
     </header>
+  );
+}
+
+function MenuLink({
+  href,
+  icon: Icon,
+  label,
+  onNavigate,
+}: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      role='menuitem'
+      onClick={onNavigate}
+      className='flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted'
+    >
+      <Icon className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
+      {label}
+    </Link>
+  );
+}
+
+function MobileLink({
+  href,
+  label,
+  active,
+  onNavigate,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      aria-current={active ? 'page' : undefined}
+      onClick={onNavigate}
+      className={cn(
+        'rounded-control px-3 py-2.5 text-sm font-semibold transition-colors',
+        active
+          ? 'bg-primary-soft text-primary-soft-foreground'
+          : 'text-foreground hover:bg-muted',
+      )}
+    >
+      {label}
+    </Link>
   );
 }

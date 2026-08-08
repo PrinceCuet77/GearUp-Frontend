@@ -4,31 +4,57 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useState,
+  useSyncExternalStore,
 } from 'react';
 
-type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark';
 
 interface ThemeContextValue {
   theme: Theme;
+  setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: 'light',
+  setTheme: () => {},
   toggleTheme: () => {},
 });
 
-function getInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-  try {
-    const stored = localStorage.getItem('theme');
-    if (stored === 'dark' || stored === 'light') return stored;
-  } catch {}
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+const STORAGE_KEY = 'theme';
+
+/**
+ * The DOM is the source of truth for the current theme.
+ *
+ * An inline script in the root layout stamps `.dark` on `<html>` before React
+ * hydrates (see `src/app/layout.tsx`), so reading the class back is both the
+ * cheapest and the most accurate snapshot — no effect, no flash, no mismatch.
+ */
+function getThemeFromDom(): Theme {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+}
+
+/** Subscribers are notified through a DOM `class` mutation observer. */
+function subscribe(onChange: () => void) {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+
+  // Keep multiple tabs in sync when the user flips the theme in one of them.
+  const onStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY) return;
+    if (event.newValue === 'dark' || event.newValue === 'light') {
+      applyTheme(event.newValue);
+    }
+  };
+  window.addEventListener('storage', onStorage);
+
+  return () => {
+    observer.disconnect();
+    window.removeEventListener('storage', onStorage);
+  };
 }
 
 function applyTheme(theme: Theme) {
@@ -37,32 +63,28 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Initialize with correct theme immediately to avoid flash
-    if (typeof window === 'undefined') return 'light';
-    return getInitialTheme();
-  });
+  const theme = useSyncExternalStore<Theme>(
+    subscribe,
+    getThemeFromDom,
+    () => 'light',
+  );
 
-  useEffect(() => {
-    // Sync on mount in case localStorage changed (e.g. another tab)
-    const initial = getInitialTheme();
-    if (initial !== theme) {
-      setTheme(initial);
+  const setTheme = useCallback((next: Theme) => {
+    applyTheme(next);
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Private-mode or blocked storage — the class change still applies.
     }
-    applyTheme(initial);
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      localStorage.setItem('theme', next);
-      return next;
-    });
-  }, []);
+  const toggleTheme = useCallback(
+    () => setTheme(getThemeFromDom() === 'dark' ? 'light' : 'dark'),
+    [setTheme],
+  );
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

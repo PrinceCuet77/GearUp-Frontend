@@ -1,42 +1,38 @@
-'use client';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 
-import { useEffect, useState } from 'react';
-import type { GearItem } from '@/lib/types';
-import { GearDetailSkeleton } from '@/components/Skeleton';
-import { getSingleGearAction } from '@/app/(public)/gears/[id]/_actions/getSingleGear';
-import NotFound from '@/app/not-found';
+import { getSingleGearAction } from './_actions/getSingleGear';
 import { SingleGearDetail } from './_components/SingleGearDetail';
+import { SITE } from '@/lib/site';
 
-export default function GearDetailPage() {
-  const [gear, setGear] = useState<GearItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
+interface GearDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
-  useEffect(() => {
-    const id = window.location.pathname.split('/').pop();
-    if (!id) {
-      setNotFound(true);
-      setLoading(false);
-      return;
-    }
+export async function generateMetadata({
+  params,
+}: GearDetailPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const result = await getSingleGearAction(id);
+  const gear = result?.data;
 
-    getSingleGearAction(id).then((res) => {
-      if (res?.data) {
-        setGear(res.data);
-      } else {
-        setNotFound(true);
-      }
-      setLoading(false);
-    });
-  }, []);
+  if (!gear) return { title: `Gear not found — ${SITE.name}` };
 
-  if (loading) {
-    return <GearDetailSkeleton />;
-  }
+  return {
+    title: `${gear.name} — ${SITE.name}`,
+    description: gear.description,
+  };
+}
 
-  if (notFound || !gear) {
-    return <NotFound />;
-  }
+/**
+ * Rendered on the server so the listing is crawlable and the user never waits
+ * on a client-side fetch waterfall. `loading.tsx` covers the fetch itself.
+ */
+export default async function GearDetailPage({ params }: GearDetailPageProps) {
+  const { id } = await params;
+  const result = await getSingleGearAction(id);
 
-  return <SingleGearDetail gear={gear} />;
+  if (!result?.data) notFound();
+
+  return <SingleGearDetail gear={result.data} />;
 }

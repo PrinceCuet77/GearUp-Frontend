@@ -43,7 +43,6 @@ export default function LoginPage() {
           router.push('/provider');
         }
       } else {
-        ``;
         toast.error(result?.message || 'Login failed. Please try again.');
       }
     });

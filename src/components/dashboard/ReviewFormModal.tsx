@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Star, Loader2 } from 'lucide-react';
 import Modal from '@/components/Modal';
 
@@ -69,13 +69,17 @@ export function ReviewFormModal({
   const [comment, setComment] = useState(initialComment);
   const [saving, setSaving] = useState(false);
 
-  // Reset form when modal opens with new initial values
-  useEffect(() => {
+  // Seed the form from the initial values each time the modal opens. Done
+  // during render so the first painted frame already shows the right values —
+  // an effect would flash the previous review's text for one frame.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
     if (open) {
       setRating(initialRating);
       setComment(initialComment);
     }
-  }, [open, initialRating, initialComment]);
+  }
 
   const isEditing = initialRating > 0 || initialComment.length > 0;
 

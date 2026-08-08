@@ -196,7 +196,8 @@ export function PaymentsTable({
                   className='text-sm'
                   style={{ color: 'var(--muted-foreground)' }}
                 >
-                  Page {page} of {totalPages}
+                  Page {page} of {totalPages} · {total} payment
+                  {total === 1 ? '' : 's'}
                 </p>
                 <div className='flex items-center gap-2'>
                   <button

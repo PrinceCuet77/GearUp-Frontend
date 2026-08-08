@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Tag, PlusCircle, Pencil, Loader2 } from 'lucide-react';
+import { Tag, PlusCircle, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';

@@ -20,9 +20,15 @@ function toLocalDateStr(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
 export function RentalCreateForm({ gear, onSuccess }: RentalCreateFormProps) {
   const today = toLocalDateStr(new Date());
-  const defaultEnd = toLocalDateStr(new Date(Date.now() + 3 * 86400000));
+  const defaultEnd = toLocalDateStr(addDays(new Date(), 3));
 
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(defaultEnd);

@@ -1,6 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import type { GearItem } from '@/lib/types';
 import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 

@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { TableSkeleton } from '@/components/Skeleton';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 import { getAllUsers } from './_actions/getAllUsers';
 import { AdminUsersClient } from './_components/AdminUsersClient';
 

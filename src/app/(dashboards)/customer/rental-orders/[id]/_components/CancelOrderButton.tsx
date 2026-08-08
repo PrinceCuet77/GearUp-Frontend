@@ -133,7 +133,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
                   className='mt-2 text-sm leading-relaxed'
                   style={{ color: 'var(--muted-foreground)' }}
                 >
-                  Do you want to cancel this order? This can't be undone.
+                  Do you want to cancel this order? This can&apos;t be undone.
                 </p>
               </div>
             </div>

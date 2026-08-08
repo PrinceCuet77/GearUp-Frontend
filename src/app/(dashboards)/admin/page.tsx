@@ -5,7 +5,7 @@ import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import { getAdminDashboardInfo } from './_actions/getAdminDashboardInfo';
 
 export default async function AdminOverviewPage() {
-  const { success, data, error } = await getAdminDashboardInfo();
+  const { data, error } = await getAdminDashboardInfo();
 
   const userTotal = data?.stats?.totalUsers ?? 0;
   const gearTotal = data?.stats?.activeGears ?? 0;

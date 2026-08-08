@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   Calendar,
   Package,
   CreditCard,

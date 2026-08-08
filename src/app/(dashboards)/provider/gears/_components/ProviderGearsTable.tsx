@@ -266,7 +266,8 @@ export function ProviderGearsTable({
           style={{ borderColor: 'var(--border)' }}
         >
           <p className='text-sm' style={{ color: 'var(--muted-foreground)' }}>
-            Page {page} of {totalPages}
+            Page {page} of {totalPages} · {total} listing
+            {total === 1 ? '' : 's'}
           </p>
           <div className='flex items-center gap-2'>
             <button

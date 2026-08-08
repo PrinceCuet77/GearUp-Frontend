@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -91,9 +91,14 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
 
-  useEffect(() => {
+  // Close the mobile sidebar on navigation. Adjusting during render rather than
+  // in an effect avoids the extra commit that briefly paints the open sidebar
+  // on top of the page the user just navigated to.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
     setSidebarOpen(false);
-  }, [pathname]);
+  }
 
   const isActive = (href: string) =>
     OVERVIEW_PATHS.has(href) ? pathname === href : pathname.startsWith(href);

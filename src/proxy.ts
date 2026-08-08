@@ -1,4 +1,4 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtUtils } from './lib/jwt';
@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import { refreshTokenAction } from './app/(auth)/_actions/refreshTokenAction';
 
 const AUTH_ROUTES = ['/login', '/register'];
-const PUBLIC_ROUTES = ['/', '/gears'];
+const PUBLIC_ROUTES = ['/', '/gears', '/about'];
 
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {

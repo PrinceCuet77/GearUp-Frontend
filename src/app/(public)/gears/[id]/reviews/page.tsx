@@ -1,13 +1,13 @@
 'use client';
 
-import { use, useEffect, useState, useCallback, useMemo } from 'react';
+import { use, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Review, GearItem } from '@/lib/types';
 import { getReviewsForGearAction } from './_actions/getReviewsForSingleGear';
 import { getSingleGearAction } from '@/app/(public)/gears/[id]/_actions/getSingleGear';
-import { Skeleton } from '@/components/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { StarRating } from '@/app/(public)/gears/[id]/_components/StarRating';
 import { RatingBar } from './_components/RatingBar';
 import { ReviewsSkeleton } from './_components/ReviewsSkeleton';
@@ -42,17 +42,23 @@ export default function GearReviewsPage({ params }: Props) {
     });
   }, [id]);
 
-  // Fetch reviews when page changes
-  const fetchReviews = useCallback(
-    async (pageNum: number) => {
+  // Fetch reviews whenever the page changes. `cancelled` drops a response that
+  // arrives after the reader has already paged somewhere else.
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchReviews = async () => {
       setReviewsLoading(true);
+
       const res = await getReviewsForGearAction(
         id,
-        pageNum,
+        page,
         REVIEWS_PER_PAGE,
         'createdAt',
         'desc',
       );
+      if (cancelled) return;
+
       if (res?.data) {
         setReviews(res.data);
         setTotal(res.meta.total);
@@ -62,15 +68,16 @@ export default function GearReviewsPage({ params }: Props) {
         setTotal(0);
         setTotalPages(1);
       }
+
       setReviewsLoading(false);
       setLoading(false);
-    },
-    [id],
-  );
+    };
 
-  useEffect(() => {
-    fetchReviews(page);
-  }, [page, fetchReviews]);
+    void fetchReviews();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, page]);
 
   const avgRating = useMemo(() => {
     if (reviews.length === 0) return 0;

@@ -1,4 +1,4 @@
-import { StatsCardSkeleton, Skeleton } from '@/components/Skeleton';
+import { StatsCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 
 export default function AdminDashboardLoading() {
   const quickLinkPlaceholders = Array.from({ length: 4 });

@@ -1,7 +1,6 @@
 'use server';
 
 import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
-import { cookies } from 'next/headers';
 
 export interface ToggleStatusResult {
   success: boolean;

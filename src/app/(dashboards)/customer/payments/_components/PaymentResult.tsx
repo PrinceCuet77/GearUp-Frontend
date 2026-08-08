@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 import {
-  CheckCircle2,
-  XCircle,
   Ban,
   ArrowLeft,
   RotateCcw,

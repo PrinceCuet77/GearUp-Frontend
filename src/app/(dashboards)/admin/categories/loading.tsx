@@ -1,5 +1,4 @@
-import { Skeleton } from '@/components/Skeleton';
-import { CategorySkeleton } from '@/components/ui/Skeleton';
+import { CategorySkeleton, Skeleton } from '@/components/ui/Skeleton';
 
 export default function AdminCategoriesLoading() {
   return (

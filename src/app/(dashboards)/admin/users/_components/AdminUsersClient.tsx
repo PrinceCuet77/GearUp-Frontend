@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Users,
   ChevronLeft,
@@ -12,7 +12,6 @@ import {
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UserStatusBadge } from '@/components/dashboard/StatusBadge';
-import { TableSkeleton } from '@/components/Skeleton';
 import { changeUserStatus } from '../_actions/changeUserStatus';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import type { AdminUser, AdminUserMeta } from '../_actions/getAllUsers';
@@ -45,7 +44,6 @@ export function AdminUsersClient({
   const [meta, setMeta] = useState<AdminUserMeta>(initialMeta);
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [toggling, setToggling] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   const page = meta.page;
   const totalPages = meta.totalPages;
@@ -106,11 +104,15 @@ export function AdminUsersClient({
     setToggling(null);
   };
 
-  // Sync users when initial props change (navigation)
-  useEffect(() => {
+  // Re-seed the table when the server sends a new page of users. Comparing the
+  // prop against its last-seen value during render replaces the previous
+  // effect, which committed the stale list for one frame before correcting it.
+  const [lastInitialUsers, setLastInitialUsers] = useState(initialUsers);
+  if (initialUsers !== lastInitialUsers) {
+    setLastInitialUsers(initialUsers);
     setUsers(initialUsers);
     setMeta(initialMeta);
-  }, [initialUsers, initialMeta]);
+  }
 
   return (
     <div>
@@ -165,9 +167,7 @@ export function AdminUsersClient({
         className='rounded-xl border'
         style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
       >
-        {loading ? (
-          <TableSkeleton rows={5} cols={5} />
-        ) : users.length === 0 ? (
+        {users.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20'>
             <Users
               className='mb-3 h-10 w-10 opacity-30'

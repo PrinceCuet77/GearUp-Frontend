@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Package,
   ChevronLeft,
@@ -14,12 +14,11 @@ import {
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-// import { TableSkeleton } from '@/components/Skeleton';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 import type { GearItem, Category } from '@/lib/types';
 import { getAllGearsForAdmin } from './_actions/getAllGearsForAdmin';
 import { getAllCategoriesAction } from '@/app/(public)/_actions/getAllCategories';
-import { TableSkeleton } from '@/components/Skeleton';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 
 const LIMIT = 10;
 
@@ -79,44 +78,55 @@ export default function AdminGearsPage() {
     });
   }, []);
 
-  const fetchGears = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await getAllGearsForAdmin({
-        page,
-        limit: LIMIT,
-        search: search || undefined,
-        category: category || undefined,
-        minPrice: minPrice || undefined,
-        maxPrice: maxPrice || undefined,
-        sortBy: sortBy || undefined,
-        sortOrder: sortBy ? sortOrder : undefined,
-      });
-      if (result.success && result.data) {
-        setGears(result.data);
-        setTotalPages(result.meta?.totalPages ?? 1);
-        setTotal(result.meta?.total ?? 0);
-      } else {
-        const msg = result.error ?? 'Failed to load gear listings.';
-        setError(msg);
+  // Refetch whenever a filter, sort or page changes. The request lives inside
+  // the effect so `cancelled` can discard a slow response that has already been
+  // superseded by a newer filter combination.
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchGears = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await getAllGearsForAdmin({
+          page,
+          limit: LIMIT,
+          search: search || undefined,
+          category: category || undefined,
+          minPrice: minPrice || undefined,
+          maxPrice: maxPrice || undefined,
+          sortBy: sortBy || undefined,
+          sortOrder: sortBy ? sortOrder : undefined,
+        });
+        if (cancelled) return;
+
+        if (result.success && result.data) {
+          setGears(result.data);
+          setTotalPages(result.meta?.totalPages ?? 1);
+          setTotal(result.meta?.total ?? 0);
+        } else {
+          setError(result.error ?? 'Failed to load gear listings.');
+          setGears([]);
+          setTotalPages(1);
+          setTotal(0);
+        }
+      } catch {
+        if (cancelled) return;
+        setError('An unexpected error occurred. Please try again.');
         setGears([]);
         setTotalPages(1);
         setTotal(0);
       }
-    } catch (err) {
-      const msg = 'An unexpected error occurred. Please try again.';
-      setError(msg);
-      setGears([]);
-      setTotalPages(1);
-      setTotal(0);
-    }
-    setLoading(false);
-  }, [page, search, category, minPrice, maxPrice, sortBy, sortOrder]);
 
-  useEffect(() => {
+      if (!cancelled) setLoading(false);
+    };
+
     void fetchGears();
-  }, [fetchGears]);
+    return () => {
+      cancelled = true;
+    };
+  }, [page, search, category, minPrice, maxPrice, sortBy, sortOrder]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,11 +166,6 @@ export default function AdminGearsPage() {
     setMaxPrice(draftMaxPrice);
     setSortBy(draftSortBy);
     setSortOrder(draftSortOrder);
-  };
-
-  const handleSortSelect = (opt: SortOption) => {
-    setDraftSortBy(opt.value);
-    setDraftSortOrder(opt.order);
   };
 
   return (

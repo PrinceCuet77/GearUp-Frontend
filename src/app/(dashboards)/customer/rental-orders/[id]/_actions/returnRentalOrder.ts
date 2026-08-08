@@ -1,6 +1,5 @@
 'use server';
 
-import { cookies } from 'next/headers';
 import type { RentalOrder } from '@/lib/types';
 import { isAccessTokenExist } from '@/app/(auth)/_actions/refreshTokenAction';
 

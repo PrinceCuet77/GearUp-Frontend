@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton } from '@/components/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 function SummarySkeleton() {
   return (
