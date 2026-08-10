@@ -19,7 +19,6 @@ import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { cn } from '@/lib/cn';
 
 interface Props {
   gear: GearItem;
@@ -200,7 +199,7 @@ export default function AddToCartModal({ gear, onClose }: Props) {
               </div>
 
               {isAuthenticated ? (
-                <div className='flex w-full flex-col gap-2 sm:flex-row'>
+                <div className='grid w-full grid-cols-1 gap-2 sm:grid-cols-2'>
                   <Button variant='outline' fullWidth onClick={onClose}>
                     Keep browsing
                   </Button>
@@ -221,7 +220,7 @@ export default function AddToCartModal({ gear, onClose }: Props) {
                     Your cart is saved on this device. Sign in to turn it into a
                     rental order.
                   </p>
-                  <div className='flex w-full flex-col gap-2 sm:flex-row'>
+                  <div className='grid w-full grid-cols-1 gap-2 sm:grid-cols-2'>
                     <Button variant='outline' fullWidth onClick={onClose}>
                       Keep browsing
                     </Button>
@@ -381,7 +380,7 @@ export default function AddToCartModal({ gear, onClose }: Props) {
                 </div>
               </dl>
 
-              <div className={cn('flex gap-3')}>
+              <div className='grid grid-cols-2 gap-3'>
                 <Button
                   type='button'
                   variant='outline'

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="Gear category artwork">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="ridge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b2239" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#0b2239"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="800" height="500" fill="url(#sky)"/>
+  <circle cx="628" cy="132" r="52" fill="#fbbf24" opacity="0.9"/>
+
+  <!-- Back ridge -->
+  <path d="M0 330 L150 214 L268 316 L372 224 L520 348 L640 268 L800 372 L800 500 L0 500 Z" fill="#0f3350" opacity="0.75"/>
+  <!-- Front ridge -->
+  <path d="M0 396 L128 300 L246 388 L360 306 L470 400 L592 330 L800 452 L800 500 L0 500 Z" fill="url(#ridge)"/>
+
+  <!-- Gear glyph -->
+  <g transform="translate(400 236)" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.55">
+    <circle r="40"/>
+    <circle r="14"/>
+    <path d="M0 -68 V -52 M0 68 V 52 M-68 0 H -52 M68 0 H 52 M-48 -48 L-37 -37 M48 48 L37 37 M48 -48 L37 -37 M-48 48 L-37 37"/>
+  </g>
+</svg>

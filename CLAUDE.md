@@ -35,7 +35,7 @@ Required in `.env.local` (see `.env.example`):
    - Enforces auth: unauthenticated users get redirected to `/login` for any non-public route; already-authenticated users are redirected away from `/login`/`/register` to their role's dashboard.
    - Enforces RBAC by pathname prefix: `/admin/*` requires `role === 'ADMIN'`, `/customer/*` requires `CUSTOMER`, `/provider/*` requires `PROVIDER` — mismatches redirect to `/not-found`.
    - `PUBLIC_ROUTES` (`/`, `/gears`) and `AUTH_ROUTES` (`/login`, `/register`) are hardcoded arrays at the top of the file — update them when adding new public/auth pages.
-   - The middleware `matcher` excludes `/api`, `/_next/static`, `/_next/image`, and `*.png`.
+   - The middleware `matcher` excludes `/api`, `/_next/static`, `/_next/image`, and any request ending in a static asset extension (images, fonts, `.txt`/`.xml`/`.webmanifest`). Assets in `public/` must stay excluded — otherwise they are treated as protected routes and redirected to `/login`, which renders as a broken image.
 
 2. **Server Actions** (`_actions/` folders colocated with routes) are the *only* way the app talks to the backend. Every action:
    - Is a `'use server'` module.

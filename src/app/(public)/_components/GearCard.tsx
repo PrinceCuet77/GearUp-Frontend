@@ -179,7 +179,7 @@ export default function GearCard({
                 title={isRentable ? `Rent ${gear.name}` : status.label(gear.stock)}
                 className={cn(
                   buttonClasses({ variant: 'primary', size: 'sm' }),
-                  'w-9 px-0',
+                  'w-12 px-0',
                 )}
               >
                 <ShoppingCart className='h-4 w-4' aria-hidden='true' />

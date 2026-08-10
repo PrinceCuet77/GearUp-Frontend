@@ -117,7 +117,9 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Exclude API routes, static files, image optimizations, and .png files
-    '/((?!api|_next/static|_next/image|.*\\.png$).*)',
+    // Exclude API routes, Next internals and every static asset in `public/`.
+    // Asset requests carry no auth intent — without this they get redirected to
+    // /login like any other protected path and render as broken images.
+    '/((?!api|_next/static|_next/image|.*\\.(?:png|jpe?g|gif|svg|webp|avif|ico|bmp|txt|xml|webmanifest|woff2?|ttf|otf|mp4)$).*)',
   ],
 };

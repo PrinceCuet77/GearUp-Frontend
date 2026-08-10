@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowRight, Layers, Package } from 'lucide-react';
+import { ArrowRight, Layers } from 'lucide-react';
 
 import { Section, SectionHeading } from '@/components/ui/Section';
 import { RevealGroup, RevealItem } from '@/components/ui/Reveal';
@@ -8,6 +8,9 @@ import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatBDT, parseGearImages } from '@/lib/gear-utils';
 import type { CategoryHighlight } from '@/lib/home-data';
+
+/** Artwork used for categories that have no listing to source an image from. */
+const CATEGORY_IMAGE_FALLBACK = '/category-placeholder.svg';
 
 export function CategoriesSection({
   categories,
@@ -49,9 +52,11 @@ export function CategoriesSection({
       ) : (
         <RevealGroup className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
           {visible.map((category) => {
+            // Empty categories have no listing to borrow an image from — fall
+            // back to artwork so the tile still reads as a finished card.
             const image = category.image
               ? parseGearImages(category.image)[0]
-              : null;
+              : CATEGORY_IMAGE_FALLBACK;
 
             return (
               <RevealItem key={category.id}>
@@ -60,22 +65,13 @@ export function CategoriesSection({
                   className='surface-card-interactive group flex h-full flex-col overflow-hidden'
                 >
                   <div className='relative aspect-16/10 w-full overflow-hidden bg-muted'>
-                    {image ? (
-                      <Image
-                        src={image}
-                        alt=''
-                        fill
-                        sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-                        className='object-cover transition-transform duration-500 group-hover:scale-105'
-                      />
-                    ) : (
-                      <span className='flex h-full w-full items-center justify-center'>
-                        <Package
-                          className='h-8 w-8 text-muted-foreground'
-                          aria-hidden='true'
-                        />
-                      </span>
-                    )}
+                    <Image
+                      src={image}
+                      alt=''
+                      fill
+                      sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                      className='object-cover transition-transform duration-500 group-hover:scale-105'
+                    />
                     <div
                       className='absolute inset-0 bg-gradient-to-t from-black/60 to-transparent'
                       aria-hidden='true'
