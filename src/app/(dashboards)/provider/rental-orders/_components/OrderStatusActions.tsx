@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, CheckCircle, Truck, RotateCcw } from 'lucide-react';
+import { CheckCircle, Truck, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import type { RentalStatus } from '@/lib/types';
+import { Button, type ButtonVariant } from '@/components/ui/Button';
 import { updateRentalOrderForProvider } from '../_actions/updateRentalOrderForProvider';
 
 interface Props {
@@ -12,29 +13,38 @@ interface Props {
   currentStatus: RentalStatus;
 }
 
+/**
+ * The single next step available at each stage of the order lifecycle:
+ * PLACED → CONFIRMED → PAID → PICKED_UP → RETURNED
+ */
 const NEXT_ACTIONS: Partial<
   Record<
     RentalStatus,
-    { status: string; label: string; icon: React.ElementType; color: string }
+    {
+      status: string;
+      label: string;
+      icon: React.ElementType;
+      variant: ButtonVariant;
+    }
   >
 > = {
   PLACED: {
     status: 'CONFIRMED',
     label: 'Confirm Order',
     icon: CheckCircle,
-    color: '#2563eb',
+    variant: 'accent',
   },
   PAID: {
     status: 'PICKED_UP',
     label: 'Mark as Picked Up',
     icon: Truck,
-    color: '#22c55e',
+    variant: 'secondary',
   },
   PICKED_UP: {
     status: 'RETURNED',
     label: 'Mark as Returned',
     icon: RotateCcw,
-    color: 'var(--muted-foreground)',
+    variant: 'primary',
   },
 };
 
@@ -67,37 +77,17 @@ export function OrderStatusActions({ orderId, currentStatus }: Props) {
   };
 
   return (
-    <div
-      className='rounded-xl border p-5'
-      style={{
-        backgroundColor: 'var(--card)',
-        borderColor: 'var(--border)',
-      }}
-    >
-      <h2
-        className='mb-4 text-sm font-semibold'
-        style={{ color: 'var(--foreground)' }}
-      >
-        Order Actions
-      </h2>
-      <button
+    <div className='surface-card p-5'>
+      <h2 className='mb-4 text-sm font-bold text-foreground'>Order Actions</h2>
+      <Button
+        variant={action.variant}
         onClick={handleUpdate}
-        disabled={loading}
-        className='cursor-pointer inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition-colors disabled:opacity-60'
-        style={{
-          backgroundColor:
-            action.color !== 'var(--muted-foreground)'
-              ? action.color
-              : 'var(--primary)',
-        }}
+        loading={loading}
+        loadingText='Updating…'
+        leadingIcon={<Icon className='h-4 w-4' />}
       >
-        {loading ? (
-          <Loader2 className='h-4 w-4 animate-spin' />
-        ) : (
-          <Icon className='h-4 w-4' />
-        )}
         {action.label}
-      </button>
+      </Button>
     </div>
   );
 }

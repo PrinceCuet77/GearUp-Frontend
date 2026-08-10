@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CreditCard, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
+import { Button } from '@/components/ui/Button';
 import { createPayment } from '../_actions/createPayment';
 
 export function PayButton({ orderId }: { orderId: string }) {
@@ -32,14 +33,12 @@ export function PayButton({ orderId }: { orderId: string }) {
 
   return (
     <>
-      <button
+      <Button
         onClick={() => setOpen(true)}
-        className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer'
-        style={{ backgroundColor: 'var(--primary)' }}
+        leadingIcon={<CreditCard className='h-4 w-4' />}
       >
-        <CreditCard className='h-4 w-4' />
         Pay Now
-      </button>
+      </Button>
 
       <Modal
         open={open}
@@ -53,39 +52,25 @@ export function PayButton({ orderId }: { orderId: string }) {
         footerRight
       >
         <div className='flex flex-col items-center justify-center py-4'>
-          <div
-            className='mb-5 flex h-14 w-14 items-center justify-center rounded-2xl'
-            style={{
-              backgroundColor: 'color-mix(in srgb, #7c3aed 14%, transparent)',
-            }}
-          >
-            <CreditCard className='h-7 w-7' style={{ color: '#7c3aed' }} />
-          </div>
-          <h2
-            className='mb-2 text-center text-lg font-bold'
-            style={{ color: 'var(--foreground)' }}
-          >
+          <span className='mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft'>
+            <CreditCard
+              className='h-7 w-7 text-accent-soft-foreground'
+              aria-hidden='true'
+            />
+          </span>
+          <h2 className='mb-2 text-center text-lg font-bold text-foreground'>
             Proceed to Payment
           </h2>
-          <p
-            className='mb-6 text-center text-sm'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
+          <p className='mb-6 text-center text-sm text-muted-foreground'>
             You will be redirected to SSLCommerz to securely complete your
             payment.
           </p>
-          <div
-            className='flex w-full items-start gap-3 rounded-lg p-4'
-            style={{
-              backgroundColor: 'color-mix(in srgb, #22c55e 8%, transparent)',
-              border: '1px solid color-mix(in srgb, #22c55e 20%, transparent)',
-            }}
-          >
+          <div className='flex w-full items-start gap-3 rounded-control border border-secondary/25 bg-secondary-soft p-4'>
             <Shield
-              className='mt-0.5 h-4 w-4 shrink-0'
-              style={{ color: '#16a34a' }}
+              className='mt-0.5 h-4 w-4 shrink-0 text-secondary-soft-foreground'
+              aria-hidden='true'
             />
-            <p className='text-xs' style={{ color: '#16a34a' }}>
+            <p className='text-xs text-secondary-soft-foreground'>
               Payments are securely processed via SSLCommerz. Your financial
               information is never stored on our servers.
             </p>

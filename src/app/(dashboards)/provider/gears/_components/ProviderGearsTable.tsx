@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { Package, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { GearItem } from '@/lib/types';
 import { parseGearImages } from '@/lib/gear-utils';
+import { GearStatusBadge } from '@/components/dashboard/StatusBadge';
 import { GearActions } from './GearActions';
 import { useGearEdit, useGearAdd } from './ProviderGearsShell';
 
@@ -65,8 +66,7 @@ export function ProviderGearsTable({
         </p>
         <button
           onClick={() => onAdd?.()}
-          className='mt-4 inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white'
-          style={{ backgroundColor: 'var(--primary)' }}
+          className='mt-4 inline-flex h-9 cursor-pointer items-center gap-2 rounded-control bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover'
         >
           <PlusCircle className='h-4 w-4' />
           Add Your First Gear
@@ -107,22 +107,7 @@ export function ProviderGearsTable({
                         >
                           {formatCurrency(gear.price)}/day · Stock: {gear.stock}
                         </p>
-                        <span
-                          className='mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold'
-                          style={
-                            gear.isActive
-                              ? {
-                                  backgroundColor: 'rgba(34,197,94,0.12)',
-                                  color: '#16a34a',
-                                }
-                              : {
-                                  backgroundColor: 'var(--muted)',
-                                  color: 'var(--muted-foreground)',
-                                }
-                          }
-                        >
-                          {gear.isActive ? 'Active' : 'Inactive'}
-                        </span>
+                        <GearStatusBadge isActive={gear.isActive} />
                       </div>
                     </div>
                   </div>
@@ -228,22 +213,7 @@ export function ProviderGearsTable({
                     {gear.stock}
                   </td>
                   <td className='px-6 py-4'>
-                    <span
-                      className='inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold'
-                      style={
-                        gear.isActive
-                          ? {
-                              backgroundColor: 'rgba(34,197,94,0.12)',
-                              color: '#16a34a',
-                            }
-                          : {
-                              backgroundColor: 'var(--muted)',
-                              color: 'var(--muted-foreground)',
-                            }
-                      }
-                    >
-                      {gear.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    <GearStatusBadge isActive={gear.isActive} />
                   </td>
                   <td className='px-6 py-4'>
                     <GearActions

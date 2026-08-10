@@ -38,11 +38,7 @@ export default async function ProviderGearPage({
       )}
 
       <div
-        className='rounded-xl border'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+        className='surface-card'
       >
         <Suspense fallback={<TableSkeleton rows={5} cols={5} />}>
           <ProviderGearsTable

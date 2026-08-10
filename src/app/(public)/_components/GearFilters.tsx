@@ -1,9 +1,12 @@
 'use client';
 
+import { useId } from 'react';
 import { Search, X } from 'lucide-react';
 import type { Category } from '@/lib/types';
 import { type SortBy, type SortOrder, SORT_OPTIONS } from '@/lib/gear-utils';
 import { formatBDT } from '@/lib/gear-utils';
+import { cn } from '@/lib/cn';
+import { Button } from '@/components/ui/Button';
 
 export interface GearFiltersProps {
   /** All available categories for the filter chips. */
@@ -24,16 +27,8 @@ export interface GearFiltersProps {
   onReset: () => void;
 }
 
-const inputBase =
-  'h-9 w-full rounded-lg border px-3 text-sm outline-none focus:ring-1 transition-colors';
-
-function getInputStyle() {
-  return {
-    backgroundColor: 'var(--input-bg)',
-    borderColor: 'var(--input-border)',
-    color: 'var(--foreground)',
-  };
-}
+const GROUP_LABEL =
+  'mb-2 block text-xs font-bold tracking-wide text-muted-foreground uppercase';
 
 /**
  * Reusable filter panel — rendered in the desktop sidebar and
@@ -55,37 +50,47 @@ export default function GearFilters({
   onSort,
   onReset,
 }: GearFiltersProps) {
-  const inputStyle = getInputStyle();
+  const searchId = useId();
+  const minId = useId();
+  const maxId = useId();
+  const sortId = useId();
+  const categoryGroupId = useId();
+
   const currentSortValue = `${sortBy}:${sortOrder}`;
+
+  const chipClass = (active: boolean) =>
+    cn(
+      'cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors',
+      active
+        ? 'bg-primary text-primary-foreground'
+        : 'bg-muted text-muted-foreground hover:text-foreground',
+    );
 
   return (
     <div className='space-y-6'>
       {/* Search */}
       <div>
-        <label
-          className='mb-2 block text-xs font-semibold uppercase tracking-wide'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
+        <label htmlFor={searchId} className={GROUP_LABEL}>
           Search
         </label>
         <div className='relative'>
           <Search
-            className='pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2'
-            style={{ color: 'var(--muted-foreground)' }}
+            className='pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground'
+            aria-hidden='true'
           />
           <input
-            type='text'
+            id={searchId}
+            type='search'
             placeholder='Search gear…'
             value={search}
             onChange={(e) => onSearch(e.target.value)}
-            className={`${inputBase} pl-9 pr-8`}
-            style={inputStyle}
+            className='field-input h-10 py-0 pr-9 pl-9'
           />
           {search && (
             <button
+              type='button'
               onClick={() => onSearch('')}
-              className='cursor-pointer absolute right-2.5 top-1/2 -translate-y-1/2'
-              style={{ color: 'var(--muted-foreground)' }}
+              className='absolute top-1/2 right-2.5 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors hover:text-foreground'
               aria-label='Clear search'
             >
               <X className='h-3.5 w-3.5' />
@@ -96,40 +101,25 @@ export default function GearFilters({
 
       {/* Category */}
       <div>
-        <label
-          className='mb-2 block text-xs font-semibold uppercase tracking-wide'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
+        <span id={categoryGroupId} className={GROUP_LABEL}>
           Category
-        </label>
-        <div className='flex flex-wrap gap-2'>
+        </span>
+        <div className='flex flex-wrap gap-2' role='group' aria-labelledby={categoryGroupId}>
           <button
+            type='button'
             onClick={() => onCategory('')}
-            className='cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors'
-            style={
-              category === ''
-                ? { backgroundColor: 'var(--primary)', color: '#fff' }
-                : {
-                    backgroundColor: 'var(--muted)',
-                    color: 'var(--muted-foreground)',
-                  }
-            }
+            aria-pressed={category === ''}
+            className={chipClass(category === '')}
           >
             All
           </button>
           {categories.map((cat) => (
             <button
               key={cat.id}
+              type='button'
               onClick={() => onCategory(cat.name)}
-              className='cursor-pointer rounded-full px-3 py-1 text-xs font-semibold transition-colors'
-              style={
-                category === cat.name
-                  ? { backgroundColor: 'var(--primary)', color: '#fff' }
-                  : {
-                      backgroundColor: 'var(--muted)',
-                      color: 'var(--muted-foreground)',
-                    }
-              }
+              aria-pressed={category === cat.name}
+              className={chipClass(category === cat.name)}
             >
               {cat.name}
             </button>
@@ -139,40 +129,44 @@ export default function GearFilters({
 
       {/* Price range */}
       <div>
-        <label
-          className='mb-2 block text-xs font-semibold uppercase tracking-wide'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          Price per Day (৳)
-        </label>
+        <span className={GROUP_LABEL}>Price per day (৳)</span>
         <div className='flex items-center gap-2'>
-          <input
-            type='number'
-            placeholder='Min'
-            value={minPrice}
-            min='0'
-            onChange={(e) => onMinPrice(e.target.value)}
-            className={inputBase}
-            style={inputStyle}
-          />
-          <span style={{ color: 'var(--muted-foreground)', flexShrink: 0 }}>
+          <div className='flex-1'>
+            <label htmlFor={minId} className='sr-only'>
+              Minimum price per day in Taka
+            </label>
+            <input
+              id={minId}
+              type='number'
+              inputMode='numeric'
+              placeholder='Min'
+              value={minPrice}
+              min='0'
+              onChange={(e) => onMinPrice(e.target.value)}
+              className='field-input h-10 py-0'
+            />
+          </div>
+          <span className='shrink-0 text-muted-foreground' aria-hidden='true'>
             –
           </span>
-          <input
-            type='number'
-            placeholder='Max'
-            value={maxPrice}
-            min='0'
-            onChange={(e) => onMaxPrice(e.target.value)}
-            className={inputBase}
-            style={inputStyle}
-          />
+          <div className='flex-1'>
+            <label htmlFor={maxId} className='sr-only'>
+              Maximum price per day in Taka
+            </label>
+            <input
+              id={maxId}
+              type='number'
+              inputMode='numeric'
+              placeholder='Max'
+              value={maxPrice}
+              min='0'
+              onChange={(e) => onMaxPrice(e.target.value)}
+              className='field-input h-10 py-0'
+            />
+          </div>
         </div>
         {(minPrice || maxPrice) && (
-          <p
-            className='mt-1.5 text-xs'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
+          <p className='field-hint'>
             {minPrice && maxPrice
               ? `${formatBDT(minPrice)} – ${formatBDT(maxPrice)}`
               : minPrice
@@ -184,13 +178,11 @@ export default function GearFilters({
 
       {/* Sort */}
       <div>
-        <label
-          className='mb-2 block text-xs font-semibold uppercase tracking-wide'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          Sort By
+        <label htmlFor={sortId} className={GROUP_LABEL}>
+          Sort by
         </label>
         <select
+          id={sortId}
           value={currentSortValue}
           onChange={(e) => {
             const [by, order] = e.target.value.split(':') as [
@@ -199,16 +191,7 @@ export default function GearFilters({
             ];
             onSort(by, order);
           }}
-          className='h-9 w-full cursor-pointer rounded-lg border px-3 text-sm outline-none transition-colors appearance-none'
-          style={{
-            backgroundColor: 'var(--input-bg)',
-            borderColor: 'var(--input-border)',
-            color: 'var(--foreground)',
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right 10px center',
-            paddingRight: '28px',
-          }}
+          className='field-input h-10 cursor-pointer py-0'
         >
           {SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -220,23 +203,16 @@ export default function GearFilters({
 
       {/* Clear filters */}
       {hasFilters && (
-        <button
+        <Button
+          variant='ghost'
+          size='sm'
+          fullWidth
           onClick={onReset}
-          className='cursor-pointer flex w-full items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium transition-colors'
-          style={{
-            color: 'var(--muted-foreground)',
-            backgroundColor: 'var(--muted)',
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.color = 'var(--foreground)')
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = 'var(--muted-foreground)')
-          }
+          leadingIcon={<X className='h-3.5 w-3.5' />}
+          className='bg-muted'
         >
-          <X className='h-3.5 w-3.5' />
           Clear all filters
-        </button>
+        </Button>
       )}
     </div>
   );

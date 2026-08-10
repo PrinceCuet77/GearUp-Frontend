@@ -19,6 +19,7 @@ import type { GearItem, Category } from '@/lib/types';
 import { getAllGearsForAdmin } from './_actions/getAllGearsForAdmin';
 import { getAllCategoriesAction } from '@/app/(public)/_actions/getAllCategories';
 import { TableSkeleton } from '@/components/ui/Skeleton';
+import { GearStatusBadge } from '@/components/dashboard/StatusBadge';
 
 const LIMIT = 10;
 
@@ -269,11 +270,7 @@ export default function AdminGearsPage() {
       {/* Filter Panel */}
       {showFilters && (
         <div
-          className='mb-6 rounded-xl border p-5'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='mb-6 surface-card p-5'
         >
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
             {/* Category */}
@@ -503,8 +500,7 @@ export default function AdminGearsPage() {
       )}
 
       <div
-        className='rounded-xl border'
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className='surface-card'
       >
         {loading ? (
           <TableSkeleton rows={5} cols={7} />
@@ -606,22 +602,7 @@ export default function AdminGearsPage() {
                           {gear.stock}
                         </td>
                         <td className='px-6 py-4'>
-                          <span
-                            className='inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold'
-                            style={
-                              gear.isActive
-                                ? {
-                                    backgroundColor: 'rgba(34,197,94,0.12)',
-                                    color: '#16a34a',
-                                  }
-                                : {
-                                    backgroundColor: 'var(--muted)',
-                                    color: 'var(--muted-foreground)',
-                                  }
-                            }
-                          >
-                            {gear.isActive ? 'Active' : 'Inactive'}
-                          </span>
+                          <GearStatusBadge isActive={gear.isActive} />
                         </td>
                       </tr>
                     );

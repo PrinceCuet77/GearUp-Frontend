@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import {
   X,
@@ -11,13 +10,18 @@ import {
   Trash2,
   ArrowRight,
   ShoppingBag,
-  Loader2,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/useCartStore';
 import { useRentalStore } from '@/store/useRentalStore';
-import { formatBDT, parseGearImages } from '@/lib/gear-utils';
+import {
+  formatBDT,
+  parseGearImages,
+  GEAR_IMAGE_FALLBACK,
+} from '@/lib/gear-utils';
+import { Button, ButtonLink } from '@/components/ui/Button';
+import { cn } from '@/lib/cn';
 
 function daysBetween(start: string, end: string): number {
   const ms = new Date(end).getTime() - new Date(start).getTime();
@@ -30,6 +34,24 @@ function formatDate(iso: string) {
     day: 'numeric',
     timeZone: 'Asia/Dhaka',
   });
+}
+
+/** Cart line thumbnail with a local fallback (no remote placeholder host). */
+function CartItemImage({ src, alt }: { src: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <div className='relative h-20 w-20 shrink-0 overflow-hidden rounded-control bg-muted'>
+      <Image
+        src={failed ? GEAR_IMAGE_FALLBACK : src}
+        alt={alt}
+        fill
+        sizes='80px'
+        className='object-cover'
+        onError={() => setFailed(true)}
+      />
+    </div>
+  );
 }
 
 export function CartSidebar() {
@@ -110,7 +132,7 @@ export function CartSidebar() {
       {isOpen && (
         <div
           className='fixed inset-0 z-40'
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{ backgroundColor: 'var(--overlay)' }}
           onClick={closeCart}
           aria-hidden='true'
         />
@@ -121,36 +143,21 @@ export function CartSidebar() {
         role='dialog'
         aria-modal='true'
         aria-label='Shopping cart'
-        className='fixed right-0 top-0 z-50 flex h-full w-full flex-col sm:w-[420px]'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderLeft: '1px solid var(--border)',
-          transform: isOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: isOpen ? '-8px 0 32px rgba(0,0,0,0.15)' : 'none',
-        }}
+        aria-hidden={!isOpen}
+        // Keeps the offscreen panel out of the tab order while closed.
+        inert={!isOpen}
+        className={cn(
+          'fixed top-0 right-0 z-50 flex h-full w-full flex-col border-l border-border bg-card transition-transform duration-300 ease-out sm:w-[420px]',
+          isOpen ? 'translate-x-0 shadow-xl' : 'translate-x-full',
+        )}
       >
         {/* Header */}
-        <div
-          className='flex shrink-0 items-center justify-between border-b px-5 py-4'
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <div className='flex shrink-0 items-center justify-between border-b border-border px-5 py-4'>
           <div className='flex items-center gap-2.5'>
-            <ShoppingCart
-              className='h-5 w-5'
-              style={{ color: 'var(--primary)' }}
-            />
-            <h2
-              className='text-base font-bold'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Your Cart
-            </h2>
+            <ShoppingCart className='h-5 w-5 text-primary' aria-hidden='true' />
+            <h2 className='text-base font-bold text-foreground'>Your Cart</h2>
             {itemCount > 0 && (
-              <span
-                className='flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-bold text-white'
-                style={{ backgroundColor: 'var(--primary)' }}
-              >
+              <span className='flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground'>
                 {itemCount}
               </span>
             )}
@@ -158,14 +165,7 @@ export function CartSidebar() {
           <button
             onClick={closeCart}
             aria-label='Close cart'
-            className='flex h-8 w-8 items-center justify-center rounded-lg transition-colors cursor-pointer'
-            style={{ color: 'var(--muted-foreground)' }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = 'var(--muted)')
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = 'transparent')
-            }
+            className='flex h-8 w-8 cursor-pointer items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
           >
             <X className='h-4 w-4' />
           </button>
@@ -175,40 +175,29 @@ export function CartSidebar() {
         <div className='flex-1 overflow-y-auto'>
           {items.length === 0 ? (
             /* Empty state */
-            <div className='flex flex-col items-center justify-center py-20 px-6 text-center'>
-              <div
-                className='mb-4 flex h-16 w-16 items-center justify-center rounded-2xl'
-                style={{ backgroundColor: 'var(--muted)' }}
-              >
+            <div className='flex flex-col items-center justify-center px-6 py-20 text-center'>
+              <span className='mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted'>
                 <ShoppingBag
-                  className='h-8 w-8'
-                  style={{ color: 'var(--muted-foreground)' }}
+                  className='h-8 w-8 text-muted-foreground'
+                  aria-hidden='true'
                 />
-              </div>
-              <p
-                className='mb-1 text-base font-semibold'
-                style={{ color: 'var(--foreground)' }}
-              >
+              </span>
+              <p className='mb-1 text-base font-bold text-foreground'>
                 Your cart is empty
               </p>
-              <p
-                className='mb-6 text-sm'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
+              <p className='mb-6 text-sm text-muted-foreground'>
                 Browse available gear and add items to get started.
               </p>
-              <Link
+              <ButtonLink
                 href='/gears'
                 onClick={closeCart}
-                className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors'
-                style={{ backgroundColor: 'var(--primary)' }}
+                trailingIcon={<ArrowRight className='h-4 w-4' />}
               >
                 Browse Gear
-                <ArrowRight className='h-4 w-4' />
-              </Link>
+              </ButtonLink>
             </div>
           ) : (
-            <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
+            <ul className='divide-y divide-border'>
               {items.map((item) => {
                 const days = daysBetween(item.startDate, item.endDate);
                 const itemTotal =
@@ -217,94 +206,52 @@ export function CartSidebar() {
                 return (
                   <li key={item.gear.id} className='p-5'>
                     <div className='flex gap-4'>
-                      {/* Thumbnail */}
-                      <div className='relative h-20 w-20 shrink-0 overflow-hidden rounded-xl'>
-                        <Image
-                          src={parseGearImages(item.gear.images)[0]}
-                          alt={item.gear.name}
-                          fill
-                          sizes='80px'
-                          className='object-cover'
-                          onError={(e) => {
-                            const img = e.currentTarget as HTMLImageElement;
-                            img.src =
-                              'https://placehold.co/80x80/e2e8f0/94a3b8?text=Gear';
-                          }}
-                        />
-                      </div>
+                      <CartItemImage
+                        src={parseGearImages(item.gear.images)[0]}
+                        alt={item.gear.name}
+                      />
 
                       {/* Info */}
                       <div className='min-w-0 flex-1'>
                         <div className='flex items-start justify-between gap-2'>
-                          <p
-                            className='line-clamp-2 text-sm font-semibold leading-tight'
-                            style={{ color: 'var(--foreground)' }}
-                          >
+                          <p className='line-clamp-2 text-sm leading-tight font-semibold text-foreground'>
                             {item.gear.name}
                           </p>
                           <button
                             onClick={() => removeItem(item.gear.id)}
-                            aria-label='Remove item'
-                            className='shrink-0 rounded p-1 transition-colors cursor-pointer'
-                            style={{ color: 'var(--muted-foreground)' }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.color = '#ef4444')
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.color =
-                                'var(--muted-foreground)')
-                            }
+                            aria-label={`Remove ${item.gear.name} from cart`}
+                            className='shrink-0 cursor-pointer rounded p-1 text-muted-foreground transition-colors hover:text-danger'
                           >
                             <Trash2 className='h-3.5 w-3.5' />
                           </button>
                         </div>
 
                         {/* Dates */}
-                        <p
-                          className='mt-1 text-xs'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
+                        <p className='mt-1 text-xs text-muted-foreground'>
                           {formatDate(item.startDate)} →{' '}
                           {formatDate(item.endDate)} · {days} day
                           {days !== 1 ? 's' : ''}
                         </p>
 
                         {/* Price */}
-                        <p
-                          className='mt-0.5 text-xs'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
+                        <p className='mt-0.5 text-xs text-muted-foreground'>
                           {formatBDT(Number(item.gear.price))}/day
                         </p>
 
                         {/* Quantity + total */}
-                        <div className='mt-3 flex items-center justify-between'>
-                          <div
-                            className='flex items-center gap-1 rounded-lg border'
-                            style={{ borderColor: 'var(--border)' }}
-                          >
+                        <div className='mt-3 flex items-center justify-between gap-3'>
+                          <div className='flex items-center gap-1 rounded-control border border-border'>
                             <button
                               onClick={() =>
                                 updateQuantity(item.gear.id, item.quantity - 1)
                               }
                               disabled={item.quantity <= 1}
-                              className='flex h-7 w-7 items-center justify-center rounded-l-lg transition-colors disabled:opacity-40 cursor-pointer'
-                              style={{ color: 'var(--foreground)' }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'var(--muted)')
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'transparent')
-                              }
+                              aria-label='Decrease quantity'
+                              className='flex h-7 w-7 cursor-pointer items-center justify-center rounded-l-control text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40'
                             >
                               <Minus className='h-3 w-3' />
                             </button>
-                            <span
-                              className='w-7 text-center text-sm font-semibold'
-                              style={{ color: 'var(--foreground)' }}
-                            >
+                            <span className='w-7 text-center text-sm font-semibold text-foreground'>
                               {item.quantity}
                             </span>
                             <button
@@ -312,25 +259,14 @@ export function CartSidebar() {
                                 updateQuantity(item.gear.id, item.quantity + 1)
                               }
                               disabled={item.quantity >= item.gear.stock}
-                              className='flex h-7 w-7 items-center justify-center rounded-r-lg transition-colors disabled:opacity-40 cursor-pointer'
-                              style={{ color: 'var(--foreground)' }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'var(--muted)')
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.backgroundColor =
-                                  'transparent')
-                              }
+                              aria-label='Increase quantity'
+                              className='flex h-7 w-7 cursor-pointer items-center justify-center rounded-r-control text-foreground transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40'
                             >
                               <Plus className='h-3 w-3' />
                             </button>
                           </div>
 
-                          <span
-                            className='text-sm font-bold'
-                            style={{ color: 'var(--foreground)' }}
-                          >
+                          <span className='text-sm font-bold text-foreground'>
                             {formatBDT(itemTotal)}
                           </span>
                         </div>
@@ -345,74 +281,43 @@ export function CartSidebar() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div
-            className='shrink-0 border-t p-5'
-            style={{ borderColor: 'var(--border)' }}
-          >
+          <div className='shrink-0 border-t border-border p-5'>
             {/* Subtotal */}
             <div className='mb-4 space-y-2'>
-              <div className='flex items-center justify-between'>
-                <span
-                  className='text-sm'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+              <div className='flex items-center justify-between gap-3'>
+                <span className='text-sm text-muted-foreground'>
                   {itemCount} item{itemCount !== 1 ? 's' : ''}
                 </span>
-                <span
-                  className='text-lg font-bold'
-                  style={{ color: 'var(--foreground)' }}
-                >
+                <span className='text-lg font-bold text-foreground'>
                   {formatBDT(subtotal)}
                 </span>
               </div>
-              <p
-                className='text-xs'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
+              <p className='text-xs text-muted-foreground'>
                 Prices include all rental days. Payment processed after provider
                 confirms.
               </p>
             </div>
 
             {/* CTA */}
-            <button
+            <Button
               onClick={handleCreateOrder}
-              disabled={isCreating}
-              className='flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold text-white transition-colors disabled:opacity-60 cursor-pointer'
-              style={{ backgroundColor: 'var(--primary)' }}
-              onMouseEnter={(e) => {
-                if (!isCreating)
-                  e.currentTarget.style.backgroundColor =
-                    'var(--primary-hover)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--primary)';
-              }}
+              fullWidth
+              loading={isCreating}
+              loadingText='Creating Order…'
+              trailingIcon={<ArrowRight className='h-4 w-4' />}
             >
-              {isCreating ? (
-                <>
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                  Creating Order…
-                </>
-              ) : (
-                <>
-                  Create Rental Order
-                  <ArrowRight className='h-4 w-4' />
-                </>
-              )}
-            </button>
+              Create Rental Order
+            </Button>
 
-            <button
+            <Button
+              variant='ghost'
+              size='sm'
+              fullWidth
               onClick={clearCart}
-              className='mt-2 w-full py-2 text-xs font-medium transition-colors cursor-pointer'
-              style={{ color: 'var(--muted-foreground)' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.color = 'var(--muted-foreground)')
-              }
+              className='mt-2 hover:text-danger'
             >
               Clear cart
-            </button>
+            </Button>
           </div>
         )}
       </div>

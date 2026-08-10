@@ -10,6 +10,10 @@ interface ErrorBannerProps {
   showToast?: boolean;
 }
 
+/**
+ * Inline failure notice. Uses the `danger` state tokens (not the brand orange)
+ * so it reads as an error and keeps contrast in both themes.
+ */
 export function ErrorBanner({
   message,
   title = 'Could not load dashboard',
@@ -26,23 +30,16 @@ export function ErrorBanner({
 
   return (
     <div
-      className='mb-6 flex items-start gap-3 rounded-xl border-2 p-4'
-      style={{
-        backgroundColor: 'color-mix(in srgb, #f97316 10%, transparent)',
-        borderColor: 'color-mix(in srgb, #f97316 40%, transparent)',
-      }}
+      role='alert'
+      className='mb-6 flex items-start gap-3 rounded-card border border-danger/40 bg-danger-soft p-4'
     >
       <AlertTriangle
-        className='mt-0.5 h-5 w-5 shrink-0'
-        style={{ color: '#ea580c' }}
+        className='mt-0.5 h-5 w-5 shrink-0 text-danger'
+        aria-hidden='true'
       />
       <div className='flex-1'>
-        <p className='text-sm font-semibold' style={{ color: '#9a3412' }}>
-          {title}
-        </p>
-        <p className='mt-0.5 text-sm' style={{ color: '#9a3412' }}>
-          {message}
-        </p>
+        <p className='text-sm font-bold text-danger-soft-foreground'>{title}</p>
+        <p className='mt-0.5 text-sm text-danger-soft-foreground'>{message}</p>
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ import {
 import { toast } from 'sonner';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { UserStatusBadge } from '@/components/dashboard/StatusBadge';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { changeUserStatus } from '../_actions/changeUserStatus';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import type { AdminUser, AdminUserMeta } from '../_actions/getAllUsers';
@@ -22,6 +24,13 @@ const ROLE_LABELS: Record<string, string> = {
   CUSTOMER: 'Customer',
   PROVIDER: 'Provider',
   ADMIN: 'Admin',
+};
+
+/** Initial-avatar tint per role — brand tones only, defined in both themes. */
+const ROLE_AVATAR_CLASS: Record<string, string> = {
+  CUSTOMER: 'bg-accent-soft text-accent-soft-foreground',
+  PROVIDER: 'bg-secondary-soft text-secondary-soft-foreground',
+  ADMIN: 'bg-primary-soft text-primary-soft-foreground',
 };
 
 interface AdminUsersClientProps {
@@ -119,79 +128,52 @@ export function AdminUsersClient({
       {error && <ErrorBanner message={error} title='Could not load users' />}
 
       <form onSubmit={handleSearch} className='mb-6 flex gap-2'>
-        <div
-          className='flex flex-1 items-center gap-2 rounded-lg border px-3'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
-        >
+        <div className='relative flex-1'>
+          <label htmlFor='admin-user-search' className='sr-only'>
+            Search users by name or email
+          </label>
           <Search
-            className='h-4 w-4 shrink-0'
-            style={{ color: 'var(--muted-foreground)' }}
+            className='pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground'
+            aria-hidden='true'
           />
           <input
-            type='text'
+            id='admin-user-search'
+            type='search'
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder='Search by name or email…'
-            className='h-10 flex-1 bg-transparent text-sm outline-none'
-            style={{ color: 'var(--foreground)' }}
+            className='field-input h-11 py-0 pr-9 pl-9'
           />
           {searchInput && (
             <button
               type='button'
               onClick={clearSearch}
-              className='cursor-pointer'
+              aria-label='Clear search'
+              className='absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors hover:text-foreground'
             >
-              <X
-                className='h-4 w-4'
-                style={{ color: 'var(--muted-foreground)' }}
-              />
+              <X className='h-4 w-4' />
             </button>
           )}
         </div>
-        <button
-          type='submit'
-          className='cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors'
-          style={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--primary-foreground)',
-          }}
-        >
-          Search
-        </button>
+        <Button type='submit'>Search</Button>
       </form>
 
-      <div
-        className='rounded-xl border'
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-      >
-        {users.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-20'>
-            <Users
-              className='mb-3 h-10 w-10 opacity-30'
-              style={{ color: 'var(--muted-foreground)' }}
-            />
-            <p
-              className='text-sm font-medium'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              No users found
-            </p>
-          </div>
-        ) : (
-          <>
+      {users.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title='No users found'
+          description={
+            initialSearch
+              ? 'No accounts match that search. Try a different name or email.'
+              : 'No user accounts exist yet.'
+          }
+        />
+      ) : (
+        <div className='surface-card overflow-hidden'>
             <div className='overflow-x-auto'>
-              <table className='w-full'>
+              <table className='w-full min-w-[720px]'>
                 <thead>
-                  <tr
-                    className='border-b text-left text-xs font-semibold uppercase tracking-wide'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--muted-foreground)',
-                    }}
-                  >
+                  <tr className='border-b border-border text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase'>
                     <th className='px-6 py-3'>Email</th>
                     <th className='px-6 py-3'>Role</th>
                     <th className='px-6 py-3'>Status</th>
@@ -199,43 +181,28 @@ export function AdminUsersClient({
                     <th className='px-6 py-3'>Actions</th>
                   </tr>
                 </thead>
-                <tbody
-                  className='divide-y'
-                  style={{ borderColor: 'var(--border)' }}
-                >
+                <tbody className='divide-y divide-border'>
                   {users.map((user) => (
                     <tr
                       key={user.id}
-                      className='transition-colors'
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'var(--muted)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
+                      className='transition-colors hover:bg-muted'
                     >
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-3'>
                           <div
-                            className='flex h-8 w-8 shrink-0 items-center justify-center rounded-full overflow-hidden'
-                            style={{
-                              backgroundColor: user.avatarUrl
-                                ? 'transparent'
-                                : user.role === 'ADMIN'
-                                  ? '#ef4444'
-                                  : user.role === 'PROVIDER'
-                                    ? '#22c55e'
-                                    : '#3b82f6',
-                            }}
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full ${
+                              user.avatarUrl ? '' : (ROLE_AVATAR_CLASS[user.role] ?? "bg-muted text-muted-foreground")
+                            }`}
                           >
                             {user.avatarUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
                               <img
                                 src={user.avatarUrl}
                                 alt={`${user.email}'s avatar`}
                                 className='h-full w-full object-cover'
                               />
                             ) : (
-                              <span className='text-xs font-bold text-white'>
+                              <span className='text-xs font-bold'>
                                 {user.email[0].toUpperCase()}
                               </span>
                             )}
@@ -278,18 +245,11 @@ export function AdminUsersClient({
                               handleToggleStatus(user.id, user.status)
                             }
                             disabled={toggling === user.id}
-                            className='cursor-pointer inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-semibold transition-colors disabled:opacity-50'
-                            style={
+                            className={`inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-control px-3 text-xs font-semibold transition-colors disabled:opacity-50 ${
                               user.status === 'ACTIVE'
-                                ? {
-                                    backgroundColor: 'rgba(239,68,68,0.08)',
-                                    color: '#ef4444',
-                                  }
-                                : {
-                                    backgroundColor: 'rgba(34,197,94,0.08)',
-                                    color: '#16a34a',
-                                  }
-                            }
+                                ? 'bg-danger-soft text-danger-soft-foreground hover:bg-danger-soft/70'
+                                : 'bg-secondary-soft text-secondary-soft-foreground hover:bg-secondary-soft/70'
+                            }`}
                           >
                             {toggling === user.id && (
                               <Loader2 className='h-3.5 w-3.5 animate-spin' />
@@ -304,45 +264,36 @@ export function AdminUsersClient({
               </table>
             </div>
             {totalPages > 1 && (
-              <div
-                className='flex items-center justify-between border-t px-6 py-4'
-                style={{ borderColor: 'var(--border)' }}
-              >
-                <p
-                  className='text-sm'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+              <div className='flex items-center justify-between gap-4 border-t border-border px-6 py-4'>
+                <p className='text-sm text-muted-foreground'>
                   Page {page} of {totalPages}
                 </p>
                 <div className='flex items-center gap-2'>
-                  <button
+                  <Button
+                    variant='outline'
+                    size='sm'
                     onClick={() => goToPage(page - 1)}
                     disabled={page === 1}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                    }}
+                    aria-label='Previous page'
+                    className='w-9 px-0'
                   >
                     <ChevronLeft className='h-4 w-4' />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant='outline'
+                    size='sm'
                     onClick={() => goToPage(page + 1)}
                     disabled={page === totalPages}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                    }}
+                    aria-label='Next page'
+                    className='w-9 px-0'
                   >
                     <ChevronRight className='h-4 w-4' />
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
-          </>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

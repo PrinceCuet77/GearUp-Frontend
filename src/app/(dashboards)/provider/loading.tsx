@@ -25,11 +25,7 @@ export default function ProviderDashboardLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className='flex items-start gap-4 rounded-xl border p-5'
-            style={{
-              backgroundColor: 'var(--card)',
-              borderColor: 'var(--border)',
-            }}
+            className='flex items-start gap-4 surface-card p-5'
           >
             <Skeleton className='mt-0.5 h-10 w-10 shrink-0 rounded-lg' />
             <div className='flex-1'>

@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   XCircle,
   ChevronRight,
+  Tag,
+  Store,
+  Layers,
 } from 'lucide-react';
 import type { GearItem, GearReview } from '@/lib/types';
 import {
@@ -20,106 +23,174 @@ import {
   parseGearImages,
   calcAvgRating,
   formatDate,
+  getGearAvailability,
+  GEAR_IMAGE_FALLBACK,
 } from '@/lib/gear-utils';
+import { cn } from '@/lib/cn';
 import ImageModal from '@/components/ImageModal';
 import Modal from '@/components/Modal';
-import { StarRating } from './StarRating';
+import { Badge } from '@/components/ui/Badge';
+import { Rating } from '@/components/ui/Rating';
+import { Button, ButtonLink } from '@/components/ui/Button';
+import GearCard from '@/app/(public)/_components/GearCard';
 import { RentalCreateForm } from './RentalCreateForm';
 
 interface SingleGearDetailProps {
   gear: GearItem;
+  /** Same-category gear, current item already excluded. */
+  related?: GearItem[];
 }
 
-export function SingleGearDetail({ gear }: SingleGearDetailProps) {
+/** Avatar fallback — brand tokens only, so it themes with everything else. */
+function Avatar({
+  src,
+  name,
+  size = 'md',
+}: {
+  src?: string | null;
+  name: string;
+  size?: 'sm' | 'md';
+}) {
+  const [failed, setFailed] = useState(false);
+  const dimension = size === 'md' ? 'h-12 w-12 text-sm' : 'h-10 w-10 text-xs';
+
+  return (
+    <div
+      className={cn(
+        'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-soft font-bold text-primary-soft-foreground',
+        dimension,
+      )}
+    >
+      {src && !failed ? (
+        <Image
+          src={src}
+          alt={name}
+          fill
+          className='rounded-full object-cover'
+          sizes='48px'
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        name.charAt(0).toUpperCase()
+      )}
+    </div>
+  );
+}
+
+/** One row of the specifications table. */
+function SpecRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Package;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className='flex items-center justify-between gap-4 px-5 py-3.5'>
+      <span className='flex items-center gap-2.5 text-sm text-muted-foreground'>
+        <Icon className='h-4 w-4 shrink-0' aria-hidden='true' />
+        {label}
+      </span>
+      <span className='text-right text-sm font-semibold text-foreground'>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+export function SingleGearDetail({ gear, related = [] }: SingleGearDetailProps) {
   const reviews = gear.reviews ?? [];
   const images = parseGearImages(gear.images);
   const avgRating = reviews.length > 0 ? calcAvgRating(reviews) : 0;
+  const availability = getGearAvailability(gear);
+  const isRentable = availability === 'available' || availability === 'low-stock';
 
+  const [activeImage, setActiveImage] = useState(0);
   const [imgModalOpen, setImgModalOpen] = useState(false);
-  const [imgModalSrc, setImgModalSrc] = useState('');
   const [rentModalOpen, setRentModalOpen] = useState(false);
+  const [mainSrcFailed, setMainSrcFailed] = useState(false);
 
-  const openImage = (src: string) => {
-    setImgModalSrc(src);
-    setImgModalOpen(true);
-  };
+  const currentSrc = mainSrcFailed
+    ? GEAR_IMAGE_FALLBACK
+    : (images[activeImage] ?? GEAR_IMAGE_FALLBACK);
 
   return (
-    <div style={{ backgroundColor: 'var(--background)' }}>
-      <div className='mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8'>
+    <div className='min-h-screen bg-background'>
+      <div className='container-page py-8'>
         {/* Back */}
         <Link
           href='/gears'
-          className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium transition-colors'
-          style={{ color: 'var(--muted-foreground)' }}
-          onMouseEnter={(e) =>
-            ((e.currentTarget as HTMLAnchorElement).style.color =
-              'var(--foreground)')
-          }
-          onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLAnchorElement).style.color =
-              'var(--muted-foreground)')
-          }
+          className='mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground'
         >
-          <ArrowLeft className='h-4 w-4' />
+          <ArrowLeft className='h-4 w-4' aria-hidden='true' />
           Back to Browse
         </Link>
 
         {/* Main grid */}
         <div className='grid gap-8 lg:grid-cols-2'>
-          {/* Images */}
+          {/* ── Media ──────────────────────────────────────────────────── */}
           <div className='space-y-3'>
-            {/* Primary image */}
-            <div
-              className='group relative aspect-4/3 cursor-zoom-in overflow-hidden rounded-2xl'
-              onClick={() => openImage(images[0])}
+            <button
+              type='button'
+              onClick={() => setImgModalOpen(true)}
+              aria-label={`Expand image of ${gear.name}`}
+              className='group relative block aspect-4/3 w-full cursor-zoom-in overflow-hidden rounded-card border border-border bg-muted'
             >
               <Image
-                src={images[0]}
+                src={currentSrc}
                 alt={gear.name}
                 fill
                 sizes='(max-width: 1024px) 100vw, 50vw'
                 className='object-cover transition-transform duration-300 group-hover:scale-105'
                 priority
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    'https://placehold.co/800x600/e2e8f0/94a3b8?text=Gear';
-                }}
+                onError={() => setMainSrcFailed(true)}
               />
-              {!gear.isActive && (
-                <div className='absolute inset-0 flex items-center justify-center bg-black/60'>
-                  <span className='rounded-full bg-white/90 px-4 py-1.5 text-sm font-bold text-gray-900'>
-                    Currently Unavailable
+
+              {!isRentable && (
+                <span className='absolute inset-0 flex items-center justify-center bg-black/60'>
+                  <span className='rounded-full bg-white px-4 py-1.5 text-sm font-bold text-slate-900'>
+                    {availability === 'inactive'
+                      ? 'Currently Unavailable'
+                      : 'Out of stock'}
                   </span>
-                </div>
+                </span>
               )}
-              <span
-                className='absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-semibold'
-                style={{ backgroundColor: 'var(--primary)', color: '#fff' }}
-              >
+
+              <span className='absolute top-4 left-4 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground shadow-sm'>
                 {gear.category?.name ?? 'Gear'}
               </span>
-              <div className='absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white backdrop-blur-sm'>
-                <ZoomIn className='h-3 w-3' />
-                Click to expand
-              </div>
-            </div>
 
-            {/* Thumbnail strip */}
+              <span className='absolute right-3 bottom-3 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm'>
+                <ZoomIn className='h-3 w-3' aria-hidden='true' />
+                Click to expand
+              </span>
+            </button>
+
+            {/* Thumbnail strip — selects the main image */}
             {images.length > 1 && (
               <div className='flex gap-2 overflow-x-auto pb-1'>
                 {images.map((src, i) => (
                   <button
-                    key={i}
-                    onClick={() => openImage(src)}
-                    className='relative cursor-pointer h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-colors'
-                    style={{
-                      borderColor: i === 0 ? 'var(--primary)' : 'var(--border)',
+                    key={src}
+                    type='button'
+                    onClick={() => {
+                      setActiveImage(i);
+                      setMainSrcFailed(false);
                     }}
+                    aria-label={`Show image ${i + 1} of ${images.length}`}
+                    aria-current={i === activeImage}
+                    className={cn(
+                      'relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-control border-2 transition-colors',
+                      i === activeImage
+                        ? 'border-primary'
+                        : 'border-border hover:border-border-strong',
+                    )}
                   >
                     <Image
                       src={src}
-                      alt={`View ${i + 1}`}
+                      alt=''
                       fill
                       className='object-cover'
                       sizes='64px'
@@ -129,38 +200,21 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
               </div>
             )}
 
-            {/* Rating card */}
+            {/* Rating summary */}
             {reviews.length > 0 && (
-              <div
-                className='flex items-center gap-4 rounded-xl border p-4'
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--border)',
-                }}
-              >
-                <div
-                  className='flex h-14 w-14 shrink-0 items-center justify-center rounded-xl text-2xl font-black'
-                  style={{
-                    backgroundColor:
-                      'color-mix(in srgb, var(--primary) 12%, transparent)',
-                    color: 'var(--primary)',
-                  }}
-                >
+              <div className='surface-card flex items-center gap-4 p-4'>
+                <div className='flex h-14 w-14 shrink-0 items-center justify-center rounded-control bg-primary-soft text-2xl font-black text-primary-soft-foreground'>
                   {avgRating.toFixed(1)}
                 </div>
                 <div>
-                  <StarRating rating={Math.round(avgRating)} size='md' />
-                  <p
-                    className='mt-0.5 text-xs'
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
+                  <Rating value={avgRating} size='md' starsOnly />
+                  <p className='mt-0.5 text-xs text-muted-foreground'>
                     {reviews.length} review{reviews.length !== 1 ? 's' : ''}
                   </p>
                 </div>
                 <Link
                   href={`/gears/${gear.id}/reviews`}
-                  className='ml-auto flex items-center gap-1 text-sm font-medium'
-                  style={{ color: 'var(--primary)' }}
+                  className='ml-auto flex items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80'
                 >
                   See all <ChevronRight className='h-3.5 w-3.5' />
                 </Link>
@@ -168,191 +222,161 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
             )}
           </div>
 
-          {/* Info */}
+          {/* ── Info ───────────────────────────────────────────────────── */}
           <div className='flex flex-col gap-5'>
-            {/* Status badge */}
             <div className='flex items-center gap-2'>
-              {gear.isActive && gear.stock > 0 ? (
-                <span
-                  className='inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold'
-                  style={{
-                    backgroundColor: 'rgba(34,197,94,0.12)',
-                    color: '#16a34a',
-                  }}
+              {isRentable ? (
+                <Badge
+                  tone='secondary'
+                  icon={<CheckCircle2 className='h-3.5 w-3.5' />}
                 >
-                  <CheckCircle2 className='h-3.5 w-3.5' />
                   Available
-                </span>
+                </Badge>
               ) : (
-                <span
-                  className='inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold'
-                  style={{
-                    backgroundColor: 'rgba(239,68,68,0.12)',
-                    color: '#dc2626',
-                  }}
-                >
-                  <XCircle className='h-3.5 w-3.5' />
+                <Badge tone='danger' icon={<XCircle className='h-3.5 w-3.5' />}>
                   Unavailable
-                </span>
+                </Badge>
+              )}
+              {availability === 'low-stock' && (
+                <Badge tone='warning'>Only {gear.stock} left</Badge>
               )}
             </div>
 
             {/* Title & price */}
             <div>
-              <h1
-                className='text-2xl font-extrabold leading-tight sm:text-3xl'
-                style={{ color: 'var(--foreground)' }}
-              >
+              <h1 className='text-2xl leading-tight font-extrabold text-foreground sm:text-3xl'>
                 {gear.name}
               </h1>
               <div className='mt-2 flex items-baseline gap-1'>
-                <span
-                  className='text-3xl font-extrabold'
-                  style={{ color: 'var(--primary)' }}
-                >
+                <span className='text-3xl font-extrabold text-primary'>
                   {formatBDT(gear.price)}
                 </span>
-                <span
-                  className='text-sm'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  /day
-                </span>
+                <span className='text-sm text-muted-foreground'>/day</span>
               </div>
             </div>
 
-            {/* Provider Info */}
-            <div
-              className='flex items-center gap-4 rounded-xl border p-4'
-              style={{
-                backgroundColor: 'var(--card)',
-                borderColor: 'var(--border)',
-              }}
-            >
-              <div
-                className='relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-white'
-                style={{ backgroundColor: '#2563eb' }}
-              >
-                {gear.provider?.avatarUrl ? (
-                  <Image
-                    src={gear.provider.avatarUrl}
-                    alt={gear.provider?.name || 'Provider'}
-                    fill
-                    className='rounded-full object-cover'
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display =
-                        'none';
-                    }}
-                  />
-                ) : (
-                  (gear.provider?.name ?? 'P')[0].toUpperCase()
-                )}
-              </div>
+            {/* Provider */}
+            <div className='surface-card flex items-center gap-4 p-4'>
+              <Avatar
+                src={gear.provider?.avatarUrl}
+                name={gear.provider?.name ?? 'Provider'}
+              />
               <div className='min-w-0 flex-1'>
                 <div className='flex items-center gap-2'>
-                  <p
-                    className='text-sm font-semibold truncate'
-                    style={{ color: 'var(--foreground)' }}
-                  >
+                  <p className='truncate text-sm font-semibold text-foreground'>
                     {gear.provider?.name ?? 'Unknown Provider'}
                   </p>
-                  <span
-                    className='inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider'
-                    style={{
-                      backgroundColor: 'rgba(37,99,235,0.10)',
-                      color: '#2563eb',
-                    }}
-                  >
+                  <Badge tone='accent' size='sm'>
                     Provider
-                  </span>
+                  </Badge>
                 </div>
-                <p
-                  className='mt-0.5 text-xs'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
+                <p className='mt-0.5 text-xs text-muted-foreground'>
                   Member since{' '}
                   {formatDate(gear.provider?.createdAt ?? gear.createdAt)}
                 </p>
               </div>
             </div>
 
-            {/* Stock & date */}
-            <div
-              className='flex flex-wrap gap-4 text-sm'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            {/* Quick meta */}
+            <div className='flex flex-wrap gap-4 text-sm text-muted-foreground'>
               <span className='flex items-center gap-1.5'>
-                <Package className='h-4 w-4' />
+                <Package className='h-4 w-4' aria-hidden='true' />
                 {gear.stock > 0
                   ? `${gear.stock} unit${gear.stock !== 1 ? 's' : ''} available`
                   : 'Out of stock'}
               </span>
               <span className='flex items-center gap-1.5'>
-                <Calendar className='h-4 w-4' />
+                <Calendar className='h-4 w-4' aria-hidden='true' />
                 Added {formatDate(gear.createdAt)}
               </span>
             </div>
 
-            {/* Description */}
-            <div
-              className='rounded-xl border p-4'
-              style={{
-                backgroundColor: 'var(--card)',
-                borderColor: 'var(--border)',
-              }}
-            >
-              <h2
-                className='mb-2 text-xs font-semibold uppercase tracking-wide'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Description
+            {/* Overview */}
+            <section className='surface-card p-5'>
+              <h2 className='mb-2 text-xs font-bold tracking-wide text-muted-foreground uppercase'>
+                Overview
               </h2>
-              <p
-                className='text-sm leading-relaxed'
-                style={{ color: 'var(--foreground)' }}
-              >
+              <p className='text-sm leading-relaxed text-foreground'>
                 {gear.description}
               </p>
-            </div>
+            </section>
 
             {/* CTA */}
-            <button
+            <Button
+              size='lg'
+              fullWidth
               onClick={() => setRentModalOpen(true)}
-              disabled={!gear.isActive || gear.stock === 0}
-              className='flex items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition-colors disabled:opacity-50 cursor-pointer'
-              style={{ backgroundColor: 'var(--primary)' }}
+              disabled={!isRentable}
+              leadingIcon={<ShoppingBag className='h-5 w-5' />}
             >
-              <ShoppingBag className='h-4 w-4' />
-              Rent Now
-            </button>
+              {isRentable ? 'Rent Now' : 'Currently Unavailable'}
+            </Button>
           </div>
         </div>
 
-        {/* Reviews */}
+        {/* ── Specifications ───────────────────────────────────────────── */}
         <section className='mt-12'>
-          <div className='mb-6 flex items-center justify-between'>
-            <h2
-              className='text-xl font-bold'
-              style={{ color: 'var(--foreground)' }}
-            >
+          <h2 className='mb-4 text-xl font-bold text-foreground'>
+            Key Information
+          </h2>
+          <div className='surface-card divide-y divide-border overflow-hidden'>
+            <SpecRow
+              icon={Tag}
+              label='Category'
+              value={gear.category?.name ?? 'Uncategorised'}
+            />
+            <SpecRow
+              icon={ShoppingBag}
+              label='Rental price'
+              value={`${formatBDT(gear.price)} / day`}
+            />
+            <SpecRow
+              icon={Layers}
+              label='Units in stock'
+              value={String(gear.stock)}
+            />
+            <SpecRow
+              icon={Store}
+              label='Provider'
+              value={gear.provider?.name ?? 'Unknown Provider'}
+            />
+            <SpecRow
+              icon={Star}
+              label='Average rating'
+              value={
+                reviews.length > 0
+                  ? `${avgRating.toFixed(1)} / 5 (${reviews.length} review${reviews.length !== 1 ? 's' : ''})`
+                  : 'Not rated yet'
+              }
+            />
+            <SpecRow
+              icon={Calendar}
+              label='Listed on'
+              value={formatDate(gear.createdAt)}
+            />
+            <SpecRow
+              icon={CheckCircle2}
+              label='Availability'
+              value={isRentable ? 'Available to rent' : 'Unavailable'}
+            />
+          </div>
+        </section>
+
+        {/* ── Reviews ──────────────────────────────────────────────────── */}
+        <section className='mt-12'>
+          <div className='mb-6 flex items-center justify-between gap-4'>
+            <h2 className='flex items-center gap-2 text-xl font-bold text-foreground'>
               Reviews
               {reviews.length > 0 && (
-                <span
-                  className='ml-2 rounded-full px-2.5 py-0.5 text-sm font-semibold'
-                  style={{
-                    backgroundColor: 'var(--muted)',
-                    color: 'var(--muted-foreground)',
-                  }}
-                >
+                <Badge tone='neutral' size='sm'>
                   {reviews.length}
-                </span>
+                </Badge>
               )}
             </h2>
             {reviews.length > 3 && (
               <Link
                 href={`/gears/${gear.id}/reviews`}
-                className='flex items-center gap-1 text-sm font-medium'
-                style={{ color: 'var(--primary)' }}
+                className='flex shrink-0 items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80'
               >
                 View all <ChevronRight className='h-3.5 w-3.5' />
               </Link>
@@ -360,108 +384,90 @@ export function SingleGearDetail({ gear }: SingleGearDetailProps) {
           </div>
 
           {reviews.length === 0 ? (
-            <div
-              className='flex flex-col items-center justify-center rounded-2xl border py-14 text-center'
-              style={{ borderColor: 'var(--border)' }}
-            >
-              <Star
-                className='mb-3 h-10 w-10 opacity-20'
-                style={{ color: 'var(--muted-foreground)' }}
-              />
-              <p
-                className='text-base font-semibold'
-                style={{ color: 'var(--foreground)' }}
-              >
+            <div className='surface-card flex flex-col items-center justify-center px-6 py-14 text-center'>
+              <span className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted'>
+                <Star className='h-7 w-7 text-muted-foreground' aria-hidden='true' />
+              </span>
+              <p className='text-base font-bold text-foreground'>
                 No reviews yet
               </p>
-              <p
-                className='mt-1 text-sm'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
+              <p className='mt-1 text-sm text-muted-foreground'>
                 Be the first to rent and review this gear.
               </p>
             </div>
           ) : (
             <div className='space-y-4'>
               {reviews.slice(0, 3).map((review: GearReview) => (
-                <div
-                  key={review.id}
-                  className='rounded-2xl border p-5'
-                  style={{
-                    backgroundColor: 'var(--card)',
-                    borderColor: 'var(--border)',
-                  }}
-                >
+                <article key={review.id} className='surface-card p-5'>
                   <div className='flex items-start justify-between gap-4'>
                     <div className='flex items-center gap-3'>
-                      <div
-                        className='relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-bold text-white'
-                        style={{ backgroundColor: '#f97316' }}
-                      >
-                        {review.customer?.avatarUrl ? (
-                          <Image
-                            src={review.customer.avatarUrl}
-                            alt={review.customer?.name || 'Customer'}
-                            fill
-                            className='rounded-full object-cover'
-                            onError={(e) => {
-                              (
-                                e.currentTarget as HTMLImageElement
-                              ).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          (review.customer?.name ?? 'C')[0].toUpperCase()
-                        )}
-                      </div>
+                      <Avatar
+                        src={review.customer?.avatarUrl}
+                        name={review.customer?.name ?? 'Customer'}
+                        size='sm'
+                      />
                       <div>
-                        <p
-                          className='text-sm font-semibold'
-                          style={{ color: 'var(--foreground)' }}
-                        >
+                        <p className='text-sm font-semibold text-foreground'>
                           {review.customer?.name ?? 'Customer'}
                         </p>
-                        <p
-                          className='text-xs'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
+                        <p className='text-xs text-muted-foreground'>
                           {formatDate(review.createdAt)}
                         </p>
                       </div>
                     </div>
-                    <StarRating rating={review.rating} />
+                    <Rating value={review.rating} size='sm' starsOnly />
                   </div>
-                  <p
-                    className='mt-3 text-sm leading-relaxed'
-                    style={{ color: 'var(--foreground)' }}
-                  >
+                  <p className='mt-3 text-sm leading-relaxed text-foreground'>
                     {review.comment}
                   </p>
-                </div>
+                </article>
               ))}
+
               {reviews.length > 3 && (
-                <Link
+                <ButtonLink
                   href={`/gears/${gear.id}/reviews`}
-                  className='flex w-full items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition-colors'
-                  style={{
-                    borderColor: 'var(--border)',
-                    color: 'var(--primary)',
-                  }}
+                  variant='outline'
+                  fullWidth
+                  trailingIcon={<ChevronRight className='h-4 w-4' />}
                 >
                   See all {reviews.length} reviews
-                  <ChevronRight className='h-4 w-4' />
-                </Link>
+                </ButtonLink>
               )}
             </div>
           )}
         </section>
+
+        {/* ── Related items ────────────────────────────────────────────── */}
+        {related.length > 0 && (
+          <section className='mt-12'>
+            <div className='mb-6 flex items-center justify-between gap-4'>
+              <h2 className='text-xl font-bold text-foreground'>
+                Similar gear
+              </h2>
+              {gear.category?.name && (
+                <Link
+                  href={`/gears?category=${encodeURIComponent(gear.category.name)}`}
+                  className='flex shrink-0 items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80'
+                >
+                  More in {gear.category.name}
+                  <ChevronRight className='h-3.5 w-3.5' />
+                </Link>
+              )}
+            </div>
+            <div className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
+              {related.map((item) => (
+                <GearCard key={item.id} gear={item} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Modals */}
       <ImageModal
         open={imgModalOpen}
         onClose={() => setImgModalOpen(false)}
-        src={imgModalSrc}
+        src={currentSrc}
         alt={gear.name}
       />
 

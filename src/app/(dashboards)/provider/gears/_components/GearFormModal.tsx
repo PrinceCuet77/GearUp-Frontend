@@ -11,6 +11,8 @@ import {
   type CreateGearValues,
   type UpdateGearValues,
 } from '@/lib/validations/gear';
+import { FormField } from '@/components/ui/FormField';
+import { cn } from '@/lib/cn';
 import { createGear } from '../_actions/createGear';
 import { updateGearById } from '../_actions/updateGearById';
 
@@ -24,12 +26,6 @@ interface GearFormModalProps {
 type FormErrors = Partial<
   Record<keyof (CreateGearValues & UpdateGearValues), string>
 >;
-
-const inputStyle = {
-  backgroundColor: 'var(--input-bg, var(--card))',
-  borderColor: 'var(--input-border, var(--border))',
-  color: 'var(--foreground)',
-};
 
 export function GearFormModal({
   open,
@@ -67,6 +63,12 @@ export function GearFormModal({
       setErrors({});
     }
   }
+
+  /** Clears a field's error as soon as the user edits it. */
+  const clearError = (field: keyof FormErrors) =>
+    setErrors((prev) =>
+      prev[field] ? { ...prev, [field]: undefined } : prev,
+    );
 
   const validate = (): boolean => {
     const schema = isEdit ? updateGearSchema : createGearSchema;
@@ -135,9 +137,6 @@ export function GearFormModal({
     setSaving(false);
   };
 
-  const fieldClass =
-    'h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors';
-
   return (
     <Modal
       open={open}
@@ -157,219 +156,144 @@ export function GearFormModal({
         }}
         className='space-y-4'
         id='gear-form-modal'
+        noValidate
       >
-        {/* Name */}
-        <div>
-          <label
-            className='mb-1.5 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Gear Name <span style={{ color: '#ef4444' }}>*</span>
-          </label>
-          <input
-            type='text'
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              if (errors.name)
-                setErrors((prev) => ({ ...prev, name: undefined }));
-            }}
-            placeholder='e.g., Mountain Bike 26"'
-            maxLength={100}
-            className={`${fieldClass} ${errors.name ? 'border-red-500' : ''}`}
-            style={inputStyle}
-          />
-          {errors.name && (
-            <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-              {errors.name}
-            </p>
+        <FormField label='Gear name' error={errors.name} required>
+          {(props) => (
+            <input
+              {...props}
+              type='text'
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearError('name');
+              }}
+              placeholder='e.g., Mountain Bike 26"'
+              maxLength={100}
+            />
           )}
-        </div>
+        </FormField>
 
-        {/* Description */}
-        <div>
-          <label
-            className='mb-1.5 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Description <span style={{ color: '#ef4444' }}>*</span>
-          </label>
-          <textarea
-            value={description}
-            onChange={(e) => {
-              setDescription(e.target.value);
-              if (errors.description)
-                setErrors((prev) => ({ ...prev, description: undefined }));
-            }}
-            rows={3}
-            maxLength={255}
-            placeholder='Describe the gear, its condition, and any special notes…'
-            className={`w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-colors resize-none ${errors.description ? 'border-red-500' : ''}`}
-            style={inputStyle}
-          />
-          {errors.description && (
-            <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-              {errors.description}
-            </p>
+        <FormField label='Description' error={errors.description} required>
+          {(props) => (
+            <textarea
+              {...props}
+              className={cn(props.className, 'resize-none')}
+              value={description}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                clearError('description');
+              }}
+              rows={3}
+              maxLength={255}
+              placeholder='Describe the gear, its condition, and any special notes…'
+            />
           )}
-        </div>
+        </FormField>
 
-        {/* Price + Stock */}
         <div className='grid gap-4 sm:grid-cols-2'>
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Price per Day (৳) <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type='number'
-              value={price}
-              onChange={(e) => {
-                setPrice(e.target.value);
-                if (errors.price)
-                  setErrors((prev) => ({ ...prev, price: undefined }));
-              }}
-              min='0.01'
-              step='0.01'
-              placeholder='25'
-              className={`${fieldClass} ${errors.price ? 'border-red-500' : ''}`}
-              style={inputStyle}
-            />
-            {errors.price && (
-              <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-                {errors.price}
-              </p>
+          <FormField label='Price per day (৳)' error={errors.price} required>
+            {(props) => (
+              <input
+                {...props}
+                type='number'
+                value={price}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  clearError('price');
+                }}
+                min='0.01'
+                step='0.01'
+                placeholder='25'
+              />
             )}
-          </div>
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Stock Quantity <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type='number'
-              value={stock}
-              onChange={(e) => {
-                setStock(e.target.value);
-                if (errors.stock)
-                  setErrors((prev) => ({ ...prev, stock: undefined }));
-              }}
-              min='0'
-              placeholder='1'
-              className={`${fieldClass} ${errors.stock ? 'border-red-500' : ''}`}
-              style={inputStyle}
-            />
-            {errors.stock && (
-              <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-                {errors.stock}
-              </p>
+          </FormField>
+
+          <FormField label='Stock quantity' error={errors.stock} required>
+            {(props) => (
+              <input
+                {...props}
+                type='number'
+                value={stock}
+                onChange={(e) => {
+                  setStock(e.target.value);
+                  clearError('stock');
+                }}
+                min='0'
+                placeholder='1'
+              />
             )}
-          </div>
+          </FormField>
         </div>
 
-        {/* Category */}
-        <div>
-          <label
-            className='mb-1.5 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Category <span style={{ color: '#ef4444' }}>*</span>
-          </label>
-          <select
-            value={categoryId}
-            onChange={(e) => {
-              setCategoryId(e.target.value);
-              if (errors.categoryId)
-                setErrors((prev) => ({ ...prev, categoryId: undefined }));
-            }}
-            className={`h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors ${errors.categoryId ? 'border-red-500' : ''}`}
-            style={inputStyle}
-          >
-            <option value=''>Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {errors.categoryId && (
-            <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-              {errors.categoryId}
-            </p>
+        <FormField label='Category' error={errors.categoryId} required>
+          {(props) => (
+            <select
+              {...props}
+              className={cn(props.className, 'h-11 cursor-pointer py-0')}
+              value={categoryId}
+              onChange={(e) => {
+                setCategoryId(e.target.value);
+                clearError('categoryId');
+              }}
+            >
+              <option value=''>Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           )}
-        </div>
+        </FormField>
 
-        {/* Image URL */}
-        <div>
-          <label
-            className='mb-1.5 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Image URL <span style={{ color: '#ef4444' }}>*</span>
-          </label>
-          <input
-            type='text'
-            value={images}
-            onChange={(e) => {
-              setImages(e.target.value);
-              if (errors.images)
-                setErrors((prev) => ({ ...prev, images: undefined }));
-            }}
-            placeholder='https://example.com/gear-image.jpg'
-            maxLength={255}
-            className={`${fieldClass} ${errors.images ? 'border-red-500' : ''}`}
-            style={inputStyle}
-          />
-          {errors.images && (
-            <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-              {errors.images}
-            </p>
+        <FormField
+          label='Image URL'
+          error={errors.images}
+          hint='Provide a direct link to the gear image.'
+          required
+        >
+          {(props) => (
+            <input
+              {...props}
+              type='url'
+              value={images}
+              onChange={(e) => {
+                setImages(e.target.value);
+                clearError('images');
+              }}
+              placeholder='https://example.com/gear-image.jpg'
+              maxLength={255}
+            />
           )}
-          <p
-            className='mt-1 text-xs'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            Provide a direct link to the gear image.
-          </p>
-        </div>
+        </FormField>
 
         {/* Active toggle */}
-        <div
-          className='flex flex-col gap-3 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-0'
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <div className='flex flex-col gap-3 rounded-control border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4'>
           <div>
-            <p
-              className='text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
+            <p className='text-sm font-semibold text-foreground'>
               Active Listing
             </p>
-            <p className='text-xs' style={{ color: 'var(--muted-foreground)' }}>
+            <p className='text-xs text-muted-foreground'>
               Customers can browse and rent this gear when active.
             </p>
           </div>
           <button
             type='button'
             onClick={() => setIsActive((v) => !v)}
-            className='relative cursor-pointer inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors'
-            style={{
-              backgroundColor: isActive ? 'var(--primary)' : 'var(--muted)',
-            }}
+            className={cn(
+              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors',
+              isActive ? 'bg-primary' : 'bg-muted',
+            )}
             role='switch'
             aria-checked={isActive}
+            aria-label='Active listing'
           >
             <span
-              className='inline-block h-4 w-4 transform rounded-full bg-white transition-transform'
-              style={{
-                transform: isActive
-                  ? 'translateX(1.375rem)'
-                  : 'translateX(0.25rem)',
-              }}
+              className={cn(
+                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                isActive ? 'translate-x-[1.375rem]' : 'translate-x-1',
+              )}
             />
           </button>
         </div>

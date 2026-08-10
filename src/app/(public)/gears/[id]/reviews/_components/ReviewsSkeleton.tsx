@@ -5,8 +5,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 function SummarySkeleton() {
   return (
     <div
-      className='mb-8 rounded-2xl border p-6'
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      className='mb-8 surface-card p-6'
     >
       <div className='flex flex-col gap-6 sm:flex-row sm:items-start'>
         <div className='flex flex-col items-center gap-2 sm:w-32 sm:shrink-0'>
@@ -31,8 +30,7 @@ function SummarySkeleton() {
 function ReviewCardSkeleton() {
   return (
     <div
-      className='rounded-2xl border p-5'
-      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+      className='surface-card p-5'
     >
       <div className='flex items-start justify-between gap-4'>
         <div className='flex items-center gap-3'>

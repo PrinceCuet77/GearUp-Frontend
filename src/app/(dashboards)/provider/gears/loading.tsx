@@ -14,11 +14,7 @@ export default function ProviderGearsLoading() {
 
       {/* Table Skeleton */}
       <div
-        className='rounded-xl border'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+        className='surface-card'
       >
         <TableSkeleton rows={5} cols={5} />
 

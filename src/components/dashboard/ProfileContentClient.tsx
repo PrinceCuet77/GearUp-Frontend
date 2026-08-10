@@ -2,15 +2,38 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Pencil, User as UserIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { FormField } from '@/components/ui/FormField';
 import { updateProfile } from '@/app/(dashboards)/customer/profile/_actions/updateProfile';
 import { useAuthStore } from '@/store/useAuthStore';
-import type { User } from '@/lib/types';
+import type { User, UserRole } from '@/lib/types';
 
 interface ProfileContentClientProps {
   user: User;
+}
+
+/** Roles map onto brand tones only — no extra colours enter the palette. */
+const ROLE_TONE: Record<UserRole, BadgeTone> = {
+  ADMIN: 'danger',
+  PROVIDER: 'secondary',
+  CUSTOMER: 'accent',
+};
+
+function getInitials(n?: string | null, e?: string) {
+  if (n)
+    return n
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase();
+  return (e?.[0] ?? 'U').toUpperCase();
 }
 
 export function ProfileContentClient({ user }: ProfileContentClientProps) {
@@ -20,6 +43,8 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
   const [name, setName] = useState(user.name ?? '');
   const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? '');
   const [saving, setSaving] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [previewFailed, setPreviewFailed] = useState(false);
 
   /* Track original values to detect changes */
   const originalName = user.name ?? '';
@@ -35,8 +60,16 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
     if (modalOpen) {
       setName(originalName);
       setAvatarUrl(originalAvatar);
+      setPreviewFailed(false);
     }
   }
+
+  const nameError =
+    name.trim().length > 100 ? 'Name must be 100 characters or fewer.' : undefined;
+  const avatarError =
+    avatarUrl.trim().length > 255
+      ? 'Avatar URL must be 255 characters or fewer.'
+      : undefined;
 
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
@@ -63,6 +96,7 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
       setUser(result.data);
       toast.success('Profile updated successfully.');
       setModalOpen(false);
+      setAvatarFailed(false);
       router.refresh();
     } else {
       toast.error(
@@ -73,40 +107,13 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
     setSaving(false);
   }, [name, avatarUrl, router, setUser]);
 
-  const inputStyle = {
-    backgroundColor: 'var(--input-bg)',
-    borderColor: 'var(--input-border)',
-    color: 'var(--foreground)',
-  };
-
-  const getInitials = (n?: string | null, e?: string) => {
-    if (n)
-      return n
-        .trim()
-        .split(/\s+/)
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join('')
-        .toUpperCase();
-    return (e?.[0] ?? 'U').toUpperCase();
-  };
-
   return (
     <div className='mx-auto max-w-2xl space-y-6'>
       {/* Profile info card */}
-      <div
-        className='rounded-xl border p-6'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
-      >
+      <div className='surface-card p-6'>
         <div className='mb-5 flex items-center gap-2'>
-          <UserIcon className='h-4 w-4' style={{ color: 'var(--primary)' }} />
-          <h2
-            className='text-base font-semibold'
-            style={{ color: 'var(--foreground)' }}
-          >
+          <UserIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+          <h2 className='text-base font-bold text-foreground'>
             Personal Information
           </h2>
         </div>
@@ -114,96 +121,72 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
         <div className='space-y-4'>
           {/* Avatar */}
           <div className='flex items-center gap-4'>
-            {user.avatarUrl ? (
-              <img
+            {user.avatarUrl && !avatarFailed ? (
+              <Image
                 src={user.avatarUrl}
-                alt={user.name ?? ''}
-                className='h-16 w-16 rounded-xl object-cover'
+                alt={user.name ?? 'Profile photo'}
+                width={64}
+                height={64}
+                className='h-16 w-16 rounded-control object-cover'
+                onError={() => setAvatarFailed(true)}
+                unoptimized
               />
             ) : (
-              <span
-                className='flex h-16 w-16 items-center justify-center rounded-xl text-lg font-bold text-white'
-                style={{ backgroundColor: 'var(--primary)' }}
-              >
+              <span className='flex h-16 w-16 items-center justify-center rounded-control bg-primary text-lg font-bold text-primary-foreground'>
                 {getInitials(user.name, user.email)}
               </span>
             )}
-            <div>
-              <p style={{ color: 'var(--foreground)' }}>
+            <div className='min-w-0'>
+              <p className='truncate font-semibold text-foreground'>
                 {user.name ?? 'No name set'}
               </p>
-              <p
-                className='text-xs'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
+              <p className='truncate text-xs text-muted-foreground'>
                 {user.email}
               </p>
-              <span
-                className='mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold'
-                style={{
-                  backgroundColor:
-                    user.role === 'ADMIN'
-                      ? 'rgba(239,68,68,0.12)'
-                      : user.role === 'PROVIDER'
-                        ? 'rgba(34,197,94,0.12)'
-                        : 'rgba(59,130,246,0.12)',
-                  color:
-                    user.role === 'ADMIN'
-                      ? '#dc2626'
-                      : user.role === 'PROVIDER'
-                        ? '#16a34a'
-                        : '#2563eb',
-                }}
+              <Badge
+                tone={ROLE_TONE[user.role] ?? 'neutral'}
+                size='sm'
+                className='mt-1.5'
               >
                 {user.role}
-              </span>
+              </Badge>
             </div>
           </div>
 
           {/* Read-only fields */}
           <div className='grid gap-4 sm:grid-cols-2'>
-            <div>
-              <label
-                className='mb-1.5 block text-sm font-medium'
-                style={{ color: 'var(--foreground)' }}
-              >
-                Email
-              </label>
-              <input
-                type='email'
-                value={user.email}
-                disabled
-                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60 cursor-not-allowed'
-                style={inputStyle}
-              />
-            </div>
-            <div>
-              <label
-                className='mb-1.5 block text-sm font-medium'
-                style={{ color: 'var(--foreground)' }}
-              >
-                Full Name
-              </label>
-              <input
-                type='text'
-                value={user.name ?? ''}
-                disabled
-                className='h-10 w-full rounded-lg border px-3 text-sm opacity-60 cursor-not-allowed'
-                style={inputStyle}
-              />
-            </div>
+            <FormField label='Email'>
+              {(props) => (
+                <input
+                  {...props}
+                  type='email'
+                  value={user.email}
+                  disabled
+                  className={`${props.className} cursor-not-allowed opacity-60`}
+                />
+              )}
+            </FormField>
+
+            <FormField label='Full name'>
+              {(props) => (
+                <input
+                  {...props}
+                  type='text'
+                  value={user.name ?? ''}
+                  disabled
+                  className={`${props.className} cursor-not-allowed opacity-60`}
+                />
+              )}
+            </FormField>
           </div>
 
           <div className='flex justify-end'>
-            <button
-              type='button'
+            <Button
               onClick={() => setModalOpen(true)}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors cursor-pointer'
-              style={{ backgroundColor: 'var(--primary)' }}
+              leadingIcon={<Pencil className='h-4 w-4' />}
             >
-              <Pencil className='h-4 w-4' />
               Update Profile
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -217,87 +200,69 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
         saveLabel='Save Changes'
         cancelLabel='Cancel'
         saving={saving}
-        saveDisabled={!hasChanges || saving}
+        saveDisabled={!hasChanges || Boolean(nameError || avatarError)}
         footerRight
       >
-        <div className='space-y-4'>
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Full Name
-            </label>
-            <input
-              type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='Your full name'
-              maxLength={100}
-              className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors focus:ring-2'
-              style={
-                {
-                  ...inputStyle,
-                  '--tw-ring-color': 'var(--ring)',
-                } as React.CSSProperties
-              }
-            />
-            <p
-              className='mt-1 text-right text-xs'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              {name.length}/100
-            </p>
-          </div>
-
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Avatar URL
-              <span
-                className='ml-1 text-xs font-normal'
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                (optional)
-              </span>
-            </label>
-            <input
-              type='url'
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder='https://example.com/avatar.jpg'
-              maxLength={255}
-              className='h-10 w-full rounded-lg border px-3 text-sm outline-none transition-colors'
-              style={inputStyle}
-            />
-            <p
-              className='mt-1 text-right text-xs'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              {avatarUrl.length}/255
-            </p>
-            {avatarUrl && (
-              <div className='mt-2 flex items-center gap-3'>
-                <img
-                  src={avatarUrl}
-                  alt='Avatar preview'
-                  className='h-10 w-10 rounded-lg object-cover'
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                <span
-                  className='text-xs'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Preview
-                </span>
-              </div>
+        <form
+          className='space-y-4'
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
+          }}
+        >
+          <FormField
+            label='Full name'
+            error={nameError}
+            hint={`${name.length}/100 characters`}
+          >
+            {(props) => (
+              <input
+                {...props}
+                type='text'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder='Your full name'
+                maxLength={100}
+              />
             )}
-          </div>
-        </div>
+          </FormField>
+
+          <FormField
+            label='Avatar URL'
+            error={avatarError}
+            hint={`Optional — ${avatarUrl.length}/255 characters`}
+          >
+            {(props) => (
+              <input
+                {...props}
+                type='url'
+                value={avatarUrl}
+                onChange={(e) => {
+                  setAvatarUrl(e.target.value);
+                  setPreviewFailed(false);
+                }}
+                placeholder='https://example.com/avatar.jpg'
+                maxLength={255}
+              />
+            )}
+          </FormField>
+
+          {avatarUrl && !previewFailed && (
+            <div className='flex items-center gap-3'>
+              <Image
+                src={avatarUrl}
+                alt='Avatar preview'
+                width={40}
+                height={40}
+                className='h-10 w-10 rounded-control object-cover'
+                onError={() => setPreviewFailed(true)}
+                unoptimized
+              />
+              <span className='text-xs text-muted-foreground'>Preview</span>
+            </div>
+          )}
+        </form>
       </Modal>
     </div>
   );

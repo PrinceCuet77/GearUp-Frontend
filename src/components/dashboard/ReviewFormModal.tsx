@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
 import Modal from '@/components/Modal';
+import { Button } from '@/components/ui/Button';
+import { FormField } from '@/components/ui/FormField';
+import { cn } from '@/lib/cn';
+
+const MAX_COMMENT = 100;
 
 interface ReviewFormModalProps {
   /** Whether the modal is open. */
@@ -25,32 +30,53 @@ interface ReviewFormModalProps {
   submitLabel?: string;
 }
 
-function StarRating({
+/**
+ * Interactive star picker. Rendered as a radio group so it is reachable and
+ * operable by keyboard, not just by mouse.
+ */
+function StarPicker({
   rating,
-  interactive = false,
   onChange,
 }: {
   rating: number;
-  interactive?: boolean;
-  onChange?: (r: number) => void;
+  onChange: (r: number) => void;
 }) {
   const [hover, setHover] = useState(0);
+  const shown = hover || rating;
 
   return (
-    <div className='flex items-center gap-0.5'>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          className={`h-5 w-5 ${interactive ? 'cursor-pointer' : ''}`}
-          style={{
-            color: i < (hover || rating) ? '#f59e0b' : 'var(--border)',
-            fill: i < (hover || rating) ? '#f59e0b' : 'transparent',
-          }}
-          onMouseEnter={() => interactive && setHover(i + 1)}
-          onMouseLeave={() => interactive && setHover(0)}
-          onClick={() => interactive && onChange?.(i + 1)}
-        />
-      ))}
+    <div
+      className='flex items-center gap-0.5'
+      role='radiogroup'
+      aria-label='Rating out of 5'
+    >
+      {Array.from({ length: 5 }).map((_, i) => {
+        const value = i + 1;
+        return (
+          <button
+            key={value}
+            type='button'
+            role='radio'
+            aria-checked={rating === value}
+            aria-label={`${value} star${value === 1 ? '' : 's'}`}
+            onMouseEnter={() => setHover(value)}
+            onMouseLeave={() => setHover(0)}
+            onClick={() => onChange(value)}
+            className='cursor-pointer rounded p-0.5'
+          >
+            <Star
+              className={cn(
+                'h-6 w-6 transition-colors',
+                value <= shown
+                  ? 'text-warning'
+                  : 'text-border-strong',
+              )}
+              fill='currentColor'
+              aria-hidden='true'
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -90,7 +116,7 @@ export function ReviewFormModal({
     rating >= 1 &&
     rating <= 5 &&
     comment.trim().length > 0 &&
-    comment.trim().length <= 100 &&
+    comment.trim().length <= MAX_COMMENT &&
     (isEditing ? hasChanges : true);
 
   const handleSubmit = async () => {
@@ -106,100 +132,69 @@ export function ReviewFormModal({
     if (result.success) {
       onSuccess({ rating, comment: comment.trim() });
       onClose();
-    } else {
-      // Error is expected to be handled by the parent (toast, etc.)
-      // We still close the modal on success, but keep it open on error
-      // so the user can retry. The parent's onSubmit should toast the error.
     }
+    // On failure the modal stays open so the user can retry; the parent's
+    // onSubmit is responsible for surfacing the error toast.
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={() => !saving && onClose()}
-      title={title}
-      noFooter
-    >
-      <div className='space-y-4'>
+    <Modal open={open} onClose={() => !saving && onClose()} title={title} noFooter>
+      <form
+        className='space-y-4'
+        noValidate
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         {/* Rating */}
         <div>
-          <label
-            className='mb-2 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Rating
-          </label>
-          <StarRating rating={rating} interactive onChange={setRating} />
-          {rating > 0 && (
-            <p
-              className='mt-1 text-xs'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              {rating}/5
-            </p>
-          )}
-        </div>
-
-        {/* Comment */}
-        <div>
-          <label
-            className='mb-2 block text-sm font-medium'
-            style={{ color: 'var(--foreground)' }}
-          >
-            Comment
-          </label>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={3}
-            maxLength={100}
-            placeholder='Share your experience with this gear...'
-            className='w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary'
-            style={{
-              backgroundColor: 'var(--background)',
-              borderColor: 'var(--border)',
-              color: 'var(--foreground)',
-            }}
-          />
-          <p
-            className='mt-1 text-xs'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
-            {comment.length}/100 characters
+          <span className='field-label'>Rating</span>
+          <StarPicker rating={rating} onChange={setRating} />
+          <p className='field-hint' aria-live='polite'>
+            {rating > 0 ? `${rating}/5 selected` : 'Select a rating'}
           </p>
         </div>
 
+        {/* Comment */}
+        <FormField
+          label='Comment'
+          hint={`${comment.length}/${MAX_COMMENT} characters`}
+          required
+        >
+          {(props) => (
+            <textarea
+              {...props}
+              className={cn(props.className, 'resize-none')}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={3}
+              maxLength={MAX_COMMENT}
+              placeholder='Share your experience with this gear…'
+            />
+          )}
+        </FormField>
+
         {/* Actions */}
         <div className='flex justify-end gap-3'>
-          <button
+          <Button
+            type='button'
+            variant='outline'
             onClick={() => !saving && onClose()}
             disabled={saving}
-            className='cursor-pointer rounded-lg border px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50'
-            style={{
-              borderColor: 'var(--border)',
-              color: 'var(--foreground)',
-              backgroundColor: 'transparent',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--muted)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
           >
             Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={saving || !canSubmit}
-            className='inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50'
-            style={{ backgroundColor: 'var(--primary)' }}
+          </Button>
+          <Button
+            type='submit'
+            disabled={!canSubmit}
+            loading={saving}
+            loadingText='Saving…'
           >
-            {saving && <Loader2 className='h-4 w-4 animate-spin' />}
             {submitLabel}
-          </button>
+          </Button>
         </div>
-      </div>
+      </form>
     </Modal>
   );
 }

@@ -140,11 +140,7 @@ export default async function OrderDetailPage({ params }: Props) {
       <div className='grid gap-4 sm:grid-cols-2'>
         {/* Rental period */}
         <div
-          className='rounded-xl border p-5'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='surface-card p-5'
         >
           <div className='mb-3 flex items-center gap-2'>
             <Calendar className='h-4 w-4' style={{ color: 'var(--primary)' }} />
@@ -180,14 +176,10 @@ export default async function OrderDetailPage({ params }: Props) {
 
         {/* Amount */}
         <div
-          className='rounded-xl border p-5'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='surface-card p-5'
         >
           <div className='mb-3 flex items-center gap-2'>
-            <CreditCard className='h-4 w-4' style={{ color: '#7c3aed' }} />
+            <CreditCard className='h-4 w-4 text-accent' />
             <h2
               className='text-sm font-semibold'
               style={{ color: 'var(--foreground)' }}
@@ -216,11 +208,7 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* Items */}
       {order.items && order.items.length > 0 && (
         <div
-          className='mt-4 rounded-xl border'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='mt-4 surface-card'
         >
           <div
             className='flex items-center gap-2 border-b px-5 py-4'
@@ -339,17 +327,13 @@ export default async function OrderDetailPage({ params }: Props) {
       {/* Payment History */}
       {order.payments && order.payments.length > 0 && (
         <div
-          className='mt-4 rounded-xl border'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='mt-4 surface-card'
         >
           <div
             className='flex items-center gap-2 border-b px-5 py-4'
             style={{ borderColor: 'var(--border)' }}
           >
-            <Receipt className='h-4 w-4' style={{ color: '#7c3aed' }} />
+            <Receipt className='h-4 w-4 text-accent' />
             <h2
               className='text-sm font-semibold'
               style={{ color: 'var(--foreground)' }}
@@ -402,11 +386,7 @@ export default async function OrderDetailPage({ params }: Props) {
         <OrderReviews reviews={order.reviews} />
       ) : (
         <div
-          className='mt-4 rounded-xl border'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
+          className='mt-4 surface-card'
         >
           <div
             className='flex items-center gap-2 border-b px-5 py-4'

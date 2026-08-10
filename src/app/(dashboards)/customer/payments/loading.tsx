@@ -20,11 +20,7 @@ export default function PaymentsLoading() {
 
       {/* Table skeleton — matches PaymentsTable structure */}
       <div
-        className='overflow-hidden rounded-xl border'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+        className='overflow-hidden surface-card'
       >
         {/* Table header */}
         <div

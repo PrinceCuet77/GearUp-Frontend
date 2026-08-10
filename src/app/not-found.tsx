@@ -16,11 +16,11 @@ export default function NotFound() {
           404
         </span>
         <div className='absolute inset-0 flex items-center justify-center'>
-          <div
-            className='flex h-20 w-20 items-center justify-center rounded-3xl shadow-lg'
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
-            <Compass className='h-10 w-10 text-white' />
+          <div className='flex h-20 w-20 items-center justify-center rounded-3xl bg-primary shadow-lg'>
+            <Compass
+              className='h-10 w-10 text-primary-foreground'
+              aria-hidden='true'
+            />
           </div>
         </div>
       </div>
@@ -44,20 +44,14 @@ export default function NotFound() {
       <div className='flex flex-wrap items-center justify-center gap-3'>
         <Link
           href='/'
-          className='inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:opacity-90'
-          style={{ backgroundColor: 'var(--primary)' }}
+          className='inline-flex items-center gap-2 rounded-control bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition-opacity hover:opacity-90'
         >
           <ArrowLeft className='h-4 w-4' />
           Back to Home
         </Link>
         <Link
           href='/gears'
-          className='inline-flex items-center gap-2 rounded-xl border px-6 py-3 text-sm font-semibold transition-colors hover:opacity-80'
-          style={{
-            borderColor: 'var(--border)',
-            color: 'var(--foreground)',
-            backgroundColor: 'var(--card)',
-          }}
+          className='inline-flex items-center gap-2 surface-card px-6 py-3 text-sm font-semibold transition-colors hover:opacity-80'
         >
           <Search className='h-4 w-4' />
           Browse Gear

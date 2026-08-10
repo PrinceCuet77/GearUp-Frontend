@@ -6,17 +6,19 @@
  * Layout:
  *   Header  – title (left) + × close button (right)
  *   Body    – scrollable children
- *   Footer  – [Cancel] [Save] buttons on the LEFT (per spec)
+ *   Footer  – [Cancel] [Save] buttons
  *
  * Features:
- *   • Blur backdrop (`backdrop-blur-sm`)
+ *   • Blur backdrop over the themed `--overlay` scrim
  *   • Click outside → close
  *   • Escape key → close
  *   • Body-scroll lock while open
+ *   • Labelled by its own title for screen readers
  */
 
-import { useEffect, useRef, type ReactNode } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 
 interface ModalProps {
   open: boolean;
@@ -58,6 +60,7 @@ export default function Modal({
   footerRight = false,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -84,7 +87,7 @@ export default function Modal({
   return (
     <div
       className='fixed inset-0 z-50 flex items-center justify-center p-4'
-      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      style={{ backgroundColor: 'var(--overlay)' }}
       onMouseDown={(e) => {
         // Close only when clicking the backdrop itself
         if (e.target === e.currentTarget && !saving) onClose();
@@ -96,23 +99,15 @@ export default function Modal({
       {/* Panel */}
       <div
         ref={panelRef}
-        className={`relative z-10 flex w-full ${maxWidth} flex-col rounded-2xl shadow-2xl`}
-        style={{
-          backgroundColor: 'var(--card)',
-          border: '1px solid var(--border)',
-          maxHeight: '90vh',
-        }}
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby={title ? titleId : undefined}
+        className={`surface-card relative z-10 flex max-h-[90vh] w-full ${maxWidth} flex-col shadow-xl`}
       >
         {/* Header */}
-        <div
-          className='flex shrink-0 items-center justify-between gap-4 border-b px-6 py-4'
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <div className='flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-4'>
           {title ? (
-            <h2
-              className='text-base font-semibold'
-              style={{ color: 'var(--foreground)' }}
-            >
+            <h2 id={titleId} className='text-base font-bold text-foreground'>
               {title}
             </h2>
           ) : (
@@ -121,18 +116,7 @@ export default function Modal({
           <button
             onClick={() => !saving && onClose()}
             aria-label='Close modal'
-            className='cursor-pointer ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors'
-            style={{ color: 'var(--muted-foreground)' }}
-            onMouseEnter={(e) => {
-              const btn = e.currentTarget;
-              btn.style.backgroundColor = 'var(--muted)';
-              btn.style.color = 'var(--foreground)';
-            }}
-            onMouseLeave={(e) => {
-              const btn = e.currentTarget;
-              btn.style.backgroundColor = 'transparent';
-              btn.style.color = 'var(--muted-foreground)';
-            }}
+            className='ml-auto flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-control text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'
           >
             <X className='h-4 w-4' />
           </button>
@@ -144,50 +128,27 @@ export default function Modal({
         {/* Footer */}
         {!noFooter && (
           <div
-            className={`flex shrink-0 items-center gap-3 border-t px-6 py-4 ${footerRight ? 'justify-end' : ''}`}
-            style={{ borderColor: 'var(--border)' }}
+            className={`flex shrink-0 items-center gap-3 border-t border-border px-6 py-4 ${footerRight ? 'justify-end' : ''}`}
           >
-            <button
+            <Button
+              variant='outline'
+              size='md'
               onClick={() => !saving && onClose()}
               disabled={saving}
-              className='cursor-pointer rounded-lg border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50'
-              style={{
-                borderColor: 'var(--border)',
-                color: 'var(--foreground)',
-                backgroundColor: 'transparent',
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  'var(--muted)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                  'transparent';
-              }}
             >
               {cancelLabel}
-            </button>
+            </Button>
 
             {onSave && (
-              <button
+              <Button
+                variant='primary'
+                size='md'
                 onClick={onSave}
-                disabled={saving || saveDisabled}
-                className='cursor-pointer flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60'
-                style={{ backgroundColor: 'var(--primary)' }}
-                onMouseEnter={(e) => {
-                  if (!saving && !saveDisabled)
-                    (
-                      e.currentTarget as HTMLButtonElement
-                    ).style.backgroundColor = 'var(--primary-hover)';
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor =
-                    'var(--primary)';
-                }}
+                disabled={saveDisabled}
+                loading={saving}
               >
-                {saving && <Loader2 className='h-3.5 w-3.5 animate-spin' />}
                 {saveLabel}
-              </button>
+              </Button>
             )}
           </div>
         )}

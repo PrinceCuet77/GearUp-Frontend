@@ -175,45 +175,43 @@ export function GearGridSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
+/** Mirrors `GearFilters` group-for-group, including the category chip row. */
 export function GearFiltersSkeleton() {
+  const chipWidths = ['w-12', 'w-20', 'w-16', 'w-24', 'w-14'];
+
   return (
     <div className='space-y-6'>
       {/* Search */}
       <div>
         <Skeleton className='mb-2 h-3 w-16' />
-        <Skeleton className='h-9 w-full rounded-lg' />
+        <Skeleton className='h-10 w-full rounded-control' />
       </div>
 
-      {/* Categories */}
+      {/* Categories — chips, matching the real filter */}
       <div>
         <Skeleton className='mb-2 h-3 w-20' />
-        <div className='space-y-2'>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className='flex items-center gap-2'>
-              <Skeleton className='h-4 w-4 rounded' />
-              <Skeleton className='h-4 w-24' />
-            </div>
+        <div className='flex flex-wrap gap-2'>
+          {chipWidths.map((width, i) => (
+            <Skeleton key={i} className={`h-6 rounded-full ${width}`} />
           ))}
         </div>
       </div>
 
       {/* Price range */}
       <div>
-        <Skeleton className='mb-2 h-3 w-24' />
-        <div className='flex gap-2'>
-          <Skeleton className='h-9 w-full rounded-lg' />
-          <Skeleton className='h-9 w-full rounded-lg' />
+        <Skeleton className='mb-2 h-3 w-28' />
+        <div className='flex items-center gap-2'>
+          <Skeleton className='h-10 flex-1 rounded-control' />
+          <Skeleton className='h-3 w-2' />
+          <Skeleton className='h-10 flex-1 rounded-control' />
         </div>
       </div>
 
       {/* Sort */}
       <div>
         <Skeleton className='mb-2 h-3 w-14' />
-        <Skeleton className='h-9 w-full rounded-lg' />
+        <Skeleton className='h-10 w-full rounded-control' />
       </div>
-
-      {/* Reset */}
-      <Skeleton className='h-9 w-full rounded-control' />
     </div>
   );
 }

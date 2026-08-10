@@ -142,11 +142,7 @@ export default function GearReviewsPage({ params }: Props) {
             {/* Summary card – only when there are reviews on the current page */}
             {total > 0 && (
               <div
-                className='mb-8 rounded-2xl border p-6'
-                style={{
-                  backgroundColor: 'var(--card)',
-                  borderColor: 'var(--border)',
-                }}
+                className='mb-8 surface-card p-6'
               >
                 <div className='flex flex-col gap-6 sm:flex-row sm:items-start'>
                   <div className='flex flex-col items-center text-center sm:w-32 sm:shrink-0'>
@@ -210,18 +206,11 @@ export default function GearReviewsPage({ params }: Props) {
                     {reviews.map((review) => (
                       <div
                         key={review.id}
-                        className='rounded-2xl border p-5'
-                        style={{
-                          backgroundColor: 'var(--card)',
-                          borderColor: 'var(--border)',
-                        }}
+                        className='surface-card p-5'
                       >
                         <div className='flex items-start justify-between gap-4'>
                           <div className='flex items-center gap-3'>
-                            <div
-                              className='flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white'
-                              style={{ backgroundColor: '#f97316' }}
-                            >
+                            <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary-soft-foreground'>
                               {(review.customer?.name ??
                                 review.customerId)[0].toUpperCase()}
                             </div>
@@ -242,14 +231,7 @@ export default function GearReviewsPage({ params }: Props) {
                           </div>
                           <div className='flex items-center gap-2'>
                             <StarRating rating={review.rating} />
-                            <span
-                              className='rounded-full px-2 py-0.5 text-xs font-bold'
-                              style={{
-                                backgroundColor:
-                                  'color-mix(in srgb, #f59e0b 15%, transparent)',
-                                color: '#b45309',
-                              }}
-                            >
+                            <span className='rounded-full bg-warning-soft px-2 py-0.5 text-xs font-bold text-warning-soft-foreground'>
                               {review.rating}/5
                             </span>
                           </div>

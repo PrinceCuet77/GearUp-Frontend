@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { ReviewFormModal } from '@/components/dashboard/ReviewFormModal';
+import { Button } from '@/components/ui/Button';
 import { createReview } from '../_actions/createReview';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { Review } from '@/lib/types';
@@ -57,20 +58,12 @@ export function WriteReviewButton({
   return (
     <>
       {/* Trigger button */}
-      <button
+      <Button
         onClick={() => setModalOpen(true)}
-        className='inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors'
-        style={{ backgroundColor: 'var(--primary)' }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.9';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
+        leadingIcon={<Star className='h-4 w-4' />}
       >
-        <Star className='h-4 w-4' />
         Add Review
-      </button>
+      </Button>
 
       {/* Review form modal */}
       <ReviewFormModal

@@ -14,8 +14,7 @@ export default function AdminUsersLoading() {
 
       {/* Search / filters bar skeleton */}
       <div
-        className='mb-4 flex flex-wrap items-center gap-3 rounded-xl border p-4'
-        style={{ borderColor: 'var(--border)', backgroundColor: 'var(--card)' }}
+        className='mb-4 flex flex-wrap items-center gap-3 surface-card p-4'
       >
         <Skeleton className='h-10 w-64 rounded-lg' />
         <Skeleton className='h-10 w-32 rounded-lg' />
@@ -24,11 +23,7 @@ export default function AdminUsersLoading() {
 
       {/* Table skeleton */}
       <div
-        className='overflow-hidden rounded-xl border'
-        style={{
-          borderColor: 'var(--border)',
-          backgroundColor: 'var(--card)',
-        }}
+        className='overflow-hidden surface-card'
       >
         {/* Header row */}
         <div

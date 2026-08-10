@@ -1,120 +1,79 @@
 import type { RentalStatus, PaymentStatus, UserStatus } from '@/lib/types';
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
 
+/**
+ * Status → tone maps. Tones resolve to the brand/state token pairs, which are
+ * declared in both themes, so every badge keeps its contrast in dark mode.
+ *
+ * Lifecycle: PLACED → CONFIRMED → PAID → PICKED_UP → RETURNED
+ */
 const RENTAL_STATUS: Record<
   RentalStatus,
-  { label: string; bg: string; color: string }
+  { label: string; tone: BadgeTone }
 > = {
-  PLACED: {
-    label: 'Placed',
-    bg: 'rgba(251,191,36,0.14)',
-    color: '#b45309',
-  },
-  CONFIRMED: {
-    label: 'Confirmed',
-    bg: 'rgba(59,130,246,0.14)',
-    color: '#2563eb',
-  },
-  PAID: {
-    label: 'Paid',
-    bg: 'rgba(139,92,246,0.14)',
-    color: '#7c3aed',
-  },
-  PICKED_UP: {
-    label: 'Picked Up',
-    bg: 'rgba(34,197,94,0.14)',
-    color: '#16a34a',
-  },
-  RETURNED: {
-    label: 'Returned',
-    bg: 'rgba(100,116,139,0.14)',
-    color: '#475569',
-  },
-  CANCELLED: {
-    label: 'Cancelled',
-    bg: 'rgba(239,68,68,0.14)',
-    color: '#dc2626',
-  },
+  PLACED: { label: 'Placed', tone: 'warning' },
+  CONFIRMED: { label: 'Confirmed', tone: 'accent' },
+  PAID: { label: 'Paid', tone: 'secondary' },
+  PICKED_UP: { label: 'Picked Up', tone: 'primary' },
+  RETURNED: { label: 'Returned', tone: 'neutral' },
+  CANCELLED: { label: 'Cancelled', tone: 'danger' },
 };
 
 const PAYMENT_STATUS: Record<
   PaymentStatus,
-  { label: string; bg: string; color: string }
+  { label: string; tone: BadgeTone }
 > = {
-  PENDING: {
-    label: 'Pending',
-    bg: 'rgba(251,191,36,0.14)',
-    color: '#b45309',
-  },
-  COMPLETED: {
-    label: 'Success',
-    bg: 'rgba(34,197,94,0.14)',
-    color: '#16a34a',
-  },
-  FAILED: {
-    label: 'Failed',
-    bg: 'rgba(239,68,68,0.14)',
-    color: '#dc2626',
-  },
+  PENDING: { label: 'Pending', tone: 'warning' },
+  COMPLETED: { label: 'Success', tone: 'secondary' },
+  FAILED: { label: 'Failed', tone: 'danger' },
 };
 
-const USER_STATUS: Record<
-  UserStatus,
-  { label: string; bg: string; color: string }
-> = {
-  ACTIVE: {
-    label: 'Active',
-    bg: 'rgba(34,197,94,0.14)',
-    color: '#16a34a',
-  },
-  SUSPENDED: {
-    label: 'Suspended',
-    bg: 'rgba(239,68,68,0.14)',
-    color: '#dc2626',
-  },
+const USER_STATUS: Record<UserStatus, { label: string; tone: BadgeTone }> = {
+  ACTIVE: { label: 'Active', tone: 'secondary' },
+  SUSPENDED: { label: 'Suspended', tone: 'danger' },
 };
-
-function Badge({
-  label,
-  bg,
-  color,
-}: {
-  label: string;
-  bg: string;
-  color: string;
-}) {
-  return (
-    <span
-      className='inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold'
-      style={{ backgroundColor: bg, color }}
-    >
-      {label}
-    </span>
-  );
-}
 
 export function RentalStatusBadge({ status }: { status: RentalStatus }) {
   const cfg = RENTAL_STATUS[status] ?? {
     label: status,
-    bg: 'var(--muted)',
-    color: 'var(--muted-foreground)',
+    tone: 'neutral' as const,
   };
-  return <Badge {...cfg} />;
+  return (
+    <Badge tone={cfg.tone} size='sm'>
+      {cfg.label}
+    </Badge>
+  );
 }
 
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   const cfg = PAYMENT_STATUS[status] ?? {
     label: status,
-    bg: 'var(--muted)',
-    color: 'var(--muted-foreground)',
+    tone: 'neutral' as const,
   };
-  return <Badge {...cfg} />;
+  return (
+    <Badge tone={cfg.tone} size='sm'>
+      {cfg.label}
+    </Badge>
+  );
+}
+
+/** Active/inactive state of a gear listing, shared by every gear table. */
+export function GearStatusBadge({ isActive }: { isActive: boolean }) {
+  return (
+    <Badge tone={isActive ? 'secondary' : 'neutral'} size='sm'>
+      {isActive ? 'Active' : 'Inactive'}
+    </Badge>
+  );
 }
 
 export function UserStatusBadge({ status }: { status: UserStatus }) {
   const cfg = USER_STATUS[status] ?? {
     label: status,
-    bg: 'var(--muted)',
-    color: 'var(--muted-foreground)',
+    tone: 'neutral' as const,
   };
-  return <Badge {...cfg} />;
+  return (
+    <Badge tone={cfg.tone} size='sm'>
+      {cfg.label}
+    </Badge>
+  );
 }

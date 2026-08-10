@@ -1,18 +1,29 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Loader2, Lock, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { changePassword } from '@/app/(dashboards)/customer/change-password/_actions/passwordChange';
+import { Button } from '@/components/ui/Button';
+import { FormField, PasswordInput } from '@/components/ui/FormField';
+
+const MIN_LENGTH = 6;
 
 export function ChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [succeeded, setSucceeded] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const canSubmit = currentPassword.length > 0 && newPassword.length >= 6;
+  // Only surface the length error once the user has typed something.
+  const newPasswordError =
+    newPassword.length > 0 && newPassword.length < MIN_LENGTH
+      ? `Password must be at least ${MIN_LENGTH} characters.`
+      : undefined;
+
+  const canSubmit =
+    currentPassword.length > 0 && newPassword.length >= MIN_LENGTH;
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -20,6 +31,8 @@ export function ChangePasswordForm() {
       if (!canSubmit) return;
 
       setSaving(true);
+      setSucceeded(false);
+      setFormError(null);
 
       try {
         const result = await changePassword({
@@ -29,13 +42,18 @@ export function ChangePasswordForm() {
 
         if (result.success) {
           toast.success('Password changed successfully.');
+          setSucceeded(true);
           setCurrentPassword('');
           setNewPassword('');
         } else {
-          toast.error(result.error || 'Failed to change password.');
+          const message = result.error || 'Failed to change password.';
+          setFormError(message);
+          toast.error(message);
         }
       } catch {
-        toast.error('An unexpected error occurred. Please try again.');
+        const message = 'An unexpected error occurred. Please try again.';
+        setFormError(message);
+        toast.error(message);
       } finally {
         setSaving(false);
       }
@@ -43,124 +61,84 @@ export function ChangePasswordForm() {
     [canSubmit, currentPassword, newPassword],
   );
 
-  const inputStyle = {
-    backgroundColor: 'var(--input-bg)',
-    borderColor: 'var(--input-border)',
-    color: 'var(--foreground)',
-  };
-
   return (
     <div className='mx-auto max-w-2xl'>
-      <div
-        className='rounded-xl border p-6'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
-      >
+      <div className='surface-card p-6'>
         <div className='mb-5 flex items-center gap-2'>
-          <Lock className='h-4 w-4' style={{ color: 'var(--primary)' }} />
-          <h2
-            className='text-base font-semibold'
-            style={{ color: 'var(--foreground)' }}
-          >
+          <Lock className='h-4 w-4 text-primary' aria-hidden='true' />
+          <h2 className='text-base font-bold text-foreground'>
             Update Password
           </h2>
         </div>
 
-        <form onSubmit={handleSubmit} className='space-y-4'>
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Current Password
-            </label>
-            <div className='relative'>
-              <input
-                type={showCurrentPassword ? 'text' : 'password'}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                className='h-10 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors focus:ring-2'
-                style={
-                  {
-                    ...inputStyle,
-                    '--tw-ring-color': 'var(--ring)',
-                  } as React.CSSProperties
-                }
-                placeholder='Enter your current password'
-              />
-              <button
-                type='button'
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer'
-              >
-                {showCurrentPassword ? (
-                  <EyeOff className='h-4 w-4' />
-                ) : (
-                  <Eye className='h-4 w-4' />
-                )}
-              </button>
-            </div>
-          </div>
+        {succeeded && (
+          <p
+            role='status'
+            className='mb-5 flex items-center gap-2 rounded-control border border-secondary/40 bg-secondary-soft px-4 py-3 text-sm font-medium text-secondary-soft-foreground'
+          >
+            <CheckCircle2 className='h-4 w-4 shrink-0' aria-hidden='true' />
+            Your password has been updated.
+          </p>
+        )}
 
-          <div>
-            <label
-              className='mb-1.5 block text-sm font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              New Password
-            </label>
-            <div className='relative'>
-              <input
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+        {formError && (
+          <p
+            role='alert'
+            className='mb-5 rounded-control border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground'
+          >
+            {formError}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className='space-y-4' noValidate>
+          <FormField label='Current password' required>
+            {(props) => (
+              <PasswordInput
+                {...props}
+                value={currentPassword}
+                onChange={(e) => {
+                  setCurrentPassword(e.target.value);
+                  setSucceeded(false);
+                }}
+                autoComplete='current-password'
+                placeholder='Enter your current password'
                 required
-                minLength={6}
-                className='h-10 w-full rounded-lg border px-3 pr-10 text-sm outline-none transition-colors focus:ring-2'
-                style={
-                  {
-                    ...inputStyle,
-                    '--tw-ring-color': 'var(--ring)',
-                  } as React.CSSProperties
-                }
-                placeholder='Minimum 6 characters'
               />
-              <button
-                type='button'
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 cursor-pointer'
-              >
-                {showNewPassword ? (
-                  <EyeOff className='h-4 w-4' />
-                ) : (
-                  <Eye className='h-4 w-4' />
-                )}
-              </button>
-            </div>
-            {newPassword.length > 0 && newPassword.length < 6 && (
-              <p className='mt-1 text-xs' style={{ color: '#ef4444' }}>
-                Password must be at least 6 characters.
-              </p>
             )}
-          </div>
+          </FormField>
+
+          <FormField
+            label='New password'
+            error={newPasswordError}
+            hint={`Minimum ${MIN_LENGTH} characters.`}
+            required
+          >
+            {(props) => (
+              <PasswordInput
+                {...props}
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  setSucceeded(false);
+                }}
+                autoComplete='new-password'
+                placeholder={`Minimum ${MIN_LENGTH} characters`}
+                minLength={MIN_LENGTH}
+                required
+              />
+            )}
+          </FormField>
 
           <div className='flex justify-end'>
-            <button
+            <Button
               type='submit'
-              disabled={!canSubmit || saving}
-              className='inline-flex h-10 items-center gap-2 rounded-lg px-5 text-sm font-semibold text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer'
-              style={{ backgroundColor: 'var(--primary)' }}
+              disabled={!canSubmit}
+              loading={saving}
+              loadingText='Updating…'
+              leadingIcon={<Lock className='h-4 w-4' />}
             >
-              {saving ? (
-                <Loader2 className='h-4 w-4 animate-spin' />
-              ) : (
-                <Lock className='h-4 w-4' />
-              )}
               Update Password
-            </button>
+            </Button>
           </div>
         </form>
       </div>

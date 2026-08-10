@@ -13,11 +13,7 @@ export function ProfileSkeleton() {
 
       {/* Profile info card */}
       <div
-        className='mx-auto max-w-2xl rounded-xl border p-6'
-        style={{
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+        className='mx-auto max-w-2xl surface-card p-6'
       >
         <div className='mb-5 flex items-center gap-2'>
           <Skeleton className='h-4 w-4 rounded' />

@@ -6,6 +6,9 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import Modal from '@/components/Modal';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { FormField } from '@/components/ui/FormField';
 import type { Category } from '@/lib/types';
 import {
   createCategorySchema,
@@ -111,17 +114,19 @@ export function CategoriesContent({
     setSaving(false);
   };
 
-  const inputStyle = {
-    backgroundColor: 'var(--input-bg)',
-    borderColor: 'var(--input-border)',
-    color: 'var(--foreground)',
-  };
-
   return (
     <div>
       <PageHeader
         title='Categories'
         description={`${categories.length} gear categor${categories.length !== 1 ? 'ies' : 'y'}`}
+        action={
+          <Button
+            onClick={openCreate}
+            leadingIcon={<PlusCircle className='h-4 w-4' />}
+          >
+            New Category
+          </Button>
+        }
       />
 
       {error && (
@@ -141,129 +146,93 @@ export function CategoriesContent({
         saveLabel={editingId ? 'Update' : 'Create'}
         footerRight
       >
-        <div className='flex flex-col gap-4'>
-          <div>
-            <label
-              className='mb-1.5 block text-xs font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Name <span style={{ color: '#ef4444' }}>*</span>
-            </label>
-            <input
-              type='text'
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder='e.g., Cycling'
-              className='h-9 w-full rounded-lg border px-3 text-sm outline-none'
-              style={{
-                ...inputStyle,
-                borderColor: errors.name ? '#ef4444' : 'var(--input-border)',
-              }}
-            />
-            {errors.name && (
-              <p className='mt-1 text-xs text-red-500'>{errors.name}</p>
-            )}
-          </div>
-          <div>
-            <label
-              className='mb-1.5 block text-xs font-medium'
-              style={{ color: 'var(--foreground)' }}
-            >
-              Description
-            </label>
-            <input
-              type='text'
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder='Short description (optional)'
-              className='h-9 w-full rounded-lg border px-3 text-sm outline-none'
-              style={{
-                ...inputStyle,
-                borderColor: errors.description
-                  ? '#ef4444'
-                  : 'var(--input-border)',
-              }}
-            />
-            {errors.description && (
-              <p className='mt-1 text-xs text-red-500'>{errors.description}</p>
-            )}
-          </div>
-        </div>
-      </Modal>
-
-      <div className='flex flex-col gap-4'>
-        {/* Add button – bottom-right */}
-        <div className='flex justify-end'>
-          <button
-            onClick={openCreate}
-            className='inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition-colors cursor-pointer'
-            style={{ backgroundColor: 'var(--primary)' }}
-          >
-            <PlusCircle className='h-4 w-4' />
-            New Category
-          </button>
-        </div>
-
-        <div
-          className='rounded-xl border'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
+        <form
+          className='flex flex-col gap-4'
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSave();
           }}
         >
-          {categories.length === 0 ? (
-            <div className='flex flex-col items-center justify-center py-20'>
-              <Tag
-                className='mb-3 h-10 w-10 opacity-30'
-                style={{ color: 'var(--muted-foreground)' }}
+          <FormField label='Name' error={errors.name} required>
+            {(props) => (
+              <input
+                {...props}
+                type='text'
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder='e.g., Cycling'
+                maxLength={100}
               />
-              <p
-                className='text-sm font-medium'
-                style={{ color: 'var(--muted-foreground)' }}
+            )}
+          </FormField>
+
+          <FormField
+            label='Description'
+            error={errors.description}
+            hint='Optional — shown to customers when browsing.'
+          >
+            {(props) => (
+              <input
+                {...props}
+                type='text'
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder='Short description (optional)'
+                maxLength={255}
+              />
+            )}
+          </FormField>
+        </form>
+      </Modal>
+
+      {categories.length === 0 ? (
+        <EmptyState
+          icon={Tag}
+          title='No categories yet'
+          description='Create your first gear category so providers can list their equipment under it.'
+          action={
+            <Button
+              onClick={openCreate}
+              size='sm'
+              leadingIcon={<PlusCircle className='h-3.5 w-3.5' />}
+            >
+              New Category
+            </Button>
+          }
+        />
+      ) : (
+        <div className='surface-card overflow-hidden'>
+          <ul className='divide-y divide-border'>
+            {categories.map((cat) => (
+              <li
+                key={cat.id}
+                className='flex items-center justify-between gap-4 px-5 py-4'
               >
-                No categories yet
-              </p>
-            </div>
-          ) : (
-            <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
-              {categories.map((cat) => (
-                <li
-                  key={cat.id}
-                  className='flex items-center justify-between px-5 py-4'
-                >
-                  <div>
-                    <p
-                      className='text-sm font-semibold'
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {cat.name}
+                <div className='min-w-0'>
+                  <p className='text-sm font-semibold text-foreground'>
+                    {cat.name}
+                  </p>
+                  {cat.description && (
+                    <p className='mt-0.5 text-xs text-muted-foreground'>
+                      {cat.description}
                     </p>
-                    {cat.description && (
-                      <p
-                        className='mt-0.5 text-xs'
-                        style={{ color: 'var(--muted-foreground)' }}
-                      >
-                        {cat.description}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => openEdit(cat)}
-                    className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors'
-                    style={{
-                      backgroundColor: 'var(--muted)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    <Pencil className='h-3 w-3' />
-                    Edit
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+                  )}
+                </div>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => openEdit(cat)}
+                  leadingIcon={<Pencil className='h-3 w-3' />}
+                  aria-label={`Edit ${cat.name}`}
+                >
+                  Edit
+                </Button>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
     </div>
   );
 }

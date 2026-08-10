@@ -97,8 +97,7 @@ export function PaymentsTable({
 
       {/* Table */}
       <div
-        className='rounded-xl border'
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className='surface-card'
       >
         {payments.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20'>

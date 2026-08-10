@@ -6,7 +6,6 @@ import {
   Trash2,
   Loader2,
   Eye,
-  Star,
   ChevronLeft,
   ChevronRight,
   Package,
@@ -18,6 +17,9 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { deleteGear } from '../_actions/deleteGear';
 import Modal from '@/components/Modal';
+import { Badge } from '@/components/ui/Badge';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Rating } from '@/components/ui/Rating';
 import type { GearItem } from '@/lib/types';
 import {
   parseGearImages,
@@ -125,11 +127,8 @@ export function GearActions({
         <button
           onClick={() => setConfirmDelete(true)}
           disabled={deleting}
-          className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors disabled:opacity-50'
-          style={{
-            backgroundColor: 'rgba(239,68,68,0.08)',
-            color: '#ef4444',
-          }}
+          aria-label={`Delete ${gearName}`}
+          className='flex h-8 cursor-pointer items-center gap-1.5 rounded-control bg-danger-soft px-3 text-xs font-medium text-danger transition-colors disabled:opacity-50'
         >
           {deleting ? (
             <Loader2 className='h-3 w-3 animate-spin' />
@@ -140,40 +139,22 @@ export function GearActions({
       </div>
 
       {/* Delete confirmation modal */}
-      <Modal
+      <ConfirmDialog
         open={confirmDelete}
-        onClose={() => setConfirmDelete(false)}
+        onClose={() => !deleting && setConfirmDelete(false)}
+        onConfirm={handleDelete}
+        loading={deleting}
+        tone='danger'
         title='Delete Gear'
-        noFooter
-      >
-        <div className='space-y-4'>
-          <p className='text-sm' style={{ color: 'var(--foreground)' }}>
+        confirmLabel='Delete'
+        description={
+          <>
             Are you sure you want to delete this gear named{' '}
-            <strong className='text-red-400'>{gearName}</strong>? This action
+            <strong className='text-foreground'>{gearName}</strong>? This action
             cannot be undone.
-          </p>
-        </div>
-        <div className='flex justify-end gap-3'>
-          <button
-            onClick={() => setConfirmDelete(false)}
-            className='rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer'
-            style={{
-              backgroundColor: 'var(--muted)',
-              color: 'var(--foreground)',
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={deleting}
-            className='inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50 cursor-pointer'
-          >
-            {deleting && <Loader2 className='h-4 w-4 animate-spin' />}
-            Delete
-          </button>
-        </div>
-      </Modal>
+          </>
+        }
+      />
 
       {/* View Details Modal */}
       <Modal
@@ -246,21 +227,16 @@ export function GearActions({
 
                   {/* Status Badge */}
                   <div className='absolute top-3 left-3'>
-                    <span
-                      className='inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md'
-                      style={{
-                        backgroundColor: gear.isActive
-                          ? 'rgba(34,197,94,0.9)'
-                          : 'rgba(239,68,68,0.9)',
-                        color: 'white',
-                      }}
+                    <Badge
+                      tone={gear.isActive ? 'secondary' : 'danger'}
+                      size='md'
+                      className='backdrop-blur-md'
+                      icon={
+                        <span className='h-1.5 w-1.5 rounded-full bg-current' />
+                      }
                     >
-                      <span
-                        className='h-1.5 w-1.5 rounded-full'
-                        style={{ backgroundColor: 'white' }}
-                      />
                       {gear.isActive ? 'Active' : 'Inactive'}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
 
@@ -413,32 +389,7 @@ export function GearActions({
                       {gear.reviews.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <div className='flex items-center gap-2'>
-                    <div className='flex items-center gap-0.5'>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star
-                          key={star}
-                          className='h-4 w-4'
-                          style={{
-                            color:
-                              star <= Math.round(calcAvgRating(gear.reviews))
-                                ? '#f59e0b'
-                                : 'var(--muted)',
-                            fill:
-                              star <= Math.round(calcAvgRating(gear.reviews))
-                                ? '#f59e0b'
-                                : 'transparent',
-                          }}
-                        />
-                      ))}
-                    </div>
-                    <span
-                      className='text-sm font-semibold'
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {calcAvgRating(gear.reviews).toFixed(1)}
-                    </span>
-                  </div>
+                  <Rating value={calcAvgRating(gear.reviews)} size='md' />
                 </div>
               )}
 
@@ -540,24 +491,7 @@ export function GearActions({
                     >
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center gap-2'>
-                          <div className='flex items-center gap-0.5'>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className='h-3 w-3'
-                                style={{
-                                  color:
-                                    star <= review.rating
-                                      ? '#f59e0b'
-                                      : 'var(--muted-foreground)',
-                                  fill:
-                                    star <= review.rating
-                                      ? '#f59e0b'
-                                      : 'transparent',
-                                }}
-                              />
-                            ))}
-                          </div>
+                          <Rating value={review.rating} size='sm' starsOnly />
                           {review.customer && (
                             <span
                               className='text-xs font-medium'

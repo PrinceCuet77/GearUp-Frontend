@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Menu,
@@ -22,6 +23,8 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { logoutAction } from '@/app/(auth)/_actions/logoutActions';
+import { Badge, type BadgeTone } from '@/components/ui/Badge';
+import { cn } from '@/lib/cn';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   LayoutDashboard,
@@ -48,28 +51,11 @@ interface DashboardShellProps {
   navItems: NavItem[];
 }
 
-const ROLE_META: Record<
-  string,
-  { label: string; avatarBg: string; badgeBg: string; badgeColor: string }
-> = {
-  CUSTOMER: {
-    label: 'Customer',
-    avatarBg: '#3b82f6',
-    badgeBg: 'rgba(59,130,246,0.12)',
-    badgeColor: '#3b82f6',
-  },
-  PROVIDER: {
-    label: 'Provider',
-    avatarBg: '#22c55e',
-    badgeBg: 'rgba(34,197,94,0.12)',
-    badgeColor: '#22c55e',
-  },
-  ADMIN: {
-    label: 'Admin',
-    avatarBg: '#ef4444',
-    badgeBg: 'rgba(239,68,68,0.12)',
-    badgeColor: '#ef4444',
-  },
+/** Role identity uses brand tones only, so the chrome themes with the app. */
+const ROLE_META: Record<string, { label: string; tone: BadgeTone }> = {
+  CUSTOMER: { label: 'Customer', tone: 'accent' },
+  PROVIDER: { label: 'Provider', tone: 'secondary' },
+  ADMIN: { label: 'Admin', tone: 'primary' },
 };
 
 const OVERVIEW_PATHS = new Set(['/admin', '/customer', '/provider']);
@@ -88,6 +74,7 @@ function getInitials(name?: string | null, email?: string): string {
 
 export function DashboardShell({ children, navItems }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [avatarFailed, setAvatarFailed] = useState(false);
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
 
@@ -108,36 +95,26 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
 
   return (
     <div
-      className='flex'
-      style={{
-        minHeight: 'calc(100vh - 4rem)',
-        backgroundColor: 'var(--background)',
-      }}
+      className='flex bg-background'
+      style={{ minHeight: 'calc(100vh - 4rem)' }}
     >
       {sidebarOpen && (
         <div
           className='fixed inset-0 z-30 lg:hidden'
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+          style={{ backgroundColor: 'var(--overlay)' }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={[
-          'fixed bottom-0 left-0 z-40 flex w-64 flex-col border-r transition-transform duration-300 ease-in-out lg:translate-x-0',
+        className={cn(
+          'fixed bottom-0 left-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform duration-300 ease-in-out lg:translate-x-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-        ].join(' ')}
-        style={{
-          top: '4rem',
-          backgroundColor: 'var(--card)',
-          borderColor: 'var(--border)',
-        }}
+        )}
+        style={{ top: '4rem' }}
       >
         <nav className='flex-1 overflow-y-auto px-3 py-5'>
-          <p
-            className='mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest'
-            style={{ color: 'var(--muted-foreground)' }}
-          >
+          <p className='mb-2 px-3 text-[10px] font-bold tracking-widest text-muted-foreground uppercase'>
             Navigation
           </p>
           <ul className='space-y-0.5'>
@@ -148,32 +125,21 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className='flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150'
-                    style={{
-                      backgroundColor: active
-                        ? 'color-mix(in srgb, var(--primary) 12%, transparent)'
-                        : 'transparent',
-                      color: active
-                        ? 'var(--primary)'
-                        : 'var(--muted-foreground)',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = 'var(--muted)';
-                        e.currentTarget.style.color = 'var(--foreground)';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!active) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = 'var(--muted-foreground)';
-                      }
-                    }}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 rounded-control px-3 py-2.5 text-sm font-medium transition-colors duration-150',
+                      active
+                        ? 'bg-primary-soft text-primary'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    )}
                   >
-                    <Icon className='h-4 w-4 shrink-0' />
+                    <Icon className='h-4 w-4 shrink-0' aria-hidden='true' />
                     <span className='flex-1'>{item.label}</span>
                     {active && (
-                      <ChevronRight className='h-3.5 w-3.5 shrink-0 opacity-50' />
+                      <ChevronRight
+                        className='h-3.5 w-3.5 shrink-0 opacity-50'
+                        aria-hidden='true'
+                      />
                     )}
                   </Link>
                 </li>
@@ -182,65 +148,47 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
           </ul>
         </nav>
 
-        <div
-          className='shrink-0 border-t p-4'
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <div className='shrink-0 border-t border-border p-4'>
           {user && (
-            <div className='mb-3 flex items-center gap-3'>
-              <div
-                className='flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white'
-                style={{ backgroundColor: meta.avatarBg }}
-              >
-                {user.avatarUrl ? (
-                  <img
-                    src={user.avatarUrl}
-                    alt={user.name ?? user.email}
-                    className='h-9 w-9 rounded-full object-cover'
-                  />
-                ) : (
-                  initials
-                )}
+            <>
+              <div className='mb-3 flex items-center gap-3'>
+                <div className='flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-bold text-primary-foreground'>
+                  {user.avatarUrl && !avatarFailed ? (
+                    <Image
+                      src={user.avatarUrl}
+                      alt={user.name ?? user.email}
+                      width={36}
+                      height={36}
+                      className='h-9 w-9 rounded-full object-cover'
+                      onError={() => setAvatarFailed(true)}
+                      unoptimized
+                    />
+                  ) : (
+                    initials
+                  )}
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <p className='truncate text-sm font-semibold text-foreground'>
+                    {user.name ?? 'User'}
+                  </p>
+                  <p className='truncate text-xs text-muted-foreground'>
+                    {user.email}
+                  </p>
+                </div>
               </div>
-              <div className='min-w-0 flex-1'>
-                <p
-                  className='truncate text-sm font-semibold'
-                  style={{ color: 'var(--foreground)' }}
-                >
-                  {user.name ?? 'User'}
-                </p>
-                <p
-                  className='truncate text-xs'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  {user.email}
-                </p>
-              </div>
-            </div>
+
+              <Badge tone={meta.tone} size='sm' className='mb-3'>
+                {meta.label}
+              </Badge>
+            </>
           )}
-          {user && (
-            <span
-              className='mb-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold'
-              style={{ backgroundColor: meta.badgeBg, color: meta.badgeColor }}
-            >
-              {meta.label}
-            </span>
-          )}
+
           <form action={logoutAction}>
             <button
               type='submit'
-              className='cursor-pointer flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150'
-              style={{ color: 'var(--muted-foreground)' }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.08)';
-                e.currentTarget.style.color = '#ef4444';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--muted-foreground)';
-              }}
+              className='flex w-full cursor-pointer items-center gap-2.5 rounded-control px-3 py-2 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-danger-soft hover:text-danger'
             >
-              <LogOut className='h-4 w-4 shrink-0' />
+              <LogOut className='h-4 w-4 shrink-0' aria-hidden='true' />
               Sign Out
             </button>
           </form>
@@ -248,27 +196,17 @@ export function DashboardShell({ children, navItems }: DashboardShellProps) {
       </aside>
 
       <div className='flex min-w-0 flex-1 flex-col lg:ml-64'>
-        <div
-          className='flex h-14 shrink-0 items-center justify-between border-b px-4 lg:hidden'
-          style={{
-            backgroundColor: 'var(--card)',
-            borderColor: 'var(--border)',
-          }}
-        >
+        <div className='flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 lg:hidden'>
           <button
             onClick={() => setSidebarOpen(true)}
-            className='cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg transition-colors'
-            style={{ color: 'var(--foreground)' }}
+            className='flex h-9 w-9 cursor-pointer items-center justify-center rounded-control text-foreground transition-colors hover:bg-muted'
             aria-label='Open navigation'
           >
             <Menu className='h-5 w-5' />
           </button>
-          <span
-            className='inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold'
-            style={{ backgroundColor: meta.badgeBg, color: meta.badgeColor }}
-          >
+          <Badge tone={meta.tone} size='md'>
             {meta.label} Dashboard
-          </span>
+          </Badge>
         </div>
         <main className='flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8'>
           {children}

@@ -84,8 +84,7 @@ export default async function ProviderOrdersPage({
       </div>
 
       <div
-        className='rounded-xl border'
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className='surface-card'
       >
         {orders.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20'>

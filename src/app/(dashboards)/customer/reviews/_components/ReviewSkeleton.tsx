@@ -19,8 +19,7 @@ export function ReviewSkeleton({ rows = LIMIT }: { rows?: number }) {
 
       {/* Reviews card */}
       <div
-        className='rounded-xl border'
-        style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
+        className='surface-card'
       >
         <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
           {Array.from({ length: rows }).map((_, i) => (

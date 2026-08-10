@@ -80,7 +80,7 @@ function Avatar({
   return (
     <span
       className={cn(
-        'flex items-center justify-center font-bold text-white',
+        'flex items-center justify-center font-bold text-primary-foreground',
         className,
       )}
       style={{ backgroundColor: color ?? 'var(--primary)' }}
