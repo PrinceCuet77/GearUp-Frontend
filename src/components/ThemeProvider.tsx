@@ -16,7 +16,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'light',
+  theme: 'dark',
   setTheme: () => {},
   toggleTheme: () => {},
 });
@@ -66,7 +66,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSyncExternalStore<Theme>(
     subscribe,
     getThemeFromDom,
-    () => 'light',
+    // Server snapshot — dark is the default theme (the root layout renders
+    // `<html class="dark">`), so this matches what the client hydrates into.
+    () => 'dark',
   );
 
   const setTheme = useCallback((next: Theme) => {

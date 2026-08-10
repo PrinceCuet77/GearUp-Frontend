@@ -26,17 +26,18 @@ export const metadata: Metadata = {
     'Browse and rent premium sports and outdoor equipment. Find bikes, tents, kayaks, and more.',
 };
 
-// Inline script to apply theme before React hydration (prevents FOUC)
+// Inline script to apply theme before React hydration (prevents FOUC).
+// Dark is the default: only an explicit stored 'light' preference opts out.
 const themeScript = `
   (function() {
     try {
       var theme = localStorage.getItem('theme');
-      if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-        document.documentElement.style.colorScheme = 'dark';
-      } else {
+      if (theme === 'light') {
         document.documentElement.classList.remove('dark');
         document.documentElement.style.colorScheme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
       }
     } catch(e) {}
   })();
@@ -60,7 +61,8 @@ export default async function RootLayout({
     <html
       lang='en'
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`dark ${geistSans.variable} ${geistMono.variable}`}
+      style={{ colorScheme: 'dark' }}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
