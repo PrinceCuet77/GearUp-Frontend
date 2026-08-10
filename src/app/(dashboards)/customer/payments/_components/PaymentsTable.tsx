@@ -2,7 +2,10 @@
 
 import Link from 'next/link';
 import { CreditCard } from 'lucide-react';
-import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/dashboard/DataTable';
 import { Pagination } from '@/components/dashboard/Pagination';
 import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import { PaymentStatusBadge } from '@/components/dashboard/StatusBadge';
@@ -51,14 +54,19 @@ export function PaymentsTable({
     {
       id: 'order',
       header: 'Rental order',
-      cell: (payment) => (
-        <Link
-          href={`/customer/rental-orders/${payment.rentalOrderId}`}
-          className='font-mono text-xs font-semibold text-primary transition-opacity hover:opacity-80'
-        >
-          #{payment.rentalOrderId.slice(0, 8)}
-        </Link>
-      ),
+      cell: (payment) => {
+        if (!payment.rentalOrderId) {
+          return <span className='text-muted-foreground'>—</span>;
+        }
+        return (
+          <Link
+            href={`/customer/rental-orders/${payment.rentalOrderId}`}
+            className='font-mono text-xs font-semibold text-primary transition-opacity hover:opacity-80'
+          >
+            #{payment.rentalOrderId.slice(0, 8)}
+          </Link>
+        );
+      },
     },
     {
       id: 'amount',
