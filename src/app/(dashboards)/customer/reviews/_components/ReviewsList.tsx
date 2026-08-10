@@ -1,41 +1,36 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Star,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Pencil,
-  Eye,
-} from 'lucide-react';
+import { Eye, Pencil, Star, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Modal from '@/components/Modal';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ReviewFormModal } from '@/components/dashboard/ReviewFormModal';
+import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import { Pagination } from '@/components/dashboard/Pagination';
+import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { Rating } from '@/components/ui/Rating';
-import { ReviewSkeleton } from '@/components/ui/Skeleton';
+import { useClientTable } from '@/lib/hooks';
+import { formatShortDate, formatDate } from '@/lib/gear-utils';
 import { cn } from '@/lib/cn';
 import type { Review } from '@/lib/types';
 import { deleteReview } from '../_actions/deleteReview';
-import { getAllReviews } from '../_actions/getAllReviews';
 import { updateReview } from '../_actions/updateReview';
 
-const LIMIT = 10;
+const PAGE_SIZE = 10;
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Dhaka',
-  });
-}
+const RATING_OPTIONS = [
+  { value: '', label: 'All ratings' },
+  { value: '5', label: '5 stars' },
+  { value: '4', label: '4 stars' },
+  { value: '3', label: '3 stars' },
+  { value: '2', label: '2 stars' },
+  { value: '1', label: '1 star' },
+];
 
 function ratingLabel(rating: number) {
   if (rating === 5) return 'Excellent';
@@ -58,50 +53,41 @@ function gearLabel(review: Review) {
 
 interface ReviewsListProps {
   initialReviews: Review[];
-  initialTotalPages: number;
-  initialTotal: number;
+  initialError?: string | null;
 }
 
-export function ReviewsList({
-  initialReviews,
-  initialTotalPages,
-  initialTotal,
-}: ReviewsListProps) {
+/**
+ * The customer's reviews as a filterable table.
+ *
+ * The full set is loaded once by the page, so rating filters and search apply
+ * across every review rather than only the page currently in view.
+ */
+export function ReviewsList({ initialReviews }: ReviewsListProps) {
   const router = useRouter();
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [total, setTotal] = useState(initialTotal);
-  const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<Review | null>(null);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [viewingReview, setViewingReview] = useState<Review | null>(null);
 
-  const fetchReviews = useCallback(async (targetPage: number) => {
-    setLoading(true);
-
-    const res = await getAllReviews({ page: targetPage, limit: LIMIT });
-
-    if (res.success) {
-      setReviews(res.data);
-      setTotalPages(res.meta?.totalPages ?? 1);
-      setTotal(res.meta?.total ?? res.data.length);
-    } else {
-      toast.error(res.error ?? 'Failed to load reviews.');
-      setReviews([]);
-      setTotalPages(1);
-      setTotal(0);
-    }
-
-    setLoading(false);
-  }, []);
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    void fetchReviews(newPage);
-  };
+  const table = useClientTable(reviews, {
+    pageSize: PAGE_SIZE,
+    searchAccessor: (review) => `${gearLabel(review)} ${review.comment}`,
+    filters: [
+      {
+        key: 'rating',
+        label: 'Rating',
+        options: RATING_OPTIONS,
+        accessor: (review) => String(review.rating),
+      },
+    ],
+    sorters: {
+      rating: (review) => review.rating,
+      createdAt: (review) => new Date(review.createdAt).getTime(),
+    },
+    initialSort: { key: 'createdAt', direction: 'desc' },
+  });
 
   const handleDelete = async () => {
     if (!confirmDelete) return;
@@ -111,170 +97,188 @@ export function ReviewsList({
     const result = await deleteReview(reviewId);
     setDeleting(false);
 
-    if (result.success) {
-      toast.success('Review deleted successfully.');
-      setReviews((prev) => prev.filter((review) => review.id !== reviewId));
-      setTotal((t) => Math.max(0, t - 1));
-      setConfirmDelete(null);
-    } else {
+    if (!result.success) {
       toast.error(result.error ?? 'Failed to delete review.');
+      return;
     }
+
+    toast.success('Review deleted.');
+    setReviews((previous) => previous.filter((review) => review.id !== reviewId));
+    setConfirmDelete(null);
   };
 
   const handleSaveEdit = async (data: { rating: number; comment: string }) => {
     if (!editingReview) return { success: false };
 
-    const res = await updateReview(editingReview.id, {
-      rating: data.rating,
-      comment: data.comment,
-    });
+    const result = await updateReview(editingReview.id, data);
 
-    if (res.success) {
-      toast.success('Review updated successfully.');
-      setReviews((prev) =>
-        prev.map((r) =>
-          r.id === editingReview.id
-            ? { ...r, rating: data.rating, comment: data.comment }
-            : r,
+    if (result.success) {
+      toast.success('Review updated.');
+      setReviews((previous) =>
+        previous.map((review) =>
+          review.id === editingReview.id ? { ...review, ...data } : review,
         ),
       );
       return { success: true };
     }
 
-    toast.error(res.error ?? 'Failed to update review.');
-    return { success: false, error: res.error };
+    toast.error(result.error ?? 'Failed to update review.');
+    return { success: false, error: result.error };
   };
 
   const iconButton =
     'cursor-pointer rounded-control p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground';
 
+  const columns: Array<DataTableColumn<Review>> = [
+    {
+      id: 'gear',
+      header: 'Gear',
+      cell: (review) => (
+        <div className='min-w-0'>
+          <p className='truncate font-medium text-foreground'>
+            {gearLabel(review)}
+          </p>
+          <p className='max-w-sm truncate text-xs text-muted-foreground'>
+            {review.comment}
+          </p>
+        </div>
+      ),
+    },
+    {
+      id: 'rating',
+      header: 'Rating',
+      sortable: true,
+      cell: (review) => (
+        <div className='flex items-center gap-2'>
+          <Rating value={review.rating} size='sm' starsOnly />
+          <Badge tone={ratingTone(review.rating)} size='sm'>
+            {ratingLabel(review.rating)}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      id: 'createdAt',
+      header: 'Submitted',
+      hideBelow: 'md',
+      sortable: true,
+      cell: (review) => (
+        <span className='whitespace-nowrap text-muted-foreground'>
+          {formatShortDate(review.createdAt)}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      align: 'right',
+      srOnlyHeader: true,
+      cell: (review) => (
+        <div className='flex items-center justify-end gap-1'>
+          <button
+            type='button'
+            onClick={() => setViewingReview(review)}
+            className={iconButton}
+            aria-label={`View review for ${gearLabel(review)}`}
+            title='View review'
+          >
+            <Eye className='h-4 w-4' aria-hidden='true' />
+          </button>
+          <button
+            type='button'
+            onClick={() => setEditingReview(review)}
+            className={iconButton}
+            aria-label={`Edit review for ${gearLabel(review)}`}
+            title='Edit review'
+          >
+            <Pencil className='h-4 w-4' aria-hidden='true' />
+          </button>
+          <button
+            type='button'
+            onClick={() => setConfirmDelete(review)}
+            className={cn(iconButton, 'hover:bg-danger-soft hover:text-danger')}
+            aria-label={`Delete review for ${gearLabel(review)}`}
+            title='Delete review'
+          >
+            <Trash2 className='h-4 w-4' aria-hidden='true' />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div>
       <PageHeader
         title='My Reviews'
-        description={`${total} review${total !== 1 ? 's' : ''} submitted`}
+        description={`${reviews.length} review${reviews.length === 1 ? '' : 's'} submitted.`}
       />
 
-      {loading ? (
-        <ReviewSkeleton rows={4} />
-      ) : reviews.length === 0 ? (
-        <EmptyState
-          icon={Star}
-          title='No reviews yet'
-          description='Reviews can be left after returning rented gear.'
-          action={
+      <TableToolbar
+        searchValue={table.search}
+        onSearchChange={table.setSearch}
+        searchLabel='Find a review'
+        searchPlaceholder='Search by gear or comment…'
+        selects={[
+          {
+            key: 'rating',
+            label: 'Rating',
+            value: table.filterValues.rating ?? '',
+            options: RATING_OPTIONS,
+            onChange: (value) => table.setFilter('rating', value),
+          },
+        ]}
+        hasActiveFilters={table.hasActiveFilters}
+        onClearFilters={table.clearFilters}
+      />
+
+      <DataTable
+        caption='Reviews you have written'
+        columns={columns}
+        rows={table.rows}
+        getRowKey={(review) => review.id}
+        emptyIcon={Star}
+        emptyTitle={
+          table.hasActiveFilters ? 'No matching reviews' : 'No reviews yet'
+        }
+        emptyDescription={
+          table.hasActiveFilters
+            ? 'Try a different search term or rating.'
+            : 'Reviews can be left once you have returned a rental.'
+        }
+        emptyAction={
+          !table.hasActiveFilters && (
             <ButtonLink href='/customer/rental-orders' size='sm'>
               View my rentals
             </ButtonLink>
-          }
-        />
-      ) : (
-        <div className='surface-card overflow-hidden'>
-          <ul className='divide-y divide-border'>
-            {reviews.map((review) => (
-              <li
-                key={review.id}
-                className='p-5 transition-colors hover:bg-muted/40'
-              >
-                <div className='flex items-start justify-between gap-4'>
-                  <div className='min-w-0 flex-1'>
-                    <div className='mb-1.5 flex flex-wrap items-center gap-2.5'>
-                      <Rating value={review.rating} size='sm' starsOnly />
-                      <Badge tone={ratingTone(review.rating)} size='sm'>
-                        {ratingLabel(review.rating)}
-                      </Badge>
-                      <span className='text-xs text-muted-foreground'>
-                        {formatDate(review.createdAt)}
-                      </span>
-                    </div>
-                    <p className='text-sm font-semibold text-foreground'>
-                      {gearLabel(review)}
-                    </p>
-                    <p className='mt-1 line-clamp-2 text-sm text-muted-foreground'>
-                      {review.comment}
-                    </p>
-                  </div>
+          )
+        }
+        sortKey={table.sortKey}
+        sortDirection={table.sortDirection}
+        onSort={table.toggleSort}
+        footer={
+          <Pagination
+            page={table.page}
+            totalPages={table.totalPages}
+            total={table.filteredCount}
+            pageSize={PAGE_SIZE}
+            onPageChange={table.setPage}
+            itemLabel='reviews'
+          />
+        }
+      />
 
-                  <div className='flex shrink-0 items-center gap-1'>
-                    <button
-                      onClick={() => setViewingReview(review)}
-                      className={iconButton}
-                      aria-label={`View review for ${gearLabel(review)}`}
-                      title='View review'
-                    >
-                      <Eye className='h-4 w-4' />
-                    </button>
-                    <button
-                      onClick={() => setEditingReview(review)}
-                      className={iconButton}
-                      aria-label={`Edit review for ${gearLabel(review)}`}
-                      title='Edit review'
-                    >
-                      <Pencil className='h-4 w-4' />
-                    </button>
-                    <button
-                      onClick={() => setConfirmDelete(review)}
-                      className={cn(
-                        iconButton,
-                        'hover:bg-danger-soft hover:text-danger',
-                      )}
-                      aria-label={`Delete review for ${gearLabel(review)}`}
-                      title='Delete review'
-                    >
-                      <Trash2 className='h-4 w-4' />
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          {totalPages > 1 && (
-            <div className='flex items-center justify-between gap-4 border-t border-border px-6 py-4'>
-              <p className='text-sm text-muted-foreground'>
-                Page {page} of {totalPages}
-              </p>
-              <div className='flex items-center gap-2'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => handlePageChange(Math.max(1, page - 1))}
-                  disabled={page === 1}
-                  aria-label='Previous page'
-                  className='w-9 px-0'
-                >
-                  <ChevronLeft className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages, page + 1))
-                  }
-                  disabled={page === totalPages}
-                  aria-label='Next page'
-                  className='w-9 px-0'
-                >
-                  <ChevronRight className='h-4 w-4' />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Delete confirmation */}
       <ConfirmDialog
         open={Boolean(confirmDelete)}
         onClose={() => !deleting && setConfirmDelete(null)}
         onConfirm={handleDelete}
         loading={deleting}
         tone='danger'
-        title='Delete Review'
+        title='Delete review'
         confirmLabel='Delete'
         description={
           <>
-            This will permanently remove your review for{' '}
+            This permanently removes your review for{' '}
             <strong className='text-foreground'>
               {confirmDelete ? gearLabel(confirmDelete) : ''}
             </strong>
@@ -283,11 +287,10 @@ export function ReviewsList({
         }
       />
 
-      {/* View review modal */}
       <Modal
         open={Boolean(viewingReview)}
         onClose={() => setViewingReview(null)}
-        title='Review Details'
+        title='Review details'
         noFooter
       >
         {viewingReview && (
@@ -301,7 +304,6 @@ export function ReviewsList({
               </p>
             </div>
 
-            {/* Rating card */}
             <div className='rounded-control border border-warning/25 bg-warning-soft p-4'>
               <div className='flex items-center justify-between gap-3'>
                 <div className='flex items-center gap-3'>
@@ -316,7 +318,6 @@ export function ReviewsList({
               </div>
             </div>
 
-            {/* Comment */}
             <div>
               <span className='mb-1.5 block text-xs font-bold tracking-wider text-muted-foreground uppercase'>
                 Comment
@@ -326,7 +327,6 @@ export function ReviewsList({
               </blockquote>
             </div>
 
-            {/* Date & action */}
             <div className='flex flex-wrap items-center justify-between gap-3 rounded-control bg-muted px-4 py-3'>
               <p className='text-xs text-muted-foreground'>
                 Submitted on {formatDate(viewingReview.createdAt)}
@@ -335,14 +335,14 @@ export function ReviewsList({
               </p>
               <Button
                 size='sm'
-                leadingIcon={<Eye className='h-3.5 w-3.5' />}
+                leadingIcon={<Eye className='h-3.5 w-3.5' aria-hidden='true' />}
                 onClick={() => {
                   const orderId = viewingReview.rentalOrderId;
                   setViewingReview(null);
                   router.push(`/customer/rental-orders/${orderId}`);
                 }}
               >
-                View Order
+                View order
               </Button>
             </div>
 
@@ -355,7 +355,6 @@ export function ReviewsList({
         )}
       </Modal>
 
-      {/* Edit review modal */}
       <ReviewFormModal
         open={Boolean(editingReview)}
         onClose={() => setEditingReview(null)}
@@ -363,8 +362,8 @@ export function ReviewsList({
         onSubmit={handleSaveEdit}
         initialRating={editingReview?.rating ?? 0}
         initialComment={editingReview?.comment ?? ''}
-        title='Edit Review'
-        submitLabel='Save Changes'
+        title='Edit review'
+        submitLabel='Save changes'
       />
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Pencil,
   Trash2,
@@ -27,6 +28,10 @@ import {
   formatDate,
   calcAvgRating,
 } from '@/lib/gear-utils';
+
+/** Shared row-action button styling, matching the reviews table. */
+const ICON_BUTTON =
+  'cursor-pointer rounded-control p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground';
 
 interface GearActionsProps {
   gearId: string;
@@ -66,74 +71,41 @@ export function GearActions({
 
   return (
     <>
-      {/* Mobile view */}
-      <div className='flex items-center gap-2 sm:hidden'>
+      {/* One icon row at every breakpoint, matching the review table's actions */}
+      <div className='flex items-center justify-end gap-1'>
         <button
+          type='button'
           onClick={() => {
             setActiveImageIndex(0);
             setViewDetails(true);
           }}
-          className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-          style={{ color: 'var(--muted-foreground)' }}
+          aria-label={`View details for ${gearName}`}
+          title='View details'
+          className={ICON_BUTTON}
         >
-          <Eye className='h-4 w-4' />
+          <Eye className='h-4 w-4' aria-hidden='true' />
         </button>
         <button
+          type='button'
           onClick={() => onEdit?.()}
-          className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-          style={{ color: 'var(--muted-foreground)' }}
+          aria-label={`Edit ${gearName}`}
+          title='Edit gear'
+          className={ICON_BUTTON}
         >
-          <Pencil className='h-4 w-4' />
+          <Pencil className='h-4 w-4' aria-hidden='true' />
         </button>
         <button
-          onClick={() => setConfirmDelete(true)}
-          disabled={deleting}
-          className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg transition-colors'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          {deleting ? (
-            <Loader2 className='h-4 w-4 animate-spin' />
-          ) : (
-            <Trash2 className='h-4 w-4' />
-          )}
-        </button>
-      </div>
-
-      {/* Desktop view */}
-      <div className='hidden items-center gap-2 sm:flex'>
-        <button
-          onClick={() => {
-            setActiveImageIndex(0);
-            setViewDetails(true);
-          }}
-          className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors'
-          style={{
-            backgroundColor: 'var(--muted)',
-            color: 'var(--foreground)',
-          }}
-        >
-          <Eye className='h-3 w-3' />
-        </button>
-        <button
-          onClick={() => onEdit?.()}
-          className='cursor-pointer flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors'
-          style={{
-            backgroundColor: 'var(--muted)',
-            color: 'var(--foreground)',
-          }}
-        >
-          <Pencil className='h-3 w-3' />
-        </button>
-        <button
+          type='button'
           onClick={() => setConfirmDelete(true)}
           disabled={deleting}
           aria-label={`Delete ${gearName}`}
-          className='flex h-8 cursor-pointer items-center gap-1.5 rounded-control bg-danger-soft px-3 text-xs font-medium text-danger transition-colors disabled:opacity-50'
+          title='Delete gear'
+          className={`${ICON_BUTTON} hover:bg-danger-soft hover:text-danger disabled:opacity-50`}
         >
           {deleting ? (
-            <Loader2 className='h-3 w-3 animate-spin' />
+            <Loader2 className='h-4 w-4 animate-spin' aria-hidden='true' />
           ) : (
-            <Trash2 className='h-3 w-3' />
+            <Trash2 className='h-4 w-4' aria-hidden='true' />
           )}
         </button>
       </div>
@@ -174,10 +146,13 @@ export function GearActions({
                   className='relative overflow-hidden rounded-xl'
                   style={{ backgroundColor: 'var(--muted)' }}
                 >
-                  <img
+                  <Image
                     src={gearImages[activeImageIndex]}
                     alt={gear.name}
-                    className='h-64 w-full object-cover sm:h-80 transition-all duration-300'
+                    width={768}
+                    height={320}
+                    unoptimized
+                    className='h-64 w-full object-cover transition-all duration-300 sm:h-80'
                   />
 
                   {/* Navigation Arrows */}
@@ -258,9 +233,12 @@ export function GearActions({
                             activeImageIndex === i ? 'scale(1.05)' : 'scale(1)',
                         }}
                       >
-                        <img
+                        <Image
                           src={src}
                           alt={`Thumbnail ${i + 1}`}
+                          width={64}
+                          height={64}
+                          unoptimized
                           className='h-16 w-16 object-cover'
                         />
                       </button>
@@ -414,9 +392,12 @@ export function GearActions({
                       style={{ backgroundColor: 'var(--muted)' }}
                     >
                       {gear.provider.avatarUrl ? (
-                        <img
+                        <Image
                           src={gear.provider.avatarUrl}
                           alt={gear.provider.name ?? 'Provider'}
+                          width={36}
+                          height={36}
+                          unoptimized
                           className='h-9 w-9 rounded-full object-cover'
                         />
                       ) : (

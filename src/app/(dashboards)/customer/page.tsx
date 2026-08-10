@@ -1,54 +1,82 @@
-import Link from 'next/link';
-import { ShoppingBag, CreditCard, Star, Clock, ArrowRight } from 'lucide-react';
+import type { Metadata } from 'next';
+import { Clock, CreditCard, ShoppingBag, Star } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
-import { RentalStatusBadge } from '@/components/dashboard/StatusBadge';
-import { PageHeader } from '@/components/dashboard/PageHeader';
-import { getCustomerDashboardInfo } from './_actions/getCustomerDashboardInfo';
+import { PageHeader, SectionHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { ButtonLink } from '@/components/ui/Button';
-import { formatBDT, formatShortDate } from '@/lib/gear-utils';
-import type { CustomerRentalOrder, RentalStatus } from '@/lib/types';
+import { ChartCard } from '@/components/charts/ChartCard';
+import { LineChart } from '@/components/charts/LineChart';
+import { DonutChart } from '@/components/charts/DonutChart';
+import { RankedBars } from '@/components/charts/RankedBars';
+import {
+  byMonth,
+  monthOverMonth,
+  PAYMENT_STATUS_META,
+  rentalStatusBreakdown,
+} from '@/lib/chart-data';
+import { formatBDT } from '@/lib/gear-utils';
+import type { PaymentStatus } from '@/lib/types';
+import { getCustomerOverview } from './_actions/getCustomerOverview';
+import { RecentRentalsTable } from './_components/RecentRentalsTable';
 
 export const dynamic = 'force-dynamic';
 
-export default async function CustomerOverviewPage() {
-  const result = await getCustomerDashboardInfo();
+export const metadata: Metadata = { title: 'Customer Dashboard · GearUp' };
 
-  const stats = result.data?.stats ?? {
-    totalOrders: 0,
-    activeRentals: 0,
-    paymentsMade: 0,
-    reviewsGiven: 0,
-  };
-  const recentOrders: CustomerRentalOrder[] = result.data?.recentOrders ?? [];
+export default async function CustomerOverviewPage() {
+  const { stats, orders, payments, sampled, errors } =
+    await getCustomerOverview();
+
+  /* Every series below is derived from the customer's own records. */
+  const spendPerMonth = byMonth(orders, (order) => order.createdAt, {
+    getValue: (order) => Number(order.amount) || 0,
+  });
+  const ordersByStatus = rentalStatusBreakdown(orders);
+
+  // Bar length here is the money involved, not the transaction count — a
+  // single failed high-value payment matters more than three small ones.
+  const paymentsByOutcome = (
+    ['COMPLETED', 'PENDING', 'FAILED'] as PaymentStatus[]
+  ).map((status) => ({
+    label: PAYMENT_STATUS_META[status].label,
+    color: PAYMENT_STATUS_META[status].color,
+    value: payments
+      .filter((payment) => payment.status === status)
+      .reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0),
+  }));
+
+  const totalSpend = orders.reduce(
+    (sum, order) => sum + (Number(order.amount) || 0),
+    0,
+  );
+  const sampleNote = sampled
+    ? ' Based on your 100 most recent orders.'
+    : '';
 
   return (
     <div>
-      {/* Error banner */}
-      {!result.success && result.error && (
-        <ErrorBanner message={result.error} />
-      )}
+      {errors.length > 0 && <ErrorBanner message={errors[0]} />}
 
       <PageHeader
-        title='Welcome back!'
-        description="Here's a summary of your rental activity."
+        title='Welcome back'
+        description='Your rentals, payments and activity at a glance.'
       />
 
-      {/* Stats cards */}
-      <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      {/* Overview cards */}
+      <div className='mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <StatsCard
           title='Total Rental Orders'
           value={stats.totalOrders}
           icon={ShoppingBag}
           description='All time'
           tone='primary'
+          href='/customer/rental-orders'
+          trend={monthOverMonth(orders, (order) => order.createdAt)}
         />
         <StatsCard
           title='Active Rentals'
           value={stats.activeRentals}
           icon={Clock}
-          description='Currently rented'
+          description='Currently out with you'
           tone='secondary'
         />
         <StatsCard
@@ -57,90 +85,89 @@ export default async function CustomerOverviewPage() {
           icon={CreditCard}
           description='All transactions'
           tone='accent'
+          href='/customer/payments'
+          trend={monthOverMonth(payments, (payment) => payment.createdAt)}
         />
         <StatsCard
           title='Reviews Given'
           value={stats.reviewsGiven}
           icon={Star}
-          description='Your feedback'
+          description='Feedback you have shared'
           tone='primary'
+          href='/customer/reviews'
         />
       </div>
 
-      {/* Recent orders */}
-      <div className='surface-card overflow-hidden'>
-        <div className='flex items-center justify-between gap-4 border-b border-border px-6 py-4'>
-          <h2 className='text-base font-bold text-foreground'>
-            Recent Rental Orders
-          </h2>
-          <Link
-            href='/customer/rental-orders'
-            className='flex shrink-0 items-center gap-1 text-sm font-semibold text-primary transition-opacity hover:opacity-80'
-          >
-            View all <ArrowRight className='h-3.5 w-3.5' aria-hidden='true' />
-          </Link>
-        </div>
-
-        {recentOrders.length === 0 ? (
-          <EmptyState
-            icon={ShoppingBag}
-            title='No rental orders yet'
-            description='Browse gear to place your first rental.'
-            className='border-0 shadow-none'
-            action={
-              <ButtonLink href='/gears' size='sm'>
-                Browse Gear
-              </ButtonLink>
-            }
+      {/* Charts */}
+      <SectionHeader
+        title='Your rental activity'
+        description={`Trends from your real order and payment history.${sampleNote}`}
+      />
+      <div className='mb-8 grid gap-4 lg:grid-cols-3'>
+        <ChartCard
+          className='lg:col-span-2'
+          title='Rental spend per month'
+          description='Total order value over the last 6 months'
+          action={
+            <span className='block text-sm font-bold text-foreground'>
+              {formatBDT(totalSpend)}
+              <span className='mt-0.5 block text-[11px] font-medium text-muted-foreground'>
+                sampled total
+              </span>
+            </span>
+          }
+          isEmpty={orders.length === 0}
+          emptyTitle='No rentals yet'
+          emptyDescription='Once you place a rental order, your monthly spend appears here.'
+        >
+          <LineChart
+            data={spendPerMonth}
+            seriesLabel='Rental spend'
+            format='currency'
           />
-        ) : (
-          <div className='overflow-x-auto'>
-            <table className='w-full min-w-[640px]'>
-              <thead>
-                <tr className='border-b border-border text-left text-xs font-semibold tracking-wide text-muted-foreground uppercase'>
-                  <th className='px-6 py-3'>Rental Order ID</th>
-                  <th className='px-6 py-3'>Dates</th>
-                  <th className='px-6 py-3'>Amount</th>
-                  <th className='px-6 py-3'>Status</th>
-                  <th className='px-6 py-3'>
-                    <span className='sr-only'>Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody className='divide-y divide-border'>
-                {recentOrders.map((order) => (
-                  <tr
-                    key={order.id}
-                    className='transition-colors hover:bg-muted'
-                  >
-                    <td className='px-6 py-4 font-mono text-sm text-foreground'>
-                      #{order.id.slice(0, 8)}
-                    </td>
-                    <td className='px-6 py-4 text-sm whitespace-nowrap text-muted-foreground'>
-                      {formatShortDate(order.startDate)} –{' '}
-                      {formatShortDate(order.endDate)}
-                    </td>
-                    <td className='px-6 py-4 text-sm font-semibold text-foreground'>
-                      {formatBDT(order.amount)}
-                    </td>
-                    <td className='px-6 py-4'>
-                      <RentalStatusBadge status={order.status as RentalStatus} />
-                    </td>
-                    <td className='px-6 py-4'>
-                      <Link
-                        href={`/customer/rental-orders/${order.id}`}
-                        className='text-sm font-semibold text-primary transition-opacity hover:opacity-80'
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        </ChartCard>
+
+        <ChartCard
+          title='Orders by status'
+          description='Where your rentals are in the lifecycle'
+          isEmpty={orders.length === 0}
+          emptyTitle='No orders to break down'
+          emptyDescription='Your rental statuses will be charted here.'
+        >
+          <DonutChart data={ordersByStatus} totalLabel='rental orders' />
+        </ChartCard>
       </div>
+
+      <div className='mb-8 grid gap-4 lg:grid-cols-3'>
+        <ChartCard
+          title='Payment outcomes'
+          description='Value of your transactions by result'
+          className='lg:col-span-3'
+          isEmpty={payments.length === 0}
+          emptyTitle='No payments yet'
+          emptyDescription='Pay for a confirmed rental and the breakdown shows up here.'
+        >
+          <RankedBars
+            data={paymentsByOutcome.map((slice) => ({
+              label: slice.label,
+              value: slice.value,
+              color: slice.color,
+              displayValue: formatBDT(Math.round(slice.value)),
+            }))}
+            valueLabel='taka'
+            scaleTo='total'
+            showShare
+          />
+        </ChartCard>
+      </div>
+
+      {/* Data table */}
+      <SectionHeader
+        title='Recent rental orders'
+        description='Search, filter and page through your latest rentals.'
+        linkHref='/customer/rental-orders'
+      />
+      <RecentRentalsTable orders={orders} />
     </div>
   );
 }

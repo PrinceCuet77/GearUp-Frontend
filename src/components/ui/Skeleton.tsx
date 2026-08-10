@@ -6,11 +6,22 @@
  * the geometry of the real component they stand in for.
  */
 
+import type { CSSProperties } from 'react';
 import { cn } from '@/lib/cn';
 
-export function Skeleton({ className = '' }: { className?: string }) {
+export function Skeleton({
+  className = '',
+  style,
+}: {
+  className?: string;
+  /** For dimensions that have no utility class, e.g. a chart's exact height. */
+  style?: CSSProperties;
+}) {
   return (
-    <div className={cn('animate-pulse rounded bg-muted', className)} />
+    <div
+      className={cn('animate-pulse rounded bg-muted', className)}
+      style={style}
+    />
   );
 }
 
@@ -27,7 +38,7 @@ export function TableSkeleton({
   return (
     <div className='surface-card overflow-hidden'>
       {/* Fake header */}
-      <div className='flex items-center gap-4 border-b border-border bg-muted px-5 py-3'>
+      <div className='flex items-center gap-4 border-b border-border bg-muted/40 px-5 py-3.5'>
         {Array.from({ length: cols }).map((_, i) => (
           <Skeleton key={i} className={`h-3.5 ${colWidths[i] ?? 'w-1/6'}`} />
         ))}
@@ -43,6 +54,16 @@ export function TableSkeleton({
           </li>
         ))}
       </ul>
+
+      {/* Fake pagination */}
+      <div className='flex items-center justify-between gap-4 border-t border-border px-5 py-4'>
+        <Skeleton className='h-3.5 w-40' />
+        <div className='flex gap-1.5'>
+          <Skeleton className='h-9 w-9 rounded-control' />
+          <Skeleton className='h-9 w-9 rounded-control' />
+          <Skeleton className='h-9 w-9 rounded-control' />
+        </div>
+      </div>
     </div>
   );
 }
@@ -100,26 +121,100 @@ export function CategorySkeleton({ rows = 5 }: { rows?: number }) {
   );
 }
 
+/**
+ * A whole table page: title, filter row, table and pagination — matching the
+ * `PageHeader` + `TableToolbar` + `DataTable` composition every list page uses.
+ */
+export function TablePageSkeleton({
+  rows = 6,
+  cols = 5,
+  filters = 2,
+}: {
+  rows?: number;
+  cols?: number;
+  filters?: number;
+}) {
+  return (
+    <div>
+      <div className='mb-6 space-y-2'>
+        <Skeleton className='h-8 w-52' />
+        <Skeleton className='h-4 w-64' />
+      </div>
+
+      <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-end'>
+        <div className='space-y-1.5 sm:w-72'>
+          <Skeleton className='h-4 w-28' />
+          <Skeleton className='h-11 w-full rounded-control' />
+        </div>
+        {Array.from({ length: filters }).map((_, i) => (
+          <div key={i} className='space-y-1.5 sm:w-48'>
+            <Skeleton className='h-4 w-20' />
+            <Skeleton className='h-11 w-full rounded-control' />
+          </div>
+        ))}
+      </div>
+
+      <TableSkeleton rows={rows} cols={cols} />
+    </div>
+  );
+}
+
+/** Placeholder for a `ChartCard`: header, plot area, legend row. */
+export function ChartCardSkeleton({ height = 224 }: { height?: number }) {
+  return (
+    <div className='surface-card p-5'>
+      <div className='mb-5 flex items-start justify-between gap-4'>
+        <div className='space-y-2'>
+          <Skeleton className='h-4 w-40' />
+          <Skeleton className='h-3 w-56' />
+        </div>
+        <Skeleton className='h-8 w-20' />
+      </div>
+      <Skeleton
+        className='w-full rounded-control'
+        style={{ height }}
+      />
+      <div className='mt-4 flex gap-4'>
+        <Skeleton className='h-3 w-24' />
+        <Skeleton className='h-3 w-24' />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The overview layout: stat tiles, a wide chart beside a narrow one, then the
+ * activity table — the same grid the real page renders.
+ */
 export function DashboardOverviewSkeleton({ cols = 4 }: { cols?: number }) {
   return (
     <div>
       {/* Title */}
-      <div className='mb-8'>
+      <div className='mb-6'>
         <Skeleton className='mb-2 h-7 w-48' />
         <Skeleton className='h-4 w-64' />
       </div>
 
       {/* Stats row */}
       <div
-        className={`mb-8 grid gap-4 sm:grid-cols-2 ${cols === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}
+        className={`mb-8 grid gap-4 sm:grid-cols-2 ${cols === 3 ? 'xl:grid-cols-3' : 'xl:grid-cols-4'}`}
       >
         {Array.from({ length: cols }).map((_, i) => (
           <StatsCardSkeleton key={i} />
         ))}
       </div>
 
+      {/* Charts */}
+      <div className='mb-8 grid gap-4 lg:grid-cols-3'>
+        <div className='lg:col-span-2'>
+          <ChartCardSkeleton />
+        </div>
+        <ChartCardSkeleton height={280} />
+      </div>
+
       {/* Recent items table */}
-      <TableSkeleton rows={4} cols={4} />
+      <Skeleton className='mb-4 h-5 w-44' />
+      <TableSkeleton rows={5} cols={5} />
     </div>
   );
 }

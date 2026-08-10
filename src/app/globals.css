@@ -20,6 +20,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  /* Height of the global site header. The dashboard sidebar and topbar stick
+     below it, so the offset lives in one place instead of every component. */
+  --app-header-h: 4rem;
+
   /* ── Surfaces ───────────────────────────────────────────────────────── */
   --background: #f8fafc;
   --background-subtle: #f1f5f9;
@@ -69,6 +73,18 @@
 
   /* ── Focus ring ────────────────────────────────────────────────────── */
   --ring: #ea580c;
+
+  /* ── Data visualisation ────────────────────────────────────────────────
+     Categorical series slots. These are the SAME three brand hues, re-stepped
+     per theme so the set passes the six palette checks (lightness band, chroma
+     floor, CVD separation, normal-vision floor, contrast) against the chart
+     surface it is painted on. Assign slots in fixed order — never cycle a 4th.
+     -------------------------------------------------------------------- */
+  --chart-1: #ea580c;
+  --chart-2: #0d9488;
+  --chart-3: #4f46e5;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #94a3b8;
 
   /* ── Chrome ────────────────────────────────────────────────────────── */
   --nav-bg: rgba(255, 255, 255, 0.88);
@@ -132,6 +148,13 @@
 
   --ring: #fb923c;
 
+  /* ── Data visualisation (dark steps, validated against --card #131c2e) ── */
+  --chart-1: #e96208;
+  --chart-2: #0da294;
+  --chart-3: #7377ec;
+  --chart-grid: #253148;
+  --chart-axis: #64748b;
+
   --nav-bg: rgba(11, 18, 32, 0.88);
   --nav-border: #253148;
 
@@ -190,6 +213,12 @@
 
   --color-ring: var(--ring);
 
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
+
   /* Single radius scale — `rounded-card` is THE card radius, project-wide. */
   --radius-card: 1rem;
   --radius-control: 0.75rem;
@@ -229,6 +258,12 @@ body {
   );
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-header-h: 4.5rem;
+  }
 }
 
 html {
@@ -397,15 +432,46 @@ html {
   .field-input[aria-invalid='true'] {
     border-color: var(--danger);
   }
+  /* An invalid field keeps its danger border while focused — the focus ring
+     alone would otherwise repaint it as if the error had been resolved. */
   .field-input[aria-invalid='true']:focus {
+    border-color: var(--danger);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent);
   }
+  /* Native select styled as a field-input; caller adds the chevron overlay. */
+  .field-select {
+    @apply w-full cursor-pointer appearance-none rounded-control border py-2.5 pr-9 pl-3.5
+      text-sm transition-colors outline-none;
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--foreground);
+  }
+  .field-select:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
+  }
+
   .field-error {
     @apply mt-1.5 flex items-center gap-1.5 text-xs font-medium;
     color: var(--danger);
   }
   .field-hint {
     @apply mt-1.5 text-xs text-muted-foreground;
+  }
+
+  /* Data tables — one look for every table in the dashboard -------------- */
+  .table-th {
+    @apply px-5 py-3.5 text-left text-[11px] font-bold tracking-wider
+      whitespace-nowrap text-muted-foreground uppercase;
+  }
+  .table-td {
+    @apply px-5 py-4 align-middle text-sm text-foreground;
+  }
+  .table-row {
+    @apply border-t border-border transition-colors;
+  }
+  .table-row:hover {
+    background-color: var(--muted);
   }
 
   /* Section rhythm — identical vertical spacing on every landing section - */

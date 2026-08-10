@@ -1,96 +1,156 @@
-import { Users, Package, ClipboardList, Tag } from 'lucide-react';
+import type { Metadata } from 'next';
+import { ClipboardList, Package, Tag, Users } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { PageHeader, SectionHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-import { PageHeader } from '@/components/dashboard/PageHeader';
+import { ChartCard } from '@/components/charts/ChartCard';
+import { LineChart } from '@/components/charts/LineChart';
+import { DonutChart } from '@/components/charts/DonutChart';
+import { RankedBars } from '@/components/charts/RankedBars';
 import {
-  QuickActionGrid,
-  type QuickAction,
-} from '@/components/dashboard/QuickActionCard';
-import { getAdminDashboardInfo } from './_actions/getAdminDashboardInfo';
+  byMonth,
+  countBy,
+  monthOverMonth,
+  roleBreakdown,
+  topEntries,
+} from '@/lib/chart-data';
+import { getAdminOverview } from './_actions/getAdminOverview';
+import { RecentUsersTable } from './_components/RecentUsersTable';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = { title: 'Admin Dashboard · GearUp' };
 
 export default async function AdminOverviewPage() {
-  const { data, error } = await getAdminDashboardInfo();
+  const { stats, users, gears, categories, sampled, errors } =
+    await getAdminOverview();
 
-  const userTotal = data?.stats?.totalUsers ?? 0;
-  const gearTotal = data?.stats?.activeGears ?? 0;
-  const rentalTotal = data?.stats?.totalRentals ?? 0;
-  const categoryTotal = data?.stats?.totalCategories ?? 0;
+  /* Series derived from the platform's own user and listing records. */
+  const signupsPerMonth = byMonth(users, (user) => user.createdAt);
+  const usersByRole = roleBreakdown(users);
+  const listingsByCategory = topEntries(
+    countBy(gears, (gear) => gear.category?.name ?? 'Uncategorised'),
+    6,
+  );
 
-  const quickLinks: QuickAction[] = [
-    {
-      href: '/admin/users',
-      label: 'Manage Users',
-      description: 'View, suspend or activate user accounts.',
-      icon: Users,
-      tone: 'accent',
-    },
-    {
-      href: '/admin/gears',
-      label: 'All Gears Listings',
-      description: 'Browse all gear across providers.',
-      icon: Package,
-      tone: 'primary',
-    },
-    {
-      href: '/admin/categories',
-      label: 'Categories',
-      description: 'Create and manage gear categories.',
-      icon: Tag,
-      tone: 'secondary',
-    },
-    {
-      href: '/admin/change-password',
-      label: 'Change Password',
-      description: 'Update your account password.',
-      icon: ClipboardList,
-      tone: 'accent',
-    },
-  ];
+  const activeListings = gears.filter((gear) => gear.isActive).length;
+  const sampleNote = sampled
+    ? ' Charts read the 100 most recent records.'
+    : '';
 
   return (
     <div>
-      {error && <ErrorBanner message={error} />}
+      {errors.length > 0 && <ErrorBanner message={errors[0]} />}
 
       <PageHeader
         title='Admin Dashboard'
-        description='Platform overview and moderation controls.'
+        description='Platform health, growth and moderation at a glance.'
       />
 
-      {/* Stats */}
-      <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      {/* Overview cards */}
+      <div className='mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <StatsCard
           title='Total Users'
-          value={userTotal}
+          value={stats.totalUsers}
           icon={Users}
           description='Registered accounts'
           tone='accent'
+          href='/admin/users'
+          trend={monthOverMonth(users, (user) => user.createdAt, {
+            label: 'new signups vs last month',
+          })}
         />
         <StatsCard
-          title='Active Gears'
-          value={gearTotal}
+          title='Active Gear'
+          value={stats.activeGears}
           icon={Package}
-          description='Active listings'
+          description={`${activeListings} active in the sampled listings`}
           tone='primary'
+          href='/admin/gears'
         />
         <StatsCard
           title='Total Rentals'
-          value={rentalTotal}
+          value={stats.totalRentals}
           icon={ClipboardList}
-          description='All time orders'
+          description='Orders placed all time'
           tone='accent'
         />
         <StatsCard
           title='Categories'
-          value={categoryTotal}
+          value={stats.totalCategories || categories.length}
           icon={Tag}
-          description='Gear categories'
+          description='Gear categories in use'
           tone='secondary'
+          href='/admin/categories'
         />
       </div>
 
-      {/* Quick links */}
-      <h2 className='mb-4 text-base font-bold text-foreground'>Quick Actions</h2>
-      <QuickActionGrid actions={quickLinks} />
+      {/* Charts */}
+      <SectionHeader
+        title='Platform activity'
+        description={`Derived from live account and listing data.${sampleNote}`}
+        linkHref='/admin/analytics'
+        linkLabel='Full analytics'
+      />
+      <div className='mb-8 grid gap-4 lg:grid-cols-3'>
+        <ChartCard
+          className='lg:col-span-2'
+          title='New accounts per month'
+          description='Registrations over the last 6 months'
+          isEmpty={users.length === 0}
+          emptyTitle='No accounts yet'
+          emptyDescription='Signups will be charted here as people register.'
+        >
+          <LineChart data={signupsPerMonth} seriesLabel='New accounts' />
+        </ChartCard>
+
+        <ChartCard
+          title='Accounts by role'
+          description='Split of the sampled user base'
+          isEmpty={users.length === 0}
+          emptyTitle='No accounts to break down'
+          emptyDescription='The role split appears once users register.'
+        >
+          <DonutChart data={usersByRole} totalLabel='accounts' />
+        </ChartCard>
+      </div>
+
+      <div className='mb-8'>
+        <ChartCard
+          title='Listings by category'
+          description='Which categories providers are listing into'
+          action={
+            <span className='block text-sm font-bold text-foreground'>
+              {gears.length}
+              <span className='mt-0.5 block text-[11px] font-medium text-muted-foreground'>
+                listings sampled
+              </span>
+            </span>
+          }
+          isEmpty={gears.length === 0}
+          emptyTitle='No listings yet'
+          emptyDescription='Once providers list gear, category distribution shows here.'
+        >
+          <RankedBars
+            data={listingsByCategory.map((row) => ({
+              label: row.label,
+              value: row.value,
+              color: 'var(--chart-2)',
+            }))}
+            valueLabel='listings'
+            showShare
+          />
+        </ChartCard>
+      </div>
+
+      {/* Data table */}
+      <SectionHeader
+        title='Newest accounts'
+        description='Search, filter and page through recent registrations.'
+        linkHref='/admin/users'
+        linkLabel='Manage users'
+      />
+      <RecentUsersTable users={users} />
     </div>
   );
 }

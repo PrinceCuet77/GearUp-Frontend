@@ -1,14 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { Tag, PlusCircle, Pencil } from 'lucide-react';
+import { Pencil, PlusCircle, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
+import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import { Pagination } from '@/components/dashboard/Pagination';
+import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import Modal from '@/components/Modal';
 import { Button } from '@/components/ui/Button';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { FormField } from '@/components/ui/FormField';
+import { useClientTable } from '@/lib/hooks';
+import { formatShortDate } from '@/lib/gear-utils';
 import type { Category } from '@/lib/types';
 import {
   createCategorySchema,
@@ -17,6 +21,14 @@ import {
 
 import { createCategory } from '../_actions/createCategory';
 import { updateCategory } from '../_actions/updateCategory';
+
+const PAGE_SIZE = 10;
+
+const DESCRIBED_OPTIONS = [
+  { value: '', label: 'All categories' },
+  { value: 'described', label: 'With description' },
+  { value: 'bare', label: 'Missing description' },
+];
 
 interface CategoriesContentProps {
   initialCategories: Category[];
@@ -28,7 +40,6 @@ export function CategoriesContent({
   initialError = null,
 }: CategoriesContentProps) {
   const [categories, setCategories] = useState<Category[]>(initialCategories);
-  const [error] = useState<string | null>(initialError);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -38,6 +49,25 @@ export function CategoriesContent({
     {},
   );
 
+  const table = useClientTable(categories, {
+    pageSize: PAGE_SIZE,
+    searchAccessor: (category) =>
+      `${category.name} ${category.description ?? ''}`,
+    filters: [
+      {
+        key: 'described',
+        label: 'Description',
+        options: DESCRIBED_OPTIONS,
+        accessor: (category) => (category.description ? 'described' : 'bare'),
+      },
+    ],
+    sorters: {
+      name: (category) => category.name,
+      createdAt: (category) => new Date(category.createdAt).getTime(),
+    },
+    initialSort: { key: 'name', direction: 'asc' },
+  });
+
   const openCreate = () => {
     setEditingId(null);
     setName('');
@@ -45,10 +75,11 @@ export function CategoriesContent({
     setErrors({});
     setShowForm(true);
   };
-  const openEdit = (cat: Category) => {
-    setEditingId(cat.id);
-    setName(cat.name);
-    setDescription(cat.description ?? '');
+
+  const openEdit = (category: Category) => {
+    setEditingId(category.id);
+    setName(category.name);
+    setDescription(category.description ?? '');
     setErrors({});
     setShowForm(true);
   };
@@ -82,18 +113,19 @@ export function CategoriesContent({
       );
       if (result.success) {
         toast.success('Category updated successfully.');
-        setCategories((prev) =>
-          prev.map((c) =>
-            c.id === editingId
+        setCategories((previous) =>
+          previous.map((category) =>
+            category.id === editingId
               ? {
-                  ...c,
+                  ...category,
                   name: validation.data.name || name,
                   description: validation.data.description || null,
                   updatedAt: result.data!.updatedAt,
                 }
-              : c,
+              : category,
           ),
         );
+        setShowForm(false);
       } else {
         toast.error(result.error ?? 'Failed to update category.');
       }
@@ -104,42 +136,151 @@ export function CategoriesContent({
       );
       if (result.success) {
         toast.success('Category created successfully.');
-        setCategories((prev) => [...prev, result.data!]);
+        setCategories((previous) => [...previous, result.data!]);
+        setShowForm(false);
       } else {
         toast.error(result.error ?? 'Failed to create category.');
       }
     }
 
-    setShowForm(false);
     setSaving(false);
   };
+
+  const columns: Array<DataTableColumn<Category>> = [
+    {
+      id: 'name',
+      header: 'Category',
+      sortable: true,
+      cell: (category) => (
+        <div className='flex items-center gap-3'>
+          <span className='flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-primary-soft'>
+            <Tag className='h-4 w-4 text-primary' aria-hidden='true' />
+          </span>
+          <span className='font-medium text-foreground'>{category.name}</span>
+        </div>
+      ),
+    },
+    {
+      id: 'description',
+      header: 'Description',
+      cell: (category) => (
+        <span className='block max-w-md truncate text-muted-foreground'>
+          {category.description || 'No description yet'}
+        </span>
+      ),
+    },
+    {
+      id: 'createdAt',
+      header: 'Created',
+      hideBelow: 'md',
+      sortable: true,
+      cell: (category) => (
+        <span className='whitespace-nowrap text-muted-foreground'>
+          {formatShortDate(category.createdAt)}
+        </span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      align: 'right',
+      srOnlyHeader: true,
+      cell: (category) => (
+        <Button
+          variant='outline'
+          size='sm'
+          onClick={() => openEdit(category)}
+          leadingIcon={<Pencil className='h-3 w-3' aria-hidden='true' />}
+          aria-label={`Edit ${category.name}`}
+        >
+          Edit
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <div>
       <PageHeader
         title='Categories'
-        description={`${categories.length} gear categor${categories.length !== 1 ? 'ies' : 'y'}`}
+        description={`${categories.length} gear categor${categories.length === 1 ? 'y' : 'ies'} available to providers.`}
         action={
           <Button
             onClick={openCreate}
-            leadingIcon={<PlusCircle className='h-4 w-4' />}
+            leadingIcon={<PlusCircle className='h-4 w-4' aria-hidden='true' />}
           >
             New Category
           </Button>
         }
       />
 
-      {error && (
-        <ErrorBanner
-          message={error}
-          title='Could not load categories'
-          showToast={true}
-        />
+      {initialError && (
+        <ErrorBanner message={initialError} title='Could not load categories' />
       )}
+
+      <TableToolbar
+        searchValue={table.search}
+        onSearchChange={table.setSearch}
+        searchLabel='Find a category'
+        searchPlaceholder='Search by name or description…'
+        selects={[
+          {
+            key: 'described',
+            label: 'Description',
+            value: table.filterValues.described ?? '',
+            options: DESCRIBED_OPTIONS,
+            onChange: (value) => table.setFilter('described', value),
+          },
+        ]}
+        hasActiveFilters={table.hasActiveFilters}
+        onClearFilters={table.clearFilters}
+      />
+
+      <DataTable
+        caption='Gear categories available to providers'
+        columns={columns}
+        rows={table.rows}
+        getRowKey={(category) => category.id}
+        emptyIcon={Tag}
+        emptyTitle={
+          table.hasActiveFilters ? 'No matching categories' : 'No categories yet'
+        }
+        emptyDescription={
+          table.hasActiveFilters
+            ? 'Try a different search term or filter.'
+            : 'Create your first gear category so providers can list equipment under it.'
+        }
+        emptyAction={
+          !table.hasActiveFilters && (
+            <Button
+              onClick={openCreate}
+              size='sm'
+              leadingIcon={
+                <PlusCircle className='h-3.5 w-3.5' aria-hidden='true' />
+              }
+            >
+              New Category
+            </Button>
+          )
+        }
+        sortKey={table.sortKey}
+        sortDirection={table.sortDirection}
+        onSort={table.toggleSort}
+        footer={
+          <Pagination
+            page={table.page}
+            totalPages={table.totalPages}
+            total={table.filteredCount}
+            pageSize={PAGE_SIZE}
+            onPageChange={table.setPage}
+            itemLabel='categories'
+          />
+        }
+      />
 
       <Modal
         open={showForm}
-        onClose={() => setShowForm(false)}
+        onClose={() => !saving && setShowForm(false)}
         title={editingId ? 'Edit Category' : 'New Category'}
         onSave={handleSave}
         saving={saving}
@@ -149,8 +290,8 @@ export function CategoriesContent({
         <form
           className='flex flex-col gap-4'
           noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
+          onSubmit={(event) => {
+            event.preventDefault();
             handleSave();
           }}
         >
@@ -160,8 +301,8 @@ export function CategoriesContent({
                 {...props}
                 type='text'
                 value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder='e.g., Cycling'
+                onChange={(event) => setName(event.target.value)}
+                placeholder='e.g. Cycling'
                 maxLength={100}
               />
             )}
@@ -177,7 +318,7 @@ export function CategoriesContent({
                 {...props}
                 type='text'
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(event) => setDescription(event.target.value)}
                 placeholder='Short description (optional)'
                 maxLength={255}
               />
@@ -185,54 +326,6 @@ export function CategoriesContent({
           </FormField>
         </form>
       </Modal>
-
-      {categories.length === 0 ? (
-        <EmptyState
-          icon={Tag}
-          title='No categories yet'
-          description='Create your first gear category so providers can list their equipment under it.'
-          action={
-            <Button
-              onClick={openCreate}
-              size='sm'
-              leadingIcon={<PlusCircle className='h-3.5 w-3.5' />}
-            >
-              New Category
-            </Button>
-          }
-        />
-      ) : (
-        <div className='surface-card overflow-hidden'>
-          <ul className='divide-y divide-border'>
-            {categories.map((cat) => (
-              <li
-                key={cat.id}
-                className='flex items-center justify-between gap-4 px-5 py-4'
-              >
-                <div className='min-w-0'>
-                  <p className='text-sm font-semibold text-foreground'>
-                    {cat.name}
-                  </p>
-                  {cat.description && (
-                    <p className='mt-0.5 text-xs text-muted-foreground'>
-                      {cat.description}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => openEdit(cat)}
-                  leadingIcon={<Pencil className='h-3 w-3' />}
-                  aria-label={`Edit ${cat.name}`}
-                >
-                  Edit
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

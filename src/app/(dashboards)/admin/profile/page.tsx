@@ -1,14 +1,8 @@
+import type { Metadata } from 'next';
 import { ProfileContent } from '@/components/dashboard/ProfileContent';
-import { PageHeader } from '@/components/dashboard/PageHeader';
+
+export const metadata: Metadata = { title: 'My Profile · GearUp' };
 
 export default async function AdminProfilePage() {
-  return (
-    <div>
-      <PageHeader
-        title='Profile Settings'
-        description='View and update your account information.'
-      />
-      <ProfileContent />
-    </div>
-  );
+  return <ProfileContent />;
 }

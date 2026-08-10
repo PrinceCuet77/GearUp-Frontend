@@ -1,5 +1,5 @@
-import { ReviewSkeleton } from './_components/ReviewSkeleton';
+import { TablePageSkeleton } from '@/components/ui/Skeleton';
 
-export default function ReviewsLoading() {
-  return <ReviewSkeleton rows={5} />;
+export default function CustomerReviewsLoading() {
+  return <TablePageSkeleton rows={6} cols={4} filters={1} />;
 }

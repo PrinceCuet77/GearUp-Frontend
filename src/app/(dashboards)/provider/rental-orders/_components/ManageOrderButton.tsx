@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UpdateOrderStatusModal } from '@/components/dashboard/UpdateOrderStatusModal';
+import { Button } from '@/components/ui/Button';
 import type { RentalOrder } from '@/lib/types';
 
 interface ManageOrderButtonProps {
@@ -17,17 +18,20 @@ export function ManageOrderButton({ order }: ManageOrderButtonProps) {
 
   return (
     <>
-      <button
-        type='button'
+      <Button
+        variant='outline'
+        size='sm'
         onClick={() => setOpen(true)}
         disabled={isDisabled}
-        className='cursor-pointer text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50'
-        style={{
-          color: isDisabled ? 'var(--muted-foreground)' : 'var(--primary)',
-        }}
+        title={
+          isDisabled
+            ? 'Only placed or paid orders can be advanced'
+            : 'Advance this order'
+        }
       >
         Manage
-      </button>
+        <span className='sr-only'> order #{order.id.slice(0, 8)}</span>
+      </Button>
 
       <UpdateOrderStatusModal
         open={open}

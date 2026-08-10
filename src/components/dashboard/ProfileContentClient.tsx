@@ -1,269 +1,304 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Pencil, User as UserIcon } from 'lucide-react';
+import { useForm, useWatch } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  AlertCircle,
+  BadgeCheck,
+  CalendarDays,
+  CheckCircle2,
+  Mail,
+  RefreshCw,
+  Save,
+  ShieldCheck,
+  UserCog,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import Modal from '@/components/Modal';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
+import { UserAvatar } from './UserAvatar';
 import { updateProfile } from '@/app/(dashboards)/customer/profile/_actions/updateProfile';
 import { useAuthStore } from '@/store/useAuthStore';
+import {
+  updateProfileSchema,
+  type UpdateProfileValues,
+} from '@/lib/validations/profile';
+import { formatDate } from '@/lib/gear-utils';
 import type { User, UserRole } from '@/lib/types';
+
+const ROLE_TONE: Record<UserRole, BadgeTone> = {
+  ADMIN: 'primary',
+  PROVIDER: 'secondary',
+  CUSTOMER: 'accent',
+};
+
+const ROLE_LABEL: Record<UserRole, string> = {
+  ADMIN: 'Administrator',
+  PROVIDER: 'Gear Provider',
+  CUSTOMER: 'Customer',
+};
 
 interface ProfileContentClientProps {
   user: User;
 }
 
-/** Roles map onto brand tones only — no extra colours enter the palette. */
-const ROLE_TONE: Record<UserRole, BadgeTone> = {
-  ADMIN: 'danger',
-  PROVIDER: 'secondary',
-  CUSTOMER: 'accent',
-};
-
-function getInitials(n?: string | null, e?: string) {
-  if (n)
-    return n
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((w) => w[0])
-      .join('')
-      .toUpperCase();
-  return (e?.[0] ?? 'U').toUpperCase();
-}
-
+/**
+ * Profile page: identity summary plus the editable fields, inline.
+ *
+ * Editing happens on the page rather than in a modal — the form is the point of
+ * the page, and an inline form keeps the current values visible while typing.
+ */
 export function ProfileContentClient({ user }: ProfileContentClientProps) {
   const router = useRouter();
-  const { setUser } = useAuthStore();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [name, setName] = useState(user.name ?? '');
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl ?? '');
-  const [saving, setSaving] = useState(false);
-  const [avatarFailed, setAvatarFailed] = useState(false);
-  const [previewFailed, setPreviewFailed] = useState(false);
+  const setUser = useAuthStore((state) => state.setUser);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  /* Track original values to detect changes */
-  const originalName = user.name ?? '';
-  const originalAvatar = user.avatarUrl ?? '';
-  const hasChanges = name !== originalName || avatarUrl !== originalAvatar;
+  const defaultValues: UpdateProfileValues = {
+    name: user.name ?? '',
+    avatarUrl: user.avatarUrl ?? '',
+  };
 
-  /* Reset the draft fields each time the modal opens. Adjusting during render
-     keeps the first painted frame correct — an effect would briefly show the
-     previously edited (and discarded) values. */
-  const [wasOpen, setWasOpen] = useState(modalOpen);
-  if (modalOpen !== wasOpen) {
-    setWasOpen(modalOpen);
-    if (modalOpen) {
-      setName(originalName);
-      setAvatarUrl(originalAvatar);
-      setPreviewFailed(false);
-    }
-  }
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors, isSubmitting, isDirty },
+  } = useForm<UpdateProfileValues>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues,
+    mode: 'onBlur',
+  });
 
-  const nameError =
-    name.trim().length > 100 ? 'Name must be 100 characters or fewer.' : undefined;
-  const avatarError =
-    avatarUrl.trim().length > 255
-      ? 'Avatar URL must be 255 characters or fewer.'
-      : undefined;
+  // Subscribed values (not `watch()`) so the summary card previews edits live
+  // without handing the compiler a function it cannot memoise.
+  const previewName = useWatch({ control, name: 'name' });
+  const previewAvatar = useWatch({ control, name: 'avatarUrl' });
 
-  const handleSave = useCallback(async () => {
-    const trimmedName = name.trim();
-    const trimmedAvatar = avatarUrl.trim();
-
-    if (trimmedName.length > 100) {
-      toast.error('Name must be 100 characters or fewer.');
-      return;
-    }
-    if (trimmedAvatar.length > 255) {
-      toast.error('Avatar URL must be 255 characters or fewer.');
-      return;
-    }
-
-    setSaving(true);
+  const onSubmit = async (values: UpdateProfileValues) => {
+    setSubmitError(null);
+    setSavedAt(null);
 
     const result = await updateProfile({
-      name: trimmedName,
-      avatarUrl: trimmedAvatar || undefined,
+      name: values.name.trim(),
+      avatarUrl: values.avatarUrl.trim() || undefined,
     });
 
-    if (result.success && result.data) {
-      // Update Zustand store with new profile data
-      setUser(result.data);
-      toast.success('Profile updated successfully.');
-      setModalOpen(false);
-      setAvatarFailed(false);
-      router.refresh();
-    } else {
-      toast.error(
-        result.error ?? 'Failed to update profile. Please try again.',
-      );
+    if (!result.success || !result.data) {
+      const message =
+        result.error ?? 'Could not update your profile. Please try again.';
+      setSubmitError(message);
+      toast.error(message);
+      return;
     }
 
-    setSaving(false);
-  }, [name, avatarUrl, router, setUser]);
+    setUser(result.data);
+    setSavedAt(new Date().toISOString());
+    toast.success('Profile updated.');
+    // Re-seed the form so "unsaved changes" clears and Reset returns here.
+    reset({
+      name: result.data.name ?? '',
+      avatarUrl: result.data.avatarUrl ?? '',
+    });
+    router.refresh();
+  };
+
+  const details = [
+    {
+      icon: Mail,
+      label: 'Email address',
+      value: user.email,
+      note: 'Contact support to change your email.',
+    },
+    {
+      icon: ShieldCheck,
+      label: 'Account role',
+      value: ROLE_LABEL[user.role] ?? user.role,
+      note: 'Determines which parts of GearUp you can access.',
+    },
+    {
+      icon: CalendarDays,
+      label: 'Member since',
+      value: formatDate(user.createdAt),
+      note: 'The day this account was created.',
+    },
+    {
+      icon: RefreshCw,
+      label: 'Last updated',
+      value: formatDate(user.updatedAt),
+      note: 'When your details were last changed.',
+    },
+  ];
 
   return (
-    <div className='mx-auto max-w-2xl space-y-6'>
-      {/* Profile info card */}
-      <div className='surface-card p-6'>
+    <div className='grid gap-6 lg:grid-cols-3'>
+      {/* Identity summary */}
+      <section className='surface-card h-fit p-6 lg:col-span-1'>
+        <div className='flex flex-col items-center text-center'>
+          <UserAvatar
+            name={previewName || user.name}
+            email={user.email}
+            src={previewAvatar || user.avatarUrl}
+            size={88}
+            shape='control'
+          />
+          <h2 className='mt-4 w-full truncate text-lg font-bold text-foreground'>
+            {previewName || user.name || 'Unnamed account'}
+          </h2>
+          <p className='mt-0.5 w-full truncate text-sm text-muted-foreground'>
+            {user.email}
+          </p>
+          <div className='mt-3 flex flex-wrap items-center justify-center gap-2'>
+            <Badge tone={ROLE_TONE[user.role] ?? 'neutral'} size='sm'>
+              {ROLE_LABEL[user.role] ?? user.role}
+            </Badge>
+            <Badge
+              tone={user.status === 'ACTIVE' ? 'secondary' : 'danger'}
+              size='sm'
+              icon={<BadgeCheck className='h-3 w-3' aria-hidden='true' />}
+            >
+              {user.status === 'ACTIVE' ? 'Active' : 'Suspended'}
+            </Badge>
+          </div>
+        </div>
+
+        <dl className='mt-6 space-y-4 border-t border-border pt-5'>
+          {details.map((detail) => (
+            <div key={detail.label} className='flex items-start gap-3'>
+              <span className='mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-muted'>
+                <detail.icon
+                  className='h-4 w-4 text-muted-foreground'
+                  aria-hidden='true'
+                />
+              </span>
+              <div className='min-w-0'>
+                <dt className='text-xs font-semibold text-muted-foreground'>
+                  {detail.label}
+                </dt>
+                <dd className='truncate text-sm font-medium text-foreground'>
+                  {detail.value}
+                </dd>
+              </div>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* Editable fields */}
+      <section className='surface-card p-6 lg:col-span-2'>
         <div className='mb-5 flex items-center gap-2'>
-          <UserIcon className='h-4 w-4 text-primary' aria-hidden='true' />
+          <UserCog className='h-4 w-4 text-primary' aria-hidden='true' />
           <h2 className='text-base font-bold text-foreground'>
-            Personal Information
+            Edit your information
           </h2>
         </div>
 
-        <div className='space-y-4'>
-          {/* Avatar */}
-          <div className='flex items-center gap-4'>
-            {user.avatarUrl && !avatarFailed ? (
-              <Image
-                src={user.avatarUrl}
-                alt={user.name ?? 'Profile photo'}
-                width={64}
-                height={64}
-                className='h-16 w-16 rounded-control object-cover'
-                onError={() => setAvatarFailed(true)}
-                unoptimized
-              />
-            ) : (
-              <span className='flex h-16 w-16 items-center justify-center rounded-control bg-primary text-lg font-bold text-primary-foreground'>
-                {getInitials(user.name, user.email)}
-              </span>
-            )}
-            <div className='min-w-0'>
-              <p className='truncate font-semibold text-foreground'>
-                {user.name ?? 'No name set'}
-              </p>
-              <p className='truncate text-xs text-muted-foreground'>
-                {user.email}
-              </p>
-              <Badge
-                tone={ROLE_TONE[user.role] ?? 'neutral'}
-                size='sm'
-                className='mt-1.5'
-              >
-                {user.role}
-              </Badge>
-            </div>
-          </div>
+        {savedAt && (
+          <p
+            role='status'
+            className='mb-5 flex items-center gap-2 rounded-control border border-secondary/40 bg-secondary-soft px-4 py-3 text-sm font-medium text-secondary-soft-foreground'
+          >
+            <CheckCircle2 className='h-4 w-4 shrink-0' aria-hidden='true' />
+            Your profile was saved.
+          </p>
+        )}
 
-          {/* Read-only fields */}
-          <div className='grid gap-4 sm:grid-cols-2'>
-            <FormField label='Email'>
-              {(props) => (
-                <input
-                  {...props}
-                  type='email'
-                  value={user.email}
-                  disabled
-                  className={`${props.className} cursor-not-allowed opacity-60`}
-                />
-              )}
-            </FormField>
+        {submitError && (
+          <p
+            role='alert'
+            className='mb-5 flex items-center gap-2 rounded-control border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground'
+          >
+            <AlertCircle className='h-4 w-4 shrink-0' aria-hidden='true' />
+            {submitError}
+          </p>
+        )}
 
-            <FormField label='Full name'>
-              {(props) => (
-                <input
-                  {...props}
-                  type='text'
-                  value={user.name ?? ''}
-                  disabled
-                  className={`${props.className} cursor-not-allowed opacity-60`}
-                />
-              )}
-            </FormField>
-          </div>
-
-          <div className='flex justify-end'>
-            <Button
-              onClick={() => setModalOpen(true)}
-              leadingIcon={<Pencil className='h-4 w-4' />}
-            >
-              Update Profile
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Edit Modal */}
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title='Update Profile'
-        onSave={handleSave}
-        saveLabel='Save Changes'
-        cancelLabel='Cancel'
-        saving={saving}
-        saveDisabled={!hasChanges || Boolean(nameError || avatarError)}
-        footerRight
-      >
-        <form
-          className='space-y-4'
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSave();
-          }}
-        >
+        <form onSubmit={handleSubmit(onSubmit)} noValidate className='space-y-5'>
           <FormField
             label='Full name'
-            error={nameError}
-            hint={`${name.length}/100 characters`}
+            required
+            error={errors.name?.message}
+            hint='Shown to providers and customers on your orders.'
           >
             {(props) => (
               <input
                 {...props}
+                {...register('name')}
                 type='text'
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder='Your full name'
+                autoComplete='name'
+                placeholder='e.g. Rezoan Shakil'
                 maxLength={100}
               />
             )}
           </FormField>
 
           <FormField
-            label='Avatar URL'
-            error={avatarError}
-            hint={`Optional — ${avatarUrl.length}/255 characters`}
+            label='Profile photo URL'
+            error={errors.avatarUrl?.message}
+            hint='Optional. Must be an https:// link to an image; leave empty to use your initials.'
           >
             {(props) => (
               <input
                 {...props}
+                {...register('avatarUrl')}
                 type='url'
-                value={avatarUrl}
-                onChange={(e) => {
-                  setAvatarUrl(e.target.value);
-                  setPreviewFailed(false);
-                }}
-                placeholder='https://example.com/avatar.jpg'
+                inputMode='url'
+                autoComplete='photo'
+                placeholder='https://example.com/photo.jpg'
                 maxLength={255}
               />
             )}
           </FormField>
 
-          {avatarUrl && !previewFailed && (
-            <div className='flex items-center gap-3'>
-              <Image
-                src={avatarUrl}
-                alt='Avatar preview'
-                width={40}
-                height={40}
-                className='h-10 w-10 rounded-control object-cover'
-                onError={() => setPreviewFailed(true)}
-                unoptimized
+          <FormField label='Email address' hint='Email cannot be changed here.'>
+            {(props) => (
+              <input
+                {...props}
+                type='email'
+                value={user.email}
+                readOnly
+                disabled
+                className={`${props.className} cursor-not-allowed opacity-60`}
               />
-              <span className='text-xs text-muted-foreground'>Preview</span>
+            )}
+          </FormField>
+
+          <div className='flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between'>
+            <p className='text-xs text-muted-foreground'>
+              {isDirty
+                ? 'You have unsaved changes.'
+                : 'Everything is up to date.'}
+            </p>
+            <div className='flex gap-3'>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => {
+                  reset();
+                  setSubmitError(null);
+                  setSavedAt(null);
+                }}
+                disabled={!isDirty || isSubmitting}
+              >
+                Reset
+              </Button>
+              <Button
+                type='submit'
+                loading={isSubmitting}
+                loadingText='Saving…'
+                disabled={!isDirty}
+                leadingIcon={<Save className='h-4 w-4' aria-hidden='true' />}
+              >
+                Save changes
+              </Button>
             </div>
-          )}
+          </div>
         </form>
-      </Modal>
+      </section>
     </div>
   );
 }

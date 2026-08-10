@@ -1,12 +1,18 @@
-import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { PageHeader } from '@/components/dashboard/PageHeader';
-import { TableSkeleton } from '@/components/ui/Skeleton';
+import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import { getAllPayments } from './_actions/getAllPayments';
 import { PaymentsTable } from './_components/PaymentsTable';
 import { PaymentResult } from './_components/PaymentResult';
-import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = { title: 'Payments · GearUp' };
 
 const LIMIT = 10;
+
+/** Gateway redirects come back to this route with an outcome in `status`. */
+const RESULT_STATUSES = ['success', 'failed', 'cancelled'];
 
 export default async function PaymentsPage({
   searchParams,
@@ -19,33 +25,32 @@ export default async function PaymentsPage({
   }>;
 }) {
   const params = await searchParams;
-  const page = Math.max(1, Number(params.page) || 1);
   const statusFilter = params.status ?? '';
-  const orderId = params.orderId;
-  const tranId = params.tranId;
 
-  // Handle payment result pages
-  if (['success', 'failed', 'cancelled'].includes(statusFilter)) {
+  if (RESULT_STATUSES.includes(statusFilter)) {
     return (
-      <PaymentResult status={statusFilter} orderId={orderId} tranId={tranId} />
+      <PaymentResult
+        status={statusFilter}
+        orderId={params.orderId}
+        tranId={params.tranId}
+      />
     );
   }
 
+  const page = Math.max(1, Number(params.page) || 1);
   const result = await getAllPayments({
     page,
     limit: LIMIT,
     status: statusFilter || undefined,
   });
 
-  const payments = result.success ? result.data : [];
-  const totalPages = result.meta?.totalPages ?? 1;
-  const total = result.meta?.total ?? 0;
+  const total = result.meta?.total ?? result.data.length;
 
   return (
     <div>
       <PageHeader
-        title='Payment History'
-        description={`${total} transaction${total !== 1 ? 's' : ''}`}
+        title='Payments'
+        description={`${total} transaction${total === 1 ? '' : 's'} on your account.`}
       />
 
       {result.error && (
@@ -55,15 +60,13 @@ export default async function PaymentsPage({
         />
       )}
 
-      <Suspense fallback={<TableSkeleton rows={5} cols={5} />}>
-        <PaymentsTable
-          payments={payments}
-          page={page}
-          totalPages={totalPages}
-          total={total}
-          statusFilter={statusFilter}
-        />
-      </Suspense>
+      <PaymentsTable
+        payments={result.data}
+        page={page}
+        totalPages={result.meta?.totalPages ?? 1}
+        total={total}
+        pageSize={LIMIT}
+      />
     </div>
   );
 }

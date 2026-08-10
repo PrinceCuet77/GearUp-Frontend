@@ -6,12 +6,49 @@ import {
 } from '@/components/dashboard/DashboardShell';
 
 const navItems: NavItem[] = [
-  { href: '/admin', label: 'Overview', icon: 'LayoutDashboard' },
-  { href: '/admin/users', label: 'Users', icon: 'Users' },
-  { href: '/admin/gears', label: 'All Gears', icon: 'Package' },
-  { href: '/admin/categories', label: 'Categories', icon: 'Tag' },
-  { href: '/admin/profile', label: 'Profile', icon: 'User' },
-  { href: '/admin/change-password', label: 'Change Password', icon: 'Lock' },
+  {
+    href: '/admin',
+    label: 'Overview',
+    icon: 'LayoutDashboard',
+    group: 'Dashboard',
+    exact: true,
+  },
+  {
+    href: '/admin/analytics',
+    label: 'Analytics',
+    icon: 'ChartColumn',
+    group: 'Dashboard',
+  },
+  {
+    href: '/admin/users',
+    label: 'Manage Users',
+    icon: 'Users',
+    group: 'Management',
+  },
+  {
+    href: '/admin/gears',
+    label: 'Manage Gear',
+    icon: 'Package',
+    group: 'Management',
+  },
+  {
+    href: '/admin/categories',
+    label: 'Categories',
+    icon: 'Tag',
+    group: 'Management',
+  },
+  {
+    href: '/admin/profile',
+    label: 'Profile',
+    icon: 'User',
+    group: 'Account',
+  },
+  {
+    href: '/admin/settings',
+    label: 'Settings',
+    icon: 'Settings',
+    group: 'Account',
+  },
 ];
 
 export default async function AdminDashboardLayout({
@@ -26,5 +63,9 @@ export default async function AdminDashboardLayout({
     redirect('/login');
   }
 
-  return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
+  return (
+    <DashboardShell navItems={navItems} basePath='/admin' roleLabel='Admin'>
+      {children}
+    </DashboardShell>
+  );
 }

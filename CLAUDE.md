@@ -52,7 +52,7 @@ Required in `.env.local` (see `.env.example`):
 Uses route groups to separate layout/guard concerns without affecting URLs:
 
 - `(auth)/` — `/login`, `/register`, centered auth layout, own `_actions/`.
-- `(dashboards)/{admin,customer,provider}/` — each has its own `layout.tsx` doing a client-side role guard + sidebar nav (belt-and-suspenders with the middleware RBAC), plus its own `_actions/` and `_components/` colocated per route.
+- `(dashboards)/{admin,customer,provider}/` — each `layout.tsx` re-checks the profile server-side (belt-and-suspenders with the middleware RBAC) and passes a `NavItem[]` to `DashboardShell`, plus its own `_actions/` and `_components/` colocated per route. Every role has `profile/` and `settings/` (settings hosts the password form); admin and provider also have `analytics/`.
 - `(public)/` — landing/browsing pages (`/gears`, `/gears/[id]`) with their own `_actions/`/`_components/`.
 
 Route groups each define their own `_actions/` — there is no single global actions directory. When adding a feature, colocate the server action inside the route group/page it serves, following the existing sibling files as the pattern.
@@ -66,6 +66,17 @@ Three Zustand stores, all `'use client'`:
 - `useRentalStore` — transient (unpersisted) loading/error state for order creation.
 
 `src/contexts/CartContext.tsx` is a legacy React Context left over from before the Zustand cart store; treat `useCartStore` as the source of truth for cart state.
+
+### Dashboard building blocks
+
+Dashboard pages are assembled from a fixed set of pieces rather than bespoke markup — reach for these before writing a new card, table or chart:
+
+- **`src/components/dashboard/`** — `DashboardShell` (sidebar + topbar + `ProfileMenu`), `PageHeader`/`SectionHeader`, `StatsCard`, `DataTable` + `Pagination` + `TableToolbar`, `StatusBadge`, `UserAvatar`, `GearListingsTable`. `DataTable` owns the surface, header, loading skeleton, empty state and footer slot; callers supply only columns and rows.
+- **`src/components/charts/`** — dependency-free SVG charts (`LineChart`, `BarChart`, `DonutChart`, `RankedBars`) inside a `ChartCard`. They are `'use client'`, so **props must be serializable**: pass `format='count' | 'currency'`, never a formatter function (a Server Component rendering one will throw at runtime, not at build).
+- **`src/lib/chart-data.ts`** — pure derivations (`byMonth`, `cumulative`, `countBy`, `sumBy`, `topEntries`, `distribute`, `monthOverMonth`, the status/role breakdowns). Every dashboard series is computed here from records the app already fetches; there is no sample or placeholder data anywhere in the dashboards.
+- **`src/lib/hooks/`** — `useUrlQuery` (URL-driven filters/pagination for server-paginated tables), `useClientTable` (search/filter/sort/paginate an in-memory set), `useDebouncedValue`, `useClickOutside`.
+
+Charts draw from `--chart-1/2/3`, re-stepped per theme so the categorical set passes the colourblind-separation and contrast checks against the card surface. Status colours in charts mirror `StatusBadge` exactly, so a status reads the same in a chart, a badge and a table row.
 
 ### Validation (`src/lib/validations/`)
 

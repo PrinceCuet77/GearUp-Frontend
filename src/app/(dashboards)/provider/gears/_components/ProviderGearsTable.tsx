@@ -1,270 +1,208 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
-import { Package, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { GearItem } from '@/lib/types';
-import { parseGearImages } from '@/lib/gear-utils';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Package, PlusCircle } from 'lucide-react';
+import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import { Pagination } from '@/components/dashboard/Pagination';
+import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import { GearStatusBadge } from '@/components/dashboard/StatusBadge';
+import { Button } from '@/components/ui/Button';
+import { useDebouncedValue, useUrlQuery } from '@/lib/hooks';
+import { formatBDT, parseGearImages } from '@/lib/gear-utils';
+import type { ApiMeta, Category, GearItem } from '@/lib/types';
 import { GearActions } from './GearActions';
-import { useGearEdit, useGearAdd } from './ProviderGearsShell';
+import { useGearAdd, useGearEdit } from './ProviderGearsShell';
 
-function formatCurrency(amount: string | number) {
-  return `৳${Number(amount).toFixed(2)}`;
-}
+const SORT_OPTIONS = [
+  { value: 'createdAt:desc', label: 'Newest first' },
+  { value: 'createdAt:asc', label: 'Oldest first' },
+  { value: 'price:asc', label: 'Price: low to high' },
+  { value: 'price:desc', label: 'Price: high to low' },
+  { value: 'name:asc', label: 'Name: A to Z' },
+  { value: 'name:desc', label: 'Name: Z to A' },
+];
 
 interface ProviderGearsTableProps {
   gears: GearItem[];
-  page: number;
-  totalPages: number;
-  total: number;
+  categories: Category[];
+  meta: ApiMeta;
 }
 
+/** The provider's inventory, filtered and paged through the URL. */
 export function ProviderGearsTable({
   gears,
-  page,
-  totalPages,
-  total,
+  categories,
+  meta,
 }: ProviderGearsTableProps) {
   const onEdit = useGearEdit();
   const onAdd = useGearAdd();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const query = useUrlQuery();
 
-  const createQueryString = useCallback(
-    (updates: Record<string, string>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(updates)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      return params.toString();
-    },
-    [searchParams],
+  const urlSearch = query.get('search');
+  const [searchInput, setSearchInput] = useState(urlSearch);
+  const debouncedSearch = useDebouncedValue(searchInput, 400);
+
+  useEffect(() => {
+    if (debouncedSearch !== urlSearch) query.set({ search: debouncedSearch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, urlSearch]);
+
+  const currentSort = `${query.get('sortBy', 'createdAt')}:${query.get('sortOrder', 'desc')}`;
+  const hasActiveFilters = Boolean(
+    searchInput || query.get('category') || query.get('sortBy'),
   );
 
-  const handlePageChange = (newPage: number) => {
-    router.push(`${pathname}?${createQueryString({ page: String(newPage) })}`);
-  };
-
-  if (gears.length === 0) {
-    return (
-      <div className='flex flex-col items-center justify-center py-20'>
-        <Package
-          className='mb-3 h-10 w-10 opacity-30'
-          style={{ color: 'var(--muted-foreground)' }}
+  const columns: Array<DataTableColumn<GearItem>> = [
+    {
+      id: 'gear',
+      header: 'Gear',
+      cell: (gear) => (
+        <div className='flex items-center gap-3'>
+          <Image
+            src={parseGearImages(gear.images)[0]}
+            alt=''
+            width={44}
+            height={44}
+            unoptimized
+            className='h-11 w-11 shrink-0 rounded-control object-cover'
+          />
+          <div className='min-w-0'>
+            <p className='truncate font-medium text-foreground'>{gear.name}</p>
+            <p className='max-w-56 truncate text-xs text-muted-foreground'>
+              {gear.description}
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: 'category',
+      header: 'Category',
+      hideBelow: 'md',
+      cell: (gear) => (
+        <span className='text-muted-foreground'>
+          {gear.category?.name ?? 'Uncategorised'}
+        </span>
+      ),
+    },
+    {
+      id: 'price',
+      header: 'Price / day',
+      align: 'right',
+      cell: (gear) => (
+        <span className='font-semibold'>{formatBDT(gear.price)}</span>
+      ),
+    },
+    {
+      id: 'stock',
+      header: 'Stock',
+      align: 'right',
+      hideBelow: 'sm',
+      cell: (gear) => <span>{gear.stock}</span>,
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      hideBelow: 'sm',
+      cell: (gear) => <GearStatusBadge isActive={gear.isActive} />,
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      align: 'right',
+      srOnlyHeader: true,
+      cell: (gear) => (
+        <GearActions
+          gearId={gear.id}
+          gearName={gear.name}
+          gear={gear}
+          onEdit={() => onEdit?.(gear)}
         />
-        <p
-          className='text-sm font-medium'
-          style={{ color: 'var(--muted-foreground)' }}
-        >
-          No gear listed yet
-        </p>
-        <button
-          onClick={() => onAdd?.()}
-          className='mt-4 inline-flex h-9 cursor-pointer items-center gap-2 rounded-control bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover'
-        >
-          <PlusCircle className='h-4 w-4' />
-          Add Your First Gear
-        </button>
-      </div>
-    );
-  }
+      ),
+    },
+  ];
 
   return (
     <div>
-      {/* Mobile card view */}
-      <div className='block sm:hidden'>
-        <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
-          {gears.map((gear) => {
-            const gearImages = parseGearImages(gear.images);
-            return (
-              <li key={gear.id} className='p-4'>
-                <div className='flex items-start justify-between gap-3'>
-                  <div className='min-w-0 flex-1'>
-                    <div className='flex items-center gap-3'>
-                      {gearImages.length > 0 && (
-                        <img
-                          src={gearImages[0]}
-                          alt={gear.name}
-                          className='h-12 w-12 rounded-lg object-cover shrink-0'
-                        />
-                      )}
-                      <div className='min-w-0 flex-1'>
-                        <p
-                          className='truncate font-medium'
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          {gear.name}
-                        </p>
-                        <p
-                          className='mt-0.5 text-sm'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
-                          {formatCurrency(gear.price)}/day · Stock: {gear.stock}
-                        </p>
-                        <GearStatusBadge isActive={gear.isActive} />
-                      </div>
-                    </div>
-                  </div>
-                  <GearActions
-                    gearId={gear.id}
-                    gearName={gear.name}
-                    gear={gear}
-                    onEdit={() => onEdit?.(gear)}
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <TableToolbar
+        searchValue={searchInput}
+        onSearchChange={setSearchInput}
+        searchLabel='Find a listing'
+        searchPlaceholder='Search your gear by name…'
+        selects={[
+          {
+            key: 'category',
+            label: 'Category',
+            value: query.get('category'),
+            options: [
+              { value: '', label: 'All categories' },
+              ...categories.map((category) => ({
+                value: category.id,
+                label: category.name,
+              })),
+            ],
+            onChange: (value) => query.set({ category: value }),
+          },
+          {
+            key: 'sort',
+            label: 'Sort by',
+            value: currentSort,
+            options: SORT_OPTIONS,
+            onChange: (value) => {
+              const [sortBy, sortOrder] = value.split(':');
+              query.set({ sortBy, sortOrder });
+            },
+          },
+        ]}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={() => {
+          setSearchInput('');
+          query.clear();
+        }}
+        isPending={query.isPending}
+      />
 
-      {/* Desktop table view */}
-      <div className='hidden overflow-x-auto sm:block'>
-        <table className='w-full'>
-          <thead>
-            <tr
-              className='border-b text-left text-xs font-semibold uppercase tracking-wide'
-              style={{
-                borderColor: 'var(--border)',
-                color: 'var(--muted-foreground)',
-              }}
+      <DataTable
+        caption='Gear you have listed on GearUp'
+        columns={columns}
+        rows={gears}
+        getRowKey={(gear) => gear.id}
+        loading={query.isPending && gears.length === 0}
+        emptyIcon={Package}
+        emptyTitle={
+          hasActiveFilters ? 'No matching listings' : 'No gear listed yet'
+        }
+        emptyDescription={
+          hasActiveFilters
+            ? 'Try a different search term or category.'
+            : 'Add your first listing to start receiving rental orders.'
+        }
+        emptyAction={
+          !hasActiveFilters && (
+            <Button
+              size='sm'
+              onClick={() => onAdd?.()}
+              leadingIcon={
+                <PlusCircle className='h-3.5 w-3.5' aria-hidden='true' />
+              }
             >
-              <th className='px-6 py-3'>Image</th>
-              <th className='px-6 py-3'>Name</th>
-              <th className='px-6 py-3'>Category</th>
-              <th className='px-6 py-3'>Price/Day</th>
-              <th className='px-6 py-3'>Stock</th>
-              <th className='px-6 py-3'>Status</th>
-              <th className='px-6 py-3'>Actions</th>
-            </tr>
-          </thead>
-          <tbody className='divide-y' style={{ borderColor: 'var(--border)' }}>
-            {gears.map((gear) => {
-              const gearImages = parseGearImages(gear.images);
-              return (
-                <tr
-                  key={gear.id}
-                  className='transition-colors'
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'var(--muted)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  <td className='px-6 py-4'>
-                    {gearImages.length > 0 ? (
-                      <img
-                        src={gearImages[0]}
-                        alt={gear.name}
-                        className='h-10 w-10 rounded-lg object-cover'
-                      />
-                    ) : (
-                      <div
-                        className='flex h-10 w-10 items-center justify-center rounded-lg'
-                        style={{ backgroundColor: 'var(--muted)' }}
-                      >
-                        <Package
-                          className='h-5 w-5 opacity-40'
-                          style={{ color: 'var(--muted-foreground)' }}
-                        />
-                      </div>
-                    )}
-                  </td>
-                  <td className='px-6 py-4'>
-                    <p
-                      className='text-sm font-medium'
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {gear.name}
-                    </p>
-                    <p
-                      className='truncate text-xs'
-                      style={{
-                        color: 'var(--muted-foreground)',
-                        maxWidth: '240px',
-                      }}
-                    >
-                      {gear.description}
-                    </p>
-                  </td>
-                  <td
-                    className='px-6 py-4 text-sm'
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    {gear.category?.name ?? '—'}
-                  </td>
-                  <td
-                    className='px-6 py-4 text-sm font-semibold'
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {formatCurrency(gear.price)}
-                  </td>
-                  <td
-                    className='px-6 py-4 text-sm'
-                    style={{ color: 'var(--foreground)' }}
-                  >
-                    {gear.stock}
-                  </td>
-                  <td className='px-6 py-4'>
-                    <GearStatusBadge isActive={gear.isActive} />
-                  </td>
-                  <td className='px-6 py-4'>
-                    <GearActions
-                      gearId={gear.id}
-                      gearName={gear.name}
-                      gear={gear}
-                      onEdit={() => onEdit?.(gear)}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {totalPages > 1 && (
-        <div
-          className='flex items-center justify-between border-t px-6 py-4'
-          style={{ borderColor: 'var(--border)' }}
-        >
-          <p className='text-sm' style={{ color: 'var(--muted-foreground)' }}>
-            Page {page} of {totalPages} · {total} listing
-            {total === 1 ? '' : 's'}
-          </p>
-          <div className='flex items-center gap-2'>
-            <button
-              onClick={() => handlePageChange(Math.max(1, page - 1))}
-              disabled={page === 1}
-              className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-              style={{
-                borderColor: 'var(--border)',
-                color: 'var(--foreground)',
-              }}
-            >
-              <ChevronLeft className='h-4 w-4' />
-            </button>
-            <button
-              onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
-              disabled={page === totalPages}
-              className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-              style={{
-                borderColor: 'var(--border)',
-                color: 'var(--foreground)',
-              }}
-            >
-              <ChevronRight className='h-4 w-4' />
-            </button>
-          </div>
-        </div>
-      )}
+              Add your first gear
+            </Button>
+          )
+        }
+        footer={
+          <Pagination
+            page={meta.page}
+            totalPages={meta.totalPages}
+            total={meta.total}
+            pageSize={meta.limit}
+            onPageChange={(page) => query.set({ page })}
+            itemLabel='listings'
+            isPending={query.isPending}
+          />
+        }
+      />
     </div>
   );
 }

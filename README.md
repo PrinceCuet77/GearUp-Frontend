@@ -122,8 +122,9 @@ src/
 │   │   │   ├── users/              # User management
 │   │   │   ├── gears/              # Gear moderation
 │   │   │   ├── categories/         # Category CRUD
+│   │   │   ├── analytics/          # Platform analytics & charts
 │   │   │   ├── profile/            # Admin profile
-│   │   │   └── change-password/
+│   │   │   └── settings/
 │   │   ├── customer/
 │   │   │   ├── layout.tsx          # Customer guard + sidebar nav
 │   │   │   ├── page.tsx            # Customer overview
@@ -131,14 +132,15 @@ src/
 │   │   │   ├── payments/           # Payment records
 │   │   │   ├── reviews/            # Review management
 │   │   │   ├── profile/
-│   │   │   └── change-password/
+│   │   │   └── settings/
 │   │   └── provider/
 │   │       ├── layout.tsx          # Provider guard + sidebar nav
 │   │       ├── page.tsx            # Provider overview
 │   │       ├── gears/              # Inventory management
 │   │       ├── rental-orders/      # Order processing
+│   │       ├── analytics/          # Provider analytics & charts
 │   │       ├── profile/
-│   │       └── change-password/
+│   │       └── settings/
 │   │
 │   └── (public)/                   # Public route group
 │       ├── _actions/               # Public server actions
@@ -241,18 +243,20 @@ Access is enforced at the **middleware level** (`proxy.ts`). Unauthorized role a
 | `/admin/gears`              | Admin    | Gear moderation          |
 | `/admin/categories`         | Admin    | Category management      |
 | `/admin/profile`            | Admin    | Admin profile            |
-| `/admin/change-password`    | Admin    | Change password          |
+| `/admin/analytics`          | Admin    | Platform analytics       |
+| `/admin/settings`           | Admin    | Account settings         |
 | `/customer`                 | Customer | Dashboard overview       |
 | `/customer/rental-orders`   | Customer | Rental order history     |
 | `/customer/payments`        | Customer | Payment records          |
 | `/customer/reviews`         | Customer | Review management        |
 | `/customer/profile`         | Customer | Customer profile         |
-| `/customer/change-password` | Customer | Change password          |
+| `/customer/settings`        | Customer | Account settings         |
 | `/provider`                 | Provider | Dashboard overview       |
 | `/provider/gears`           | Provider | Inventory management     |
 | `/provider/rental-orders`   | Provider | Order processing         |
 | `/provider/profile`         | Provider | Provider profile         |
-| `/provider/change-password` | Provider | Change password          |
+| `/provider/analytics`       | Provider | Provider analytics       |
+| `/provider/settings`        | Provider | Account settings         |
 
 ## State Management
 

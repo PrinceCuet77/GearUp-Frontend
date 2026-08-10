@@ -96,12 +96,12 @@
 | Method  | Endpoint                | Frontend File                                                              | Description                              |
 | ------- | ----------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
 | `PATCH` | `/api/user/me`          | `src/app/(dashboards)/customer/profile/_actions/updateProfile.ts`          | Updates the user's name and/or avatarUrl |
-| `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/customer/change-password/_actions/passwordChange.ts` | Changes the user's password (old + new)  |
+| `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/customer/settings/_actions/passwordChange.ts` | Changes the user's password (old + new)  |
 
 **Related Components:**
 
 - `src/app/(dashboards)/customer/profile/page.tsx` — Profile view/edit
-- `src/app/(dashboards)/customer/change-password/page.tsx` — Password change form
+- `src/app/(dashboards)/customer/settings/page.tsx` — Account settings (password change)
 - `src/components/dashboard/ProfileContent.tsx` — Profile display
 - `src/components/dashboard/ChangePasswordForm.tsx` — Password form
 
@@ -174,12 +174,12 @@
 | Method  | Endpoint                | Frontend File                                                              | Description                              |
 | ------- | ----------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
 | `PATCH` | `/api/user/me`          | `src/app/(dashboards)/provider/profile/_actions/updateProfile.ts`          | Updates provider's name and/or avatarUrl |
-| `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/provider/change-password/_actions/passwordChange.ts` | Changes the provider's password          |
+| `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/customer/settings/_actions/passwordChange.ts` | Changes the provider's password          |
 
 **Related Components:**
 
 - `src/app/(dashboards)/provider/profile/page.tsx` — Profile page
-- `src/app/(dashboards)/provider/change-password/page.tsx` — Password change
+- `src/app/(dashboards)/provider/settings/page.tsx` — Account settings (password change)
 
 ---
 

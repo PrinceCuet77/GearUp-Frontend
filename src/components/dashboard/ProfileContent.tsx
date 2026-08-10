@@ -1,15 +1,20 @@
 import { redirect } from 'next/navigation';
 import { getProfileAction } from '@/app/(auth)/_actions/getProfileActions';
+import { PageHeader } from './PageHeader';
 import { ProfileContentClient } from './ProfileContentClient';
 import type { User, UserStatus } from '@/lib/types';
 
+/**
+ * Profile page body, shared by all three roles.
+ *
+ * Fetches server-side so the form renders already populated — no empty-input
+ * flash while a client request resolves.
+ */
 export async function ProfileContent() {
   let profile;
   try {
     const result = await getProfileAction();
-    if (!result.success || !result.data) {
-      redirect('/login');
-    }
+    if (!result.success || !result.data) redirect('/login');
     profile = result.data!;
   } catch {
     redirect('/login');
@@ -29,5 +34,13 @@ export async function ProfileContent() {
     updatedAt: profile.updatedAt,
   };
 
-  return <ProfileContentClient user={user} />;
+  return (
+    <div>
+      <PageHeader
+        title='My Profile'
+        description='Your account details and how you appear to others on GearUp.'
+      />
+      <ProfileContentClient user={user} />
+    </div>
+  );
 }

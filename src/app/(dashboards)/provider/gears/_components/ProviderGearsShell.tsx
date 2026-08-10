@@ -3,6 +3,7 @@
 import { useState, createContext, useContext } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { PageHeader } from '@/components/dashboard/PageHeader';
+import { Button } from '@/components/ui/Button';
 import { GearFormModal } from './GearFormModal';
 import type { GearItem, Category } from '@/lib/types';
 
@@ -50,15 +51,14 @@ export function ProviderGearsShell({
     <div>
       <PageHeader
         title='My Gear'
-        description={`${total} item${total !== 1 ? 's' : ''} in inventory`}
+        description={`${total} listing${total === 1 ? '' : 's'} in your inventory.`}
         action={
-          <button
+          <Button
             onClick={handleOpenAdd}
-            className='inline-flex h-10 cursor-pointer items-center gap-2 rounded-control bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary-hover'
+            leadingIcon={<PlusCircle className='h-4 w-4' aria-hidden='true' />}
           >
-            <PlusCircle className='h-4 w-4' />
             Add Gear
-          </button>
+          </Button>
         }
       />
 

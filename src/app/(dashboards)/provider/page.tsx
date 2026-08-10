@@ -1,104 +1,169 @@
-import {
-  Package,
-  ClipboardList,
-  Clock,
-  KeyRound,
-  UserCog,
-} from 'lucide-react';
+import type { Metadata } from 'next';
+import { ClipboardList, Clock, Package, PackageCheck } from 'lucide-react';
 import { StatsCard } from '@/components/dashboard/StatsCard';
+import { PageHeader, SectionHeader } from '@/components/dashboard/PageHeader';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
-import { PageHeader } from '@/components/dashboard/PageHeader';
+import { ChartCard } from '@/components/charts/ChartCard';
+import { BarChart } from '@/components/charts/BarChart';
+import { DonutChart } from '@/components/charts/DonutChart';
+import { RankedBars } from '@/components/charts/RankedBars';
 import {
-  QuickActionGrid,
-  type QuickAction,
-} from '@/components/dashboard/QuickActionCard';
-import { getProviderDashboardInfo } from './_actions/getProviderDashboardInfo';
+  byMonth,
+  countBy,
+  monthOverMonth,
+  rentalStatusBreakdown,
+  topEntries,
+} from '@/lib/chart-data';
+import { formatBDT } from '@/lib/gear-utils';
+import { getProviderOverview } from './_actions/getProviderOverview';
+import { RecentOrdersTable } from './_components/RecentOrdersTable';
 
-export default async function ProviderDashboardPage() {
-  const result = await getProviderDashboardInfo();
+export const dynamic = 'force-dynamic';
 
-  const stats = result.data?.stats ?? {
-    totalGearListed: 0,
-    totalOrders: 0,
-    needsConfirmation: 0,
-    readyForPickup: 0,
-  };
+export const metadata: Metadata = { title: 'Provider Dashboard · GearUp' };
 
-  const quickLinks: QuickAction[] = [
-    {
-      href: '/provider/gears',
-      label: 'My Gears',
-      description: 'View and manage your listed gear inventory.',
-      icon: Package,
-      tone: 'primary',
-    },
-    {
-      href: '/provider/rental-orders',
-      label: 'Rental Orders',
-      description: 'Review and manage incoming rental requests.',
-      icon: ClipboardList,
-      tone: 'accent',
-    },
-    {
-      href: '/provider/profile',
-      label: 'Profile Settings',
-      description: 'Update your provider profile and preferences.',
-      icon: UserCog,
-      tone: 'secondary',
-    },
-    {
-      href: '/provider/change-password',
-      label: 'Change Password',
-      description: 'Update your account security credentials.',
-      icon: KeyRound,
-      tone: 'accent',
-    },
-  ];
+export default async function ProviderOverviewPage() {
+  const { stats, orders, gears, sampled, errors } = await getProviderOverview();
+
+  /* Series derived from this provider's own orders and inventory. */
+  const revenuePerMonth = byMonth(orders, (order) => order.createdAt, {
+    getValue: (order) => Number(order.amount) || 0,
+  });
+  const ordersByStatus = rentalStatusBreakdown(orders);
+  const listingsByCategory = topEntries(
+    countBy(gears, (gear) => gear.category?.name ?? 'Uncategorised'),
+    6,
+  );
+
+  const sampledRevenue = orders.reduce(
+    (sum, order) => sum + (Number(order.amount) || 0),
+    0,
+  );
+  const activeListings = gears.filter((gear) => gear.isActive).length;
+  const sampleNote = sampled ? ' Based on your 100 most recent orders.' : '';
 
   return (
     <div>
-      {result.error && <ErrorBanner message={result.error} />}
+      {errors.length > 0 && <ErrorBanner message={errors[0]} />}
 
       <PageHeader
         title='Provider Dashboard'
-        description='Manage your gear inventory and incoming orders.'
+        description='How your inventory is performing and what needs your attention.'
       />
 
-      {/* Stats */}
-      <div className='mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      {/* Overview cards */}
+      <div className='mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4'>
         <StatsCard
-          title='Total Gear Listed'
+          title='Gear Listed'
           value={stats.totalGearListed}
           icon={Package}
-          description='In your inventory'
+          description={`${activeListings} active in the marketplace`}
           tone='primary'
+          href='/provider/gears'
         />
         <StatsCard
           title='Total Orders'
           value={stats.totalOrders}
           icon={ClipboardList}
-          description='All incoming orders'
+          description='Rentals received all time'
           tone='accent'
+          href='/provider/rental-orders'
+          trend={monthOverMonth(orders, (order) => order.createdAt)}
         />
         <StatsCard
           title='Needs Confirmation'
           value={stats.needsConfirmation}
           icon={Clock}
-          description='Awaiting your confirmation'
+          description='Waiting on your response'
           tone='primary'
+          href='/provider/rental-orders?status=PLACED'
         />
         <StatsCard
           title='Ready for Pickup'
           value={stats.readyForPickup}
-          icon={Package}
-          description='Confirmed and waiting'
+          icon={PackageCheck}
+          description='Confirmed and awaiting collection'
           tone='secondary'
+          href='/provider/rental-orders?status=CONFIRMED'
         />
       </div>
 
-      {/* Quick links */}
-      <h2 className='mb-4 text-base font-bold text-foreground'>Quick Actions</h2>
-      <QuickActionGrid actions={quickLinks} />
+      {/* Charts */}
+      <SectionHeader
+        title='Business performance'
+        description={`Derived from your real orders and listings.${sampleNote}`}
+      />
+      <div className='mb-8 grid gap-4 lg:grid-cols-3'>
+        <ChartCard
+          className='lg:col-span-2'
+          title='Order value per month'
+          description='Total value of rentals received over the last 6 months'
+          action={
+            <span className='block text-sm font-bold text-foreground'>
+              {formatBDT(sampledRevenue)}
+              <span className='mt-0.5 block text-[11px] font-medium text-muted-foreground'>
+                sampled total
+              </span>
+            </span>
+          }
+          isEmpty={orders.length === 0}
+          emptyTitle='No orders yet'
+          emptyDescription='When customers rent your gear, monthly order value appears here.'
+        >
+          <BarChart
+            data={revenuePerMonth}
+            seriesLabel='Order value'
+            color='var(--chart-2)'
+            format='currency'
+          />
+        </ChartCard>
+
+        <ChartCard
+          title='Orders by status'
+          description='Where incoming rentals sit in the lifecycle'
+          isEmpty={orders.length === 0}
+          emptyTitle='No orders to break down'
+          emptyDescription='Order statuses will be charted here.'
+        >
+          <DonutChart data={ordersByStatus} totalLabel='rental orders' />
+        </ChartCard>
+      </div>
+
+      <div className='mb-8'>
+        <ChartCard
+          title='Listings by category'
+          description='Where your inventory is concentrated'
+          action={
+            <span className='block text-sm font-bold text-foreground'>
+              {gears.length}
+              <span className='mt-0.5 block text-[11px] font-medium text-muted-foreground'>
+                listings
+              </span>
+            </span>
+          }
+          isEmpty={gears.length === 0}
+          emptyTitle='No gear listed yet'
+          emptyDescription='Add your first listing to see how your inventory is spread across categories.'
+        >
+          <RankedBars
+            data={listingsByCategory.map((row) => ({
+              label: row.label,
+              value: row.value,
+              color: 'var(--chart-3)',
+            }))}
+            valueLabel='listings'
+            showShare
+          />
+        </ChartCard>
+      </div>
+
+      {/* Data table */}
+      <SectionHeader
+        title='Recent rental orders'
+        description='Search, filter and page through the latest requests.'
+        linkHref='/provider/rental-orders'
+      />
+      <RecentOrdersTable orders={orders} />
     </div>
   );
 }

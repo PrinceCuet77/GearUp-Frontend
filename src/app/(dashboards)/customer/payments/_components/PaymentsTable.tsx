@@ -1,232 +1,142 @@
 'use client';
 
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
 import Link from 'next/link';
-import { CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
+import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import { Pagination } from '@/components/dashboard/Pagination';
+import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import { PaymentStatusBadge } from '@/components/dashboard/StatusBadge';
+import { ButtonLink } from '@/components/ui/Button';
+import { useUrlQuery } from '@/lib/hooks';
+import { formatBDT, formatShortDate } from '@/lib/gear-utils';
 import type { Payment } from '@/lib/types';
 
-const STATUS_FILTERS: { value: string; label: string }[] = [
-  { value: '', label: 'All' },
+const STATUS_OPTIONS = [
+  { value: '', label: 'All statuses' },
+  { value: 'COMPLETED', label: 'Successful' },
   { value: 'PENDING', label: 'Pending' },
-  { value: 'COMPLETED', label: 'Success' },
   { value: 'FAILED', label: 'Failed' },
 ];
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    timeZone: 'Asia/Dhaka',
-  });
-}
-
-function formatCurrency(amount: string | number) {
-  return `Tk ${Number(amount).toFixed(2)}`;
-}
 
 interface PaymentsTableProps {
   payments: Payment[];
   page: number;
   totalPages: number;
   total: number;
-  statusFilter: string;
+  pageSize: number;
 }
 
+/** Transaction history, filtered by outcome and paged on the server. */
 export function PaymentsTable({
   payments,
   page,
   totalPages,
   total,
-  statusFilter,
+  pageSize,
 }: PaymentsTableProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const query = useUrlQuery();
+  const status = query.get('status');
 
-  const createQueryString = useCallback(
-    (updates: Record<string, string>) => {
-      const params = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(updates)) {
-        if (value) {
-          params.set(key, value);
-        } else {
-          params.delete(key);
-        }
-      }
-      return params.toString();
+  const columns: Array<DataTableColumn<Payment>> = [
+    {
+      id: 'transaction',
+      header: 'Transaction',
+      hideBelow: 'md',
+      cell: (payment) => (
+        <span className='block max-w-48 truncate font-mono text-xs text-muted-foreground'>
+          {payment.transactionId}
+        </span>
+      ),
     },
-    [searchParams],
-  );
-
-  const handleStatusChange = (status: string) => {
-    router.push(`${pathname}?${createQueryString({ status, page: '1' })}`);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    router.push(`${pathname}?${createQueryString({ page: String(newPage) })}`);
-  };
+    {
+      id: 'order',
+      header: 'Rental order',
+      cell: (payment) => (
+        <Link
+          href={`/customer/rental-orders/${payment.rentalOrderId}`}
+          className='font-mono text-xs font-semibold text-primary transition-opacity hover:opacity-80'
+        >
+          #{payment.rentalOrderId.slice(0, 8)}
+        </Link>
+      ),
+    },
+    {
+      id: 'amount',
+      header: 'Amount',
+      align: 'right',
+      cell: (payment) => (
+        <span className='font-semibold'>{formatBDT(payment.amount)}</span>
+      ),
+    },
+    {
+      id: 'status',
+      header: 'Outcome',
+      cell: (payment) => <PaymentStatusBadge status={payment.status} />,
+    },
+    {
+      id: 'date',
+      header: 'Date',
+      hideBelow: 'md',
+      align: 'right',
+      cell: (payment) => (
+        <span className='whitespace-nowrap text-muted-foreground'>
+          {formatShortDate(payment.paidAt ?? payment.createdAt)}
+        </span>
+      ),
+    },
+  ];
 
   return (
     <div>
-      {/* Status filter pills */}
-      <div className='mb-6 flex flex-wrap gap-2'>
-        {STATUS_FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => handleStatusChange(f.value)}
-            className='cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all'
-            style={
-              statusFilter === f.value
-                ? {
-                    backgroundColor: 'var(--primary)',
-                    color: 'var(--primary-foreground)',
-                  }
-                : {
-                    backgroundColor: 'var(--muted)',
-                    color: 'var(--muted-foreground)',
-                  }
-            }
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      <TableToolbar
+        selects={[
+          {
+            key: 'status',
+            label: 'Filter by outcome',
+            value: status,
+            options: STATUS_OPTIONS,
+            onChange: (value) => query.set({ status: value }),
+          },
+        ]}
+        hasActiveFilters={Boolean(status)}
+        onClearFilters={() => query.clear()}
+        isPending={query.isPending}
+      />
 
-      {/* Table */}
-      <div
-        className='surface-card'
-      >
-        {payments.length === 0 ? (
-          <div className='flex flex-col items-center justify-center py-20'>
-            <CreditCard
-              className='mb-3 h-10 w-10 opacity-30'
-              style={{ color: 'var(--muted-foreground)' }}
-            />
-            <p
-              className='text-sm font-medium'
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              No payments found
-            </p>
-            {statusFilter && (
-              <button
-                onClick={() => handleStatusChange('')}
-                className='cursor-pointer mt-2 text-xs font-medium'
-                style={{ color: 'var(--primary)' }}
-              >
-                Clear filter
-              </button>
-            )}
-          </div>
-        ) : (
-          <>
-            <div className='overflow-x-auto'>
-              <table className='w-full'>
-                <thead>
-                  <tr
-                    className='border-b text-left text-xs font-semibold uppercase tracking-wide'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--muted-foreground)',
-                    }}
-                  >
-                    <th className='px-6 py-3'>Transaction ID</th>
-                    <th className='px-6 py-3'>Rental Order</th>
-                    <th className='px-6 py-3'>Amount</th>
-                    <th className='px-6 py-3'>Status</th>
-                    <th className='px-6 py-3'>Date</th>
-                  </tr>
-                </thead>
-                <tbody
-                  className='divide-y'
-                  style={{ borderColor: 'var(--border)' }}
-                >
-                  {payments.map((payment) => (
-                    <tr
-                      key={payment.id}
-                      className='transition-colors hover:bg-muted'
-                    >
-                      <td
-                        className='px-6 py-4 font-mono text-xs'
-                        style={{ color: 'var(--muted-foreground)' }}
-                      >
-                        {payment.transactionId}
-                      </td>
-                      <td className='px-6 py-4 text-sm'>
-                        <Link
-                          href={`/customer/orders/${payment.rentalOrderId}`}
-                          className='font-medium transition-colors'
-                          style={{ color: 'var(--primary)' }}
-                        >
-                          #{payment?.rentalOrder?.id?.slice(0, 8)}
-                        </Link>
-                      </td>
-                      <td
-                        className='px-6 py-4 text-sm font-semibold'
-                        style={{ color: 'var(--foreground)' }}
-                      >
-                        {formatCurrency(payment.amount)}
-                      </td>
-                      <td className='px-6 py-4'>
-                        <PaymentStatusBadge status={payment.status} />
-                      </td>
-                      <td
-                        className='px-6 py-4 text-sm'
-                        style={{ color: 'var(--muted-foreground)' }}
-                      >
-                        {formatDate(payment.paidAt ?? payment.createdAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div
-                className='flex items-center justify-between border-t px-6 py-4'
-                style={{ borderColor: 'var(--border)' }}
-              >
-                <p
-                  className='text-sm'
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Page {page} of {totalPages} · {total} payment
-                  {total === 1 ? '' : 's'}
-                </p>
-                <div className='flex items-center gap-2'>
-                  <button
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page <= 1}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    <ChevronLeft className='h-4 w-4' />
-                  </button>
-                  <button
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page >= totalPages}
-                    className='cursor-pointer flex h-8 w-8 items-center justify-center rounded-lg border transition-colors disabled:opacity-40'
-                    style={{
-                      borderColor: 'var(--border)',
-                      color: 'var(--foreground)',
-                    }}
-                  >
-                    <ChevronRight className='h-4 w-4' />
-                  </button>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      <DataTable
+        caption='Your payment history'
+        columns={columns}
+        rows={payments}
+        getRowKey={(payment) => payment.id}
+        loading={query.isPending && payments.length === 0}
+        emptyIcon={CreditCard}
+        emptyTitle={
+          status ? 'No payments with this outcome' : 'No payments yet'
+        }
+        emptyDescription={
+          status
+            ? 'Try a different outcome, or clear the filter to see everything.'
+            : 'Payments appear here once you pay for a confirmed rental.'
+        }
+        emptyAction={
+          status ? undefined : (
+            <ButtonLink href='/customer/rental-orders' size='sm'>
+              View my rentals
+            </ButtonLink>
+          )
+        }
+        footer={
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            total={total}
+            pageSize={pageSize}
+            onPageChange={(next) => query.set({ page: next })}
+            itemLabel='payments'
+            isPending={query.isPending}
+          />
+        }
+      />
     </div>
   );
 }
