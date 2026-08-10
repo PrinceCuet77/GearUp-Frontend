@@ -147,6 +147,9 @@ export default function Navbar() {
   const closeUserMenu = useCallback(() => setUserMenuOpen(false), []);
   const closeMobileMenu = useCallback(() => setMobileOpen(false), []);
 
+  // On /login, offer a way to Register; everywhere else (including /register), offer Sign In.
+  const showRegisterCta = pathname === '/login';
+
   const handleLogout = async () => {
     await logoutAction();
     clearUser();
@@ -359,25 +362,24 @@ export default function Navbar() {
                     )}
                   </AnimatePresence>
                 </div>
+              ) : showRegisterCta ? (
+                <ButtonLink
+                  href='/register'
+                  variant='primary'
+                  size='sm'
+                  leadingIcon={<UserPlus className='h-4 w-4' />}
+                >
+                  Get Started
+                </ButtonLink>
               ) : (
-                <>
-                  <ButtonLink
-                    href='/login'
-                    variant='ghost'
-                    size='sm'
-                    leadingIcon={<LogIn className='h-4 w-4' />}
-                  >
-                    Sign In
-                  </ButtonLink>
-                  <ButtonLink
-                    href='/register'
-                    variant='primary'
-                    size='sm'
-                    leadingIcon={<UserPlus className='h-4 w-4' />}
-                  >
-                    Get Started
-                  </ButtonLink>
-                </>
+                <ButtonLink
+                  href='/login'
+                  variant='ghost'
+                  size='sm'
+                  leadingIcon={<LogIn className='h-4 w-4' />}
+                >
+                  Sign In
+                </ButtonLink>
               )}
             </div>
 
@@ -498,24 +500,23 @@ export default function Navbar() {
                   >
                     Log Out
                   </Button>
+                ) : showRegisterCta ? (
+                  <ButtonLink
+                    href='/register'
+                    fullWidth
+                    leadingIcon={<UserPlus className='h-4 w-4' />}
+                  >
+                    Create Free Account
+                  </ButtonLink>
                 ) : (
-                  <div className='flex flex-col gap-2'>
-                    <ButtonLink
-                      href='/register'
-                      fullWidth
-                      leadingIcon={<UserPlus className='h-4 w-4' />}
-                    >
-                      Create Free Account
-                    </ButtonLink>
-                    <ButtonLink
-                      href='/login'
-                      variant='outline'
-                      fullWidth
-                      leadingIcon={<LogIn className='h-4 w-4' />}
-                    >
-                      Sign In
-                    </ButtonLink>
-                  </div>
+                  <ButtonLink
+                    href='/login'
+                    variant='outline'
+                    fullWidth
+                    leadingIcon={<LogIn className='h-4 w-4' />}
+                  >
+                    Sign In
+                  </ButtonLink>
                 )}
               </div>
             </div>

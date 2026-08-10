@@ -2,10 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-export const loginAction = async (_prevState: unknown, formData: FormData) => {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
+async function performLogin(email: string, password: string) {
   try {
     const response = await fetch(
       `${process.env.BACKEND_API_URL}/api/auth/login`,
@@ -45,4 +42,44 @@ export const loginAction = async (_prevState: unknown, formData: FormData) => {
           : 'Something went wrong. Please try again.',
     };
   }
+}
+
+export const loginAction = async (_prevState: unknown, formData: FormData) => {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  return performLogin(email, password);
+};
+
+export type DemoRole = 'CUSTOMER' | 'PROVIDER' | 'ADMIN';
+
+const DEMO_CREDENTIALS: Record<
+  DemoRole,
+  { email?: string; password?: string }
+> = {
+  CUSTOMER: {
+    email: process.env.DEMO_CUSTOMER_EMAIL,
+    password: process.env.DEMO_CUSTOMER_PASSWORD,
+  },
+  PROVIDER: {
+    email: process.env.DEMO_PROVIDER_EMAIL,
+    password: process.env.DEMO_PROVIDER_PASSWORD,
+  },
+  ADMIN: {
+    email: process.env.DEMO_ADMIN_EMAIL,
+    password: process.env.DEMO_ADMIN_PASSWORD,
+  },
+};
+
+export const demoLoginAction = async (role: DemoRole) => {
+  const credentials = DEMO_CREDENTIALS[role];
+
+  if (!credentials.email || !credentials.password) {
+    return {
+      success: false,
+      message: 'Demo credentials are not configured.',
+    };
+  }
+
+  return performLogin(credentials.email, credentials.password);
 };

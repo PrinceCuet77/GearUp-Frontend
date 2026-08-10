@@ -5,15 +5,36 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dumbbell, Eye, EyeOff, Loader2 } from 'lucide-react';
+import {
+  Dumbbell,
+  Eye,
+  EyeOff,
+  Loader2,
+  ShieldCheck,
+  Store,
+  User,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { loginSchema } from '@/lib/validations/auth';
-import { loginAction } from '@/app/(auth)/_actions/loginActions';
+import {
+  demoLoginAction,
+  loginAction,
+  type DemoRole,
+} from '@/app/(auth)/_actions/loginActions';
 import z from 'zod';
+
+const DEMO_OPTIONS: { role: DemoRole; label: string; icon: React.ElementType }[] = [
+  { role: 'CUSTOMER', label: 'Demo Customer', icon: User },
+  { role: 'PROVIDER', label: 'Demo Provider', icon: Store },
+  { role: 'ADMIN', label: 'Demo Admin', icon: ShieldCheck },
+];
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [demoLoadingRole, setDemoLoadingRole] = useState<DemoRole | null>(
+    null,
+  );
   const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -24,6 +45,40 @@ export default function LoginPage() {
     },
   });
 
+  const handleLoginResult = (result: {
+    success?: boolean;
+    message?: string;
+    data?: { user?: { role?: string } };
+  }) => {
+    if (result?.success) {
+      const role = result.data?.user?.role;
+      const roleLabel =
+        role === 'ADMIN'
+          ? 'Admin'
+          : role === 'CUSTOMER'
+            ? 'Customer'
+            : role === 'PROVIDER'
+              ? 'Provider'
+              : null;
+
+      toast.success(
+        roleLabel
+          ? `Logged in successfully as ${roleLabel}`
+          : result.message || 'Login successful!',
+      );
+
+      if (role === 'ADMIN') {
+        router.push('/admin');
+      } else if (role === 'CUSTOMER') {
+        router.push('/customer');
+      } else if (role === 'PROVIDER') {
+        router.push('/provider');
+      }
+    } else {
+      toast.error(result?.message || 'Login failed. Please try again.');
+    }
+  };
+
   const onSubmit = (data: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       const formData = new FormData();
@@ -31,20 +86,16 @@ export default function LoginPage() {
       formData.append('password', data.password);
 
       const result = await loginAction(null, formData);
+      handleLoginResult(result);
+    });
+  };
 
-      if (result?.success) {
-        toast.success(result.message || 'Login successful!');
-        const role = result.data?.user?.role;
-        if (role === 'ADMIN') {
-          router.push('/admin');
-        } else if (role === 'CUSTOMER') {
-          router.push('/customer');
-        } else if (role === 'PROVIDER') {
-          router.push('/provider');
-        }
-      } else {
-        toast.error(result?.message || 'Login failed. Please try again.');
-      }
+  const handleDemoLogin = (role: DemoRole) => {
+    setDemoLoadingRole(role);
+    startTransition(async () => {
+      const result = await demoLoginAction(role);
+      handleLoginResult(result);
+      setDemoLoadingRole(null);
     });
   };
 
@@ -202,6 +253,48 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Demo accounts divider */}
+          <div className='my-6 flex items-center gap-3'>
+            <div
+              className='flex-1 h-px'
+              style={{ backgroundColor: 'var(--border)' }}
+            />
+            <span
+              className='text-xs'
+              style={{ color: 'var(--muted-foreground)' }}
+            >
+              Or try a demo account
+            </span>
+            <div
+              className='flex-1 h-px'
+              style={{ backgroundColor: 'var(--border)' }}
+            />
+          </div>
+
+          {/* Demo login buttons */}
+          <div className='grid grid-cols-3 gap-2'>
+            {DEMO_OPTIONS.map(({ role, label, icon: Icon }) => (
+              <button
+                key={role}
+                type='button'
+                onClick={() => handleDemoLogin(role)}
+                disabled={isPending}
+                className='flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-xs font-semibold transition-colors hover:bg-[var(--muted)] disabled:cursor-not-allowed disabled:opacity-70'
+                style={{
+                  borderColor: 'var(--border)',
+                  color: 'var(--card-foreground)',
+                }}
+              >
+                {demoLoadingRole === role ? (
+                  <Loader2 className='h-4 w-4 animate-spin' />
+                ) : (
+                  <Icon className='h-4 w-4' />
+                )}
+                {label}
+              </button>
+            ))}
+          </div>
 
           {/* Divider */}
           <div className='my-6 flex items-center gap-3'>
