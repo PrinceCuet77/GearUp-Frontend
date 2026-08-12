@@ -8,21 +8,33 @@
 
 ## Authentication
 
-| Method          | Endpoint             | Frontend File                                   | Description                                                          |
-| --------------- | -------------------- | ----------------------------------------------- | -------------------------------------------------------------------- |
-| `POST`          | `/api/auth/login`    | `src/app/(auth)/_actions/loginActions.ts`       | Authenticates user, sets access & refresh tokens in httpOnly cookies |
-| `POST`          | `/api/auth/register` | `src/app/(auth)/_actions/registerActions.ts`    | Registers a new user with email, password, and role                  |
-| `GET`           | `/api/user/me`       | `src/app/(auth)/_actions/getProfileActions.ts`  | Fetches the authenticated user's profile                             |
-| `POST`          | `/api/auth/refresh`  | `src/app/(auth)/_actions/refreshTokenAction.ts` | Refreshes an expired access token using the refresh token cookie     |
-| _(no endpoint)_ | _(client-side only)_ | `src/app/(auth)/_actions/logoutActions.ts`      | Clears cookies and revalidates cache                                 |
+| Method  | Endpoint                                                   | Frontend File                                        | Description                                                                        |
+| ------- | ---------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `POST`  | `/api/v1/auth/login`                                       | `src/app/(auth)/_actions/loginActions.ts`            | Authenticates user, sets access & refresh tokens in httpOnly cookies               |
+| `POST`  | `/api/v1/auth/register`                                    | `src/app/(auth)/_actions/registerActions.ts`         | Registers a new user with email, password, and role                                |
+| `GET`   | `/api/user/me`                                             | `src/app/(auth)/_actions/getProfileActions.ts`       | Fetches the authenticated user's profile                                           |
+| `POST`  | `/api/v1/auth/refresh`                                     | `src/app/(auth)/_actions/refreshTokenAction.ts`      | Refreshes an expired access token using the refresh token cookie                   |
+| `POST`  | `/api/v1/auth/logout`                                      | `src/app/(auth)/_actions/logoutActions.ts`           | Clears backend cookies, then deletes ours and revalidates cache                     |
+| `GET`   | `/api/v1/auth/google/{customer,provider}`                  | `src/lib/oauth.ts` → `src/components/auth/GoogleButton.tsx` | Browser navigation (never `fetch`) that starts Google OAuth; role applies to new accounts only |
+| _(n/a)_ | `/api/v1/auth/google/callback` → `/oauth/callback` redirect | `src/app/(auth)/oauth/callback/page.tsx`             | Reads the tokens from the URL fragment and hands them to `adoptGoogleSessionAction` |
+| _(n/a)_ | _(no request — local cookie write)_                        | `src/app/(auth)/_actions/googleAuthActions.ts`       | Verifies the OAuth tokens and stores them as this origin's own session cookies      |
 
 **Related Components:**
 
 - `src/app/(auth)/login/page.tsx` — Login form
-- `src/app/(auth)/register/page.tsx` — Registration form
+- `src/app/(auth)/register/page.tsx` — Registration form (role selection drives the Google variant)
+- `src/app/(auth)/oauth/callback/page.tsx` — Google OAuth landing page
+- `src/components/auth/GoogleButton.tsx` — "Continue with Google" link
 - `src/components/Navbar.tsx` — Logout via `logoutAction()` + `clearUser()`
 - `src/components/UserInitializer.tsx` — Syncs server profile into Zustand store
 - `src/store/useAuthStore.ts` — Zustand auth store (client-side state)
+
+**Google OAuth session note:** the backend sets its own cookies on the API domain,
+but those are third-party on a split-domain deployment and are blocked by Safari,
+Firefox and Chrome incognito. The session that actually matters here is the one
+`adoptGoogleSessionAction` writes from the tokens in the callback's URL fragment —
+first-party, same flags as credential login, so the middleware and every server
+action treat a Google session exactly like a credentials one.
 
 ---
 

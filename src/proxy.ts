@@ -6,7 +6,10 @@ import { cookies } from 'next/headers';
 import { refreshTokenAction } from './app/(auth)/_actions/refreshTokenAction';
 
 const AUTH_ROUTES = ['/login', '/register'];
-const PUBLIC_ROUTES = ['/', '/gears', '/about'];
+// `/oauth/callback` has to be public: the browser lands there straight from
+// Google with the session still sitting in the URL fragment, so there are no
+// cookies yet for this middleware to see.
+const PUBLIC_ROUTES = ['/', '/gears', '/about', '/oauth/callback'];
 
 const DASHBOARD_BY_ROLE: Record<string, string> = {
   ADMIN: '/admin',
@@ -93,16 +96,6 @@ export async function proxy(request: NextRequest) {
       : null;
 
   if (accessToken && AUTH_ROUTES.includes(pathname)) {
-    return NextResponse.redirect(
-      new URL(DASHBOARD_BY_ROLE[role as string] ?? '/', request.url),
-    );
-  }
-
-  // The Google OAuth callback always redirects to `/customer`, whatever the
-  // user's role. Bounce a provider/admin landing there to their own dashboard
-  // instead of the /not-found the RBAC check below would give them. Only the
-  // bare path is forgiven — deeper /customer/* links stay guarded.
-  if (pathname === '/customer' && role && role !== 'CUSTOMER') {
     return NextResponse.redirect(
       new URL(DASHBOARD_BY_ROLE[role as string] ?? '/', request.url),
     );

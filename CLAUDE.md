@@ -42,10 +42,12 @@ Required in `.env.local` (see `.env.example`):
    - Calls `fetch(`${process.env.BACKEND_API_URL}/api/...`)` directly (no shared HTTP client wrapper).
    - Returns a consistent shape: `{ success, statusCode, message, data, meta? }` — it **never throws**; errors are caught and returned in the same shape.
    - For authenticated calls, reads the `accessToken` cookie via `cookies()` and forwards it as a `Cookie` header to the backend.
-   - `loginActions.ts`/`refreshTokenAction.ts` are where cookies get *written* (`httpOnly`, `sameSite: 'lax'`, accessToken maxAge 1 day, refreshToken maxAge 7 days).
+   - `loginActions.ts`/`refreshTokenAction.ts`/`googleAuthActions.ts` are where cookies get *written* (`httpOnly`, `sameSite: 'lax'`, accessToken maxAge 1 day, refreshToken maxAge 7 days).
+
+3. **Google OAuth** (`src/lib/oauth.ts`, `src/components/auth/GoogleButton.tsx`, `src/app/(auth)/oauth/callback/page.tsx`): the button is a plain `<a>` to `<backend>/api/v1/auth/google/{customer,provider}?redirect=/oauth/callback` — a full navigation, never `fetch`. The role variant only sets the role of *newly created* accounts. The backend redirects back to `/oauth/callback?role=…&isNewUser=…#accessToken=…&refreshToken=…`; the page pulls the tokens out of the fragment, strips it from the URL, and calls `adoptGoogleSessionAction` to verify them and write them as *our* cookies — the backend's own cookies are third-party on a split-domain deploy and can't be relied on. Failures come back as `/oauth/callback?error=<code>` and bounce to `/login` with readable copy.
    - See `API_INTEGRATION.md` for the full endpoint-to-file mapping (37 endpoints across auth/admin/customer/provider/public).
 
-3. **Server-first auth sync**: the root layout (`src/app/layout.tsx`) fetches the user profile server-side and hydrates it into Zustand via `UserInitializer` (`src/components/UserInitializer.tsx`), avoiding auth flicker on load.
+4. **Server-first auth sync**: the root layout (`src/app/layout.tsx`) fetches the user profile server-side and hydrates it into Zustand via `UserInitializer` (`src/components/UserInitializer.tsx`), avoiding auth flicker on load.
 
 ### Route structure (`src/app/`)
 

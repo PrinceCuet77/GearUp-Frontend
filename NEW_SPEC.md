@@ -24,7 +24,7 @@ Authentication API reference for the GearUp backend, covering **email/password (
   - [3. Endpoint reference](#3-endpoint-reference)
     - [3.1 `POST /api/v1/auth/register`](#31-post-apiv1authregister)
     - [3.2 `POST /api/v1/auth/login`](#32-post-apiv1authlogin)
-    - [3.3 `GET /api/v1/auth/google`](#33-get-apiv1authgoogle)
+    - [3.3 `GET /api/v1/auth/google` · `/google/customer` · `/google/provider`](#33-get-apiv1authgoogle--googlecustomer--googleprovider)
     - [3.4 `GET /api/v1/auth/google/callback`](#34-get-apiv1authgooglecallback)
     - [3.5 `POST /api/v1/auth/refresh`](#35-post-apiv1authrefresh)
     - [3.6 `POST /api/v1/auth/logout`](#36-post-apiv1authlogout)
@@ -59,7 +59,7 @@ Every successful response uses the same shape:
   "success": true,
   "statusCode": 200,
   "message": "Human readable message",
-  "data": {}
+  "data": { }
 }
 ```
 
@@ -91,10 +91,12 @@ Check the HTTP status code **and** the `success` flag. Do not rely on `statusCod
 
 On successful credential login and Google login, the API sets two `Set-Cookie` headers:
 
-| Cookie         | Contains                                       | Lifetime                      | Flags                                                 |
-| -------------- | ---------------------------------------------- | ----------------------------- | ----------------------------------------------------- |
-| `accessToken`  | Short-lived JWT used to authorise API calls    | 24 hours (`maxAge: 86400000`) | `HttpOnly`, `SameSite=None`, `Secure=false`, `Path=/` |
-| `refreshToken` | Long-lived JWT used to mint a new access token | 7 days (`maxAge: 604800000`)  | `HttpOnly`, `SameSite=None`, `Secure=false`, `Path=/` |
+| Cookie | Contains | Lifetime | Flags |
+| --- | --- | --- | --- |
+| `accessToken` | Short-lived JWT used to authorise API calls | 24 hours (`maxAge: 86400000`) | `HttpOnly`, `SameSite=None`, `Secure`, `Path=/` |
+| `refreshToken` | Long-lived JWT used to mint a new access token | 7 days (`maxAge: 604800000`) | `HttpOnly`, `SameSite=None`, `Secure`, `Path=/` |
+
+The flags are derived from the deployment: when `APP_URL` and `API_URL` resolve to **different hostnames** the cookies are cross-site and are issued `SameSite=None; Secure`. When they share a hostname (local dev, or the API proxied through the Next.js app) they are issued `SameSite=Lax` without `Secure`, so plain-HTTP dev keeps working.
 
 Both cookies are **HttpOnly** — browser JavaScript cannot read them. They are attached automatically by the browser only when the request is made with credentials enabled (`fetch(..., { credentials: 'include' })` or `axios` with `withCredentials: true`).
 
@@ -114,7 +116,11 @@ Both tokens are signed with `HS256` and carry the same claims:
 
 Access and refresh tokens are signed with **different secrets**; expiry windows come from backend env vars (`JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`) and may differ from the cookie `maxAge` values above. Treat the JWT `exp` claim as the source of truth for token validity.
 
-> ⚠️ **Cross-site cookie caveat.** The cookies are currently issued with `SameSite=None` **and** `Secure=false`. Chrome, Edge and Safari **reject** such cookies on cross-site requests. This works when frontend and API share an origin (or via a Next.js rewrite/proxy), but breaks when the Next.js app and the API are on different domains. See [§9](#9-known-issues--questions-for-the-backend-team) — for credential login you can work around this by using the tokens returned in the JSON body; the Google flow has no such fallback today.
+> ⚠️ **Third-party cookie caveat.** `SameSite=None; Secure` is the *most* a cross-domain deployment can do, but it does not make the cookies universally reliable. `gear-up-frontend-green.vercel.app` and `gear-up-self.vercel.app` are separate **sites** (`vercel.app` is on the Public Suffix List, so no shared cookie `Domain` is possible), which makes the API's cookies third-party from the frontend's point of view. Chrome sends them by default; **Safari, Firefox, and Chrome incognito block them outright.**
+>
+> Two supported ways out, in order of preference:
+> 1. **Same-origin proxy** — route the API through the Next.js app so the cookies become first-party. See [§7.2](#72-recommended-setup-same-origin-proxy). This is the durable fix.
+> 2. **Adopt the tokens the OAuth callback hands back** in the redirect's URL fragment (see [§3.4](#34-get-apiv1authgooglecallback)) and store them as a first-party cookie set by your own Next.js origin. Credential login already returns both tokens in the JSON body for the same purpose.
 
 ---
 
@@ -128,11 +134,11 @@ Creates a new credentials-based account. Does **not** log the user in — no coo
 
 **Request body**
 
-| Field      | Type                                  | Required            | Rules                                                                                                                            |
-| ---------- | ------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `email`    | string                                | yes                 | Valid email format. Must be unique.                                                                                              |
-| `password` | string                                | yes                 | 6–20 characters.                                                                                                                 |
-| `role`     | `"CUSTOMER" \| "PROVIDER" \| "ADMIN"` | **yes in practice** | Marked optional by the request validator, but the database column has no default — omitting it fails with a 400. Always send it. |
+| Field | Type | Required | Rules |
+| --- | --- | --- | --- |
+| `email` | string | yes | Valid email format. Must be unique. |
+| `password` | string | yes | 6–20 characters. |
+| `role` | `"CUSTOMER" \| "PROVIDER" \| "ADMIN"` | **yes in practice** | Marked optional by the request validator, but the database column has no default — omitting it fails with a 400. Always send it. |
 
 ```json
 {
@@ -168,11 +174,11 @@ The password hash is stripped from this response.
 
 **Errors**
 
-| Status | `message`                                                    | Cause                                           |
-| ------ | ------------------------------------------------------------ | ----------------------------------------------- |
-| `400`  | `"email: Invalid email format"` (comma-joined list)          | Zod validation failed                           |
-| `400`  | `"You have provided incorrect field type or missing fields"` | `role` was omitted                              |
-| `409`  | `"A user with this email already exists!"`                   | Email already registered (including via Google) |
+| Status | `message` | Cause |
+| --- | --- | --- |
+| `400` | `"email: Invalid email format"` (comma-joined list) | Zod validation failed |
+| `400` | `"You have provided incorrect field type or missing fields"` | `role` was omitted |
+| `409` | `"A user with this email already exists!"` | Email already registered (including via Google) |
 
 > A user who first signed up with Google has an account row with `password: null`. Registering the same email again returns `409`, not an account merge. Direct such users to “Continue with Google”.
 
@@ -186,10 +192,10 @@ Email + password login. Authenticated by a Passport **local** strategy.
 
 **Request body**
 
-| Field      | Type   | Required | Rules              |
-| ---------- | ------ | -------- | ------------------ |
-| `email`    | string | yes      | Valid email format |
-| `password` | string | yes      | Min length 1       |
+| Field | Type | Required | Rules |
+| --- | --- | --- | --- |
+| `email` | string | yes | Valid email format |
+| `password` | string | yes | Min length 1 |
 
 ```json
 {
@@ -232,35 +238,47 @@ Notes on this payload:
 
 **Errors**
 
-| Status | `message`                                                         | Cause                                  |
-| ------ | ----------------------------------------------------------------- | -------------------------------------- |
-| `400`  | `"email: Invalid email format"` etc.                              | Zod validation failed                  |
-| `403`  | `"Your account has been suspended. Please contact support."`      | `status === SUSPENDED`                 |
-| `500`  | `"User not found with this email, Please register first!"`        | Unknown email                          |
-| `500`  | `"Password does not matched"`                                     | Wrong password                         |
-| `500`  | `"This account does not have password, Please login with google"` | Google-only account (`password: null`) |
+| Status | `message` | Cause |
+| --- | --- | --- |
+| `400` | `"email: Invalid email format"` etc. | Zod validation failed |
+| `403` | `"Your account has been suspended. Please contact support."` | `status === SUSPENDED` |
+| `500` | `"User not found with this email, Please register first!"` | Unknown email |
+| `500` | `"Password does not matched"` | Wrong password |
+| `500` | `"This account does not have password, Please login with google"` | Google-only account (`password: null`) |
 
 > ⚠️ **Authentication failures currently return HTTP `500`, not `401`.** Passport failures are forwarded as plain `Error` objects, which the global error handler cannot classify. **Do not branch on the status code for login failures** — read `message` instead, or treat any non-2xx from this endpoint as “login failed”. This is expected to change to `401` once fixed; write your handler so it tolerates both.
 
 ---
 
-### 3.3 `GET /api/v1/auth/google`
+### 3.3 `GET /api/v1/auth/google` · `/google/customer` · `/google/provider`
 
 Starts the Google OAuth 2.0 flow. Responds with a `302` redirect to Google's consent screen (`scope: profile email`).
 
-**Auth:** none. **Request body:** none. **Query params:** none supported.
+**Auth:** none. **Request body:** none.
+
+| Variant | Role given to a **brand-new** account |
+| --- | --- |
+| `/google` | `CUSTOMER` (kept for backwards compatibility) |
+| `/google/customer` | `CUSTOMER` |
+| `/google/provider` | `PROVIDER` |
+
+There is no `/google/admin`, and the role only applies to accounts being created — an existing user's role is never changed by signing in with Google.
+
+| Query param | Required | Meaning |
+| --- | --- | --- |
+| `redirect` | No | Frontend path to return to. **Must start with `/`** (a `400` otherwise — absolute and protocol-relative URLs are rejected to prevent an open redirect). Defaults to the role's dashboard (`/customer`, `/provider`, `/admin`). |
 
 This is a **browser navigation endpoint, not an AJAX endpoint.** It must be reached by a full page navigation:
 
 ```tsx
-<a href={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`}>
+<a href={`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google/provider?redirect=/oauth/callback`}>
   Continue with Google
 </a>
 ```
 
 Calling it with `fetch`/`axios` will fail (CORS blocks the cross-origin redirect to Google).
 
-> New accounts created through Google are always assigned `role: "CUSTOMER"`. There is currently no way to sign up as a `PROVIDER` through Google — providers must use `POST /register`.
+The endpoint packs the role, the `redirect` path, and the origin the navigation came from into an HMAC-signed, 10-minute `state` param that Google returns to the callback. Nothing needs to be stashed in `localStorage` across the redirect.
 
 ---
 
@@ -268,27 +286,31 @@ Calling it with `fetch`/`axios` will fail (CORS blocks the cross-origin redirect
 
 The redirect URI that Google calls back with `?code=...`. **The frontend never calls this directly.** It must exactly match the `GOOGLE_REDIRECT_URI` configured in both the backend `.env` and the Google Cloud Console OAuth client.
 
-On success the endpoint:
+It first validates the signed `state`; a missing, tampered, or >10-minute-old state is rejected **without** exchanging the code. On success the endpoint:
 
-1. Finds the user by the Google-provided email, or creates one (`name` = Google display name, `role` = `CUSTOMER`).
+1. Finds the user by the Google-provided email, or creates one (`name` = Google display name, `avatarUrl` = Google photo, `role` = the role from `state`).
 2. If the user already exists as a credentials account, links a `GOOGLE` auth record to it — same account, same `id`. Email/password login keeps working.
 3. Sets the `accessToken` and `refreshToken` cookies (same flags as §2).
-4. Issues `302 Found` → **`<APP_URL>/customer`**.
+4. Issues `302 Found` to the frontend.
 
-> The redirect target is hardcoded to `/customer` regardless of the user's role, and no tokens are placed in the redirect URL — the session lives purely in the cookies. `APP_URL` is a backend env var; the client team must confirm it points at the correct Next.js origin per environment.
+**Success redirect**
 
-**On failure** the callback does not redirect. It falls through to the global error handler and returns a JSON error page in the browser:
-
-```json
-{
-  "success": false,
-  "statusCode": 500,
-  "message": "Google authentication Failed",
-  "errorDetails": "..."
-}
+```
+<origin><redirect>?role=<ROLE>&isNewUser=<true|false>#accessToken=<jwt>&refreshToken=<jwt>
 ```
 
-Other failure messages: `"No email found from google!"`, or `"Your account has been suspended. Please contact support."` (403) for suspended accounts.
+- `<origin>` is the frontend origin the flow started on (taken from the signed `state`, and re-checked against the CORS allowlist), falling back to `APP_URL`.
+- `<redirect>` is the path requested at §3.3, defaulting to the role's dashboard.
+- The **fragment** carries the tokens. A fragment is never sent to a server, so unlike query params it stays out of access logs and `Referer` headers. Read it only if you need the third-party-cookie fallback from §2; strip it from the URL (`history.replaceState`) once consumed. Frontends relying on the cookies can ignore it entirely.
+
+**Failure redirect** — `302` to `<origin><redirect>?error=<code>` (defaulting to `/login`). It no longer renders a JSON error page.
+
+| `error` code | Cause | Suggested copy |
+| --- | --- | --- |
+| `invalid_oauth_state` | State missing, tampered, or older than 10 minutes | "Your sign-in link expired. Please try again." |
+| `google_authentication_failed` | Google rejected the exchange, or the user cancelled | "Google sign-in was cancelled or failed." |
+| `No email found from google!` | The Google account exposed no email address | Show as-is |
+| `Your account has been suspended. Please contact support.` | Account is `SUSPENDED` | Show as-is |
 
 ---
 
@@ -315,10 +337,10 @@ Exchanges the refresh-token cookie for a fresh access token.
 
 **Errors**
 
-| Status | `message`                                                           | Cause                                               |
-| ------ | ------------------------------------------------------------------- | --------------------------------------------------- |
-| `400`  | `"refreshToken: Refresh token is required"`                         | Cookie missing / not forwarded                      |
-| `401`  | `"jwt expired"` / `"invalid signature"` / `"Invalid refresh token"` | Refresh token expired or invalid — force a re-login |
+| Status | `message` | Cause |
+| --- | --- | --- |
+| `400` | `"refreshToken: Refresh token is required"` | Cookie missing / not forwarded |
+| `401` | `"jwt expired"` / `"invalid signature"` / `"Invalid refresh token"` | Refresh token expired or invalid — force a re-login |
 
 > The refresh token is **not rotated** — the same refresh cookie stays valid for its full 7 days. There is no server-side revocation, so `POST /logout` only clears the browser's cookies; a copied token remains valid until it expires.
 
@@ -385,17 +407,17 @@ Browser (Next.js)                 GearUp API                     Google
 
 ### User
 
-| Field       | Type                                | Notes                                                                                |
-| ----------- | ----------------------------------- | ------------------------------------------------------------------------------------ |
-| `id`        | string (uuid)                       | Primary key                                                                          |
-| `name`      | string \| null                      | `null` for credentials sign-ups; Google display name for Google sign-ups             |
-| `email`     | string                              | Unique                                                                               |
-| `password`  | string \| null                      | bcrypt hash; `null` for Google-only accounts. Should never reach the client (see §9) |
-| `role`      | `CUSTOMER` \| `PROVIDER` \| `ADMIN` |                                                                                      |
-| `status`    | `ACTIVE` \| `SUSPENDED`             | `SUSPENDED` blocks login and every authenticated request                             |
-| `avatarUrl` | string \| null                      | Not populated from the Google profile today                                          |
-| `createdAt` | ISO 8601 string                     |                                                                                      |
-| `updatedAt` | ISO 8601 string                     |                                                                                      |
+| Field | Type | Notes |
+| --- | --- | --- |
+| `id` | string (uuid) | Primary key |
+| `name` | string \| null | `null` for credentials sign-ups; Google display name for Google sign-ups |
+| `email` | string | Unique |
+| `password` | string \| null | bcrypt hash; `null` for Google-only accounts. Should never reach the client (see §9) |
+| `role` | `CUSTOMER` \| `PROVIDER` \| `ADMIN` | |
+| `status` | `ACTIVE` \| `SUSPENDED` | `SUSPENDED` blocks login and every authenticated request |
+| `avatarUrl` | string \| null | Not populated from the Google profile today |
+| `createdAt` | ISO 8601 string | |
+| `updatedAt` | ISO 8601 string | |
 
 ### Auth (linked identities — not exposed by any auth endpoint)
 
@@ -458,13 +480,13 @@ On every protected request the API re-reads the user from the database and rejec
 
 **Common auth errors on protected endpoints**
 
-| Status | `message`                                                                         |
-| ------ | --------------------------------------------------------------------------------- |
-| `401`  | `"You are not logged in. Please log in to access this resource."`                 |
-| `401`  | `"jwt expired"` — call `POST /refresh`, then retry once                           |
-| `403`  | `"Forbidden. You don't have permission to access this resource."` (role mismatch) |
-| `403`  | `"Your account has been blocked. Please contact support."`                        |
-| `404`  | `"User not found. Please log in again."`                                          |
+| Status | `message` |
+| --- | --- |
+| `401` | `"You are not logged in. Please log in to access this resource."` |
+| `401` | `"jwt expired"` — call `POST /refresh`, then retry once |
+| `403` | `"Forbidden. You don't have permission to access this resource."` (role mismatch) |
+| `403` | `"Your account has been blocked. Please contact support."` |
+| `404` | `"User not found. Please log in again."` |
 
 Useful endpoint for session hydration: **`GET /api/user/me`** (any authenticated role).
 
@@ -479,11 +501,13 @@ Useful endpoint for session hydration: **`GET /api/user/me`** (any authenticated
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
 
-The backend must have `APP_URL` set to your Next.js origin (it drives both CORS and the post-Google redirect) and `GOOGLE_REDIRECT_URI` set to `<API_URL>/api/v1/auth/google/callback`.
+The backend must have `APP_URL` set to your Next.js origin (it is the fallback for CORS and the post-Google redirect), `API_URL` set to its own public origin (it decides the cookie flags), and `GOOGLE_REDIRECT_URI` set to `<API_URL>/api/v1/auth/google/callback`. Extra allowed frontend origins go in `CORS_ORIGINS` (comma-separated).
+
+> **These are read from the hosting provider's environment, not from a committed `.env`.** `.env` is gitignored and never deployed, so editing it locally has no effect on a deployed backend — the values must be updated in the Vercel project settings (and the project redeployed, since env vars are baked in at build/boot).
 
 ### 7.2 Recommended setup: same-origin proxy
 
-Because of the `SameSite=None; Secure=false` cookie issue, the most reliable setup is to proxy the API through your Next.js origin so the cookies become same-site:
+Because the API's cookies are third-party on a split-domain deployment, the most reliable setup is to proxy the API through your Next.js origin so they become first-party:
 
 ```js
 // next.config.js
@@ -617,18 +641,18 @@ Requests from any other origin are rejected by CORS. **If you deploy the Next.js
 
 These are behaviours observed in the current implementation that affect integration. They are listed here so the client can code defensively and so the backend team can prioritise fixes.
 
-| #   | Issue                                                                                                                                                          | Impact on the frontend                                                                    | Suggested fix                                                          |
-| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 1   | **Login failures return `500`** instead of `401`/`404`. Passport failures are wrapped in a plain `Error`.                                                      | Cannot branch on status code; must read `message`.                                        | Throw `UnauthorizedError`/`NotFoundError` from the login controller.   |
-| 2   | **The bcrypt password hash is returned** in `POST /login` → `data.user.password`.                                                                              | Security risk; must be stripped client-side.                                              | Strip `password` (and the duplicate `userId`) before `sendResponse`.   |
-| 3   | **Cookies use `SameSite=None` with `Secure=false`.** Browsers reject this combination cross-site.                                                              | Google login silently produces no session when frontend and API are on different domains. | Set `secure: true` in production and drive both flags from `NODE_ENV`. |
-| 4   | **`errorDetails` returns a full stack trace** on every error, in every environment.                                                                            | Must never be rendered.                                                                   | Omit in production.                                                    |
-| 5   | **Google callback always redirects to `<APP_URL>/customer`**, regardless of role.                                                                              | Providers/admins land on the customer route and must be re-routed client-side.            | Redirect by role, or to a neutral `/auth/callback` page.               |
-| 6   | **No role selection on Google sign-up** — new Google users are always `CUSTOMER`. `OAUTH_STATE_SECRET` exists in config but the `state` param is not wired up. | Providers cannot onboard via Google.                                                      | Pass a signed `state` carrying the intended role through `/google`.    |
-| 7   | **Google callback errors return raw JSON in the browser**, not a redirect.                                                                                     | User sees a JSON blob instead of an error page.                                           | Redirect to `<APP_URL>/login?error=...`.                               |
-| 8   | **Refresh tokens are not rotated or revocable**; `POST /logout` only clears cookies.                                                                           | A stolen refresh token stays valid for 7 days after logout.                               | Persist and invalidate refresh tokens server-side.                     |
-| 9   | **`role` is optional in the register validator** but required by the database.                                                                                 | Omitting it yields a confusing generic `400`.                                             | Make `role` required in the Zod schema, or default it to `CUSTOMER`.   |
+| # | Issue | Impact on the frontend | Suggested fix |
+| --- | --- | --- | --- |
+| 1 | **Login failures return `500`** instead of `401`/`404`. Passport failures are wrapped in a plain `Error`. | Cannot branch on status code; must read `message`. | Throw `UnauthorizedError`/`NotFoundError` from the login controller. |
+| 2 | **The bcrypt password hash is returned** in `POST /login` → `data.user.password`. | Security risk; must be stripped client-side. | Strip `password` (and the duplicate `userId`) before `sendResponse`. |
+| 3 | ~~**Cookies use `SameSite=None` with `Secure=false`.**~~ **Fixed** — the flags are now derived from whether `APP_URL` and `API_URL` share a hostname (§2). The cookies remain *third-party* on a split-domain deployment, so the §2 caveat still applies. | — | — |
+| 4 | **`errorDetails` returns a full stack trace** on every error, in every environment. | Must never be rendered. | Omit in production. |
+| 5 | ~~**Google callback always redirects to `<APP_URL>/customer`**~~ **Fixed** — redirects by role, or to the `redirect` path the frontend asked for. | — | — |
+| 6 | ~~**No role selection on Google sign-up**~~ **Fixed** — `/google/customer` and `/google/provider` carry the role through Google in a signed `state`. | — | — |
+| 7 | ~~**Google callback errors return raw JSON in the browser**~~ **Fixed** — failures redirect to `?error=<code>` (§3.4). | — | — |
+| 8 | **Refresh tokens are not rotated or revocable**; `POST /logout` only clears cookies. | A stolen refresh token stays valid for 7 days after logout. | Persist and invalidate refresh tokens server-side. |
+| 9 | **`role` is optional in the register validator** but required by the database. | Omitting it yields a confusing generic `400`. | Make `role` required in the Zod schema, or default it to `CUSTOMER`. |
 
 ---
 
-_Generated against the `authV1` module (`src/modules/authV1/`), `src/config/passport.ts`, and `src/app.ts` as of 2026-08-12._
+*Generated against the `authV1` module (`src/modules/authV1/`), `src/config/passport.ts`, and `src/app.ts` as of 2026-08-12.*

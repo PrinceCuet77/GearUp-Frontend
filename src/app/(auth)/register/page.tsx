@@ -239,10 +239,13 @@ export default function RegisterPage() {
           <span className='h-px flex-1 bg-border' />
         </div>
 
-        <GoogleButton />
+        <GoogleButton
+          role={selectedRole}
+          label={`Continue with Google as ${selectedRole === 'PROVIDER' ? 'a provider' : 'a customer'}`}
+        />
         <p className='mt-2 text-center text-xs text-muted-foreground'>
-          Google sign-up creates a customer account. To list gear as a provider,
-          use the form above.
+          Google sign-up uses the role selected above. Already have an account?
+          Signing in with Google keeps the role it was created with.
         </p>
 
         {/* Divider */}
