@@ -17,22 +17,28 @@ async function performLogin(email: string, password: string) {
 
     const result = await response.json();
 
-    if (result.success) {
-      const cookie = await cookies();
-      cookie.set('accessToken', result.data.accessToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24, // 1 day
-        sameSite: 'lax',
-      });
+    if (!result.success) return result;
 
-      cookie.set('refreshToken', result.data.refreshToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-        sameSite: 'lax',
-      });
-    }
+    const cookie = await cookies();
+    cookie.set('accessToken', result.data.accessToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24, // 1 day
+      sameSite: 'lax',
+    });
 
-    return result;
+    cookie.set('refreshToken', result.data.refreshToken, {
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      sameSite: 'lax',
+    });
+
+    // The backend currently returns the bcrypt hash (and a `userId` duplicate of
+    // `id`) on the user object — drop both so neither can reach client state.
+    const user = { ...result.data.user };
+    delete user.password;
+    delete user.userId;
+
+    return { ...result, data: { ...result.data, user } };
   } catch (error) {
     return {
       success: false,

@@ -6,7 +6,13 @@ import { cookies } from 'next/headers';
 import { refreshTokenAction } from './app/(auth)/_actions/refreshTokenAction';
 
 const AUTH_ROUTES = ['/login', '/register'];
-const PUBLIC_ROUTES = ['/', '/gears', '/about', '/oauth/callback'];
+const PUBLIC_ROUTES = ['/', '/gears', '/about'];
+
+const DASHBOARD_BY_ROLE: Record<string, string> = {
+  ADMIN: '/admin',
+  CUSTOMER: '/customer',
+  PROVIDER: '/provider',
+};
 
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {
@@ -87,15 +93,19 @@ export async function proxy(request: NextRequest) {
       : null;
 
   if (accessToken && AUTH_ROUTES.includes(pathname)) {
-    if (role === 'ADMIN') {
-      return NextResponse.redirect(new URL('/admin', request.url));
-    } else if (role === 'CUSTOMER') {
-      return NextResponse.redirect(new URL('/customer', request.url));
-    } else if (role === 'PROVIDER') {
-      return NextResponse.redirect(new URL('/provider', request.url));
-    } else {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
+    return NextResponse.redirect(
+      new URL(DASHBOARD_BY_ROLE[role as string] ?? '/', request.url),
+    );
+  }
+
+  // The Google OAuth callback always redirects to `/customer`, whatever the
+  // user's role. Bounce a provider/admin landing there to their own dashboard
+  // instead of the /not-found the RBAC check below would give them. Only the
+  // bare path is forgiven — deeper /customer/* links stay guarded.
+  if (pathname === '/customer' && role && role !== 'CUSTOMER') {
+    return NextResponse.redirect(
+      new URL(DASHBOARD_BY_ROLE[role as string] ?? '/', request.url),
+    );
   }
 
   // PROXY-2: Authentication check: If the user is not authenticated and trying to access a protected route, redirect them to the login page.

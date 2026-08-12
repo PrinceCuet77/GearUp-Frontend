@@ -35,9 +35,19 @@ const DEMO_OPTIONS: {
   { role: 'ADMIN', label: 'Demo Admin', icon: ShieldCheck },
 ];
 
-/** Exact message the backend returns for a Google-linked account (§3.2/§6.3). */
-const GOOGLE_ONLY_MESSAGE =
-  'This account was created with Google. Please continue with Google.';
+/**
+ * Login failures currently come back as HTTP `500` with a human-readable
+ * `message` (spec §3.2 / §9 #1), so the status code can't be branched on. These
+ * match on the message instead and tolerate the `401`/`404` the backend is
+ * expected to return once fixed.
+ */
+const FAILURE_PATTERNS = {
+  /** Google-only account: `password` is null, so credentials can't work. */
+  googleOnly: /login with google/i,
+  unknownEmail: /not found with this email/i,
+  wrongPassword: /password does not match/i,
+  suspended: /suspended/i,
+};
 
 /** Divider with a centred caption, used twice on this card. */
 function Divider({ children }: { children: React.ReactNode }) {
@@ -112,15 +122,18 @@ function LoginPageInner() {
     setSuspended(false);
     setGoogleOnly(false);
 
-    if (statusCode === 404) {
-      form.setError('email', { message });
-    } else if (statusCode === 401 && message === GOOGLE_ONLY_MESSAGE) {
+    if (FAILURE_PATTERNS.googleOnly.test(message)) {
       setGoogleOnly(true);
-    } else if (statusCode === 401) {
-      form.setError('password', { message });
-    } else if (statusCode === 403) {
+    } else if (statusCode === 403 || FAILURE_PATTERNS.suspended.test(message)) {
       setSuspended(true);
       setBannerError(message);
+    } else if (statusCode === 404 || FAILURE_PATTERNS.unknownEmail.test(message)) {
+      form.setError('email', { message });
+    } else if (
+      statusCode === 401 ||
+      FAILURE_PATTERNS.wrongPassword.test(message)
+    ) {
+      form.setError('password', { message });
     } else {
       setBannerError(message);
     }
@@ -185,9 +198,8 @@ function LoginPageInner() {
               This account was created with Google. Continue with Google to
               sign in.
             </p>
-            <div className='flex w-full flex-col gap-2'>
-              <GoogleButton role='CUSTOMER' />
-              <GoogleButton role='PROVIDER' />
+            <div className='w-full'>
+              <GoogleButton />
             </div>
             <button
               type='button'
@@ -243,10 +255,7 @@ function LoginPageInner() {
               Sign in
             </Button>
 
-            <div className='flex flex-col gap-2'>
-              <GoogleButton role='CUSTOMER' />
-              <GoogleButton role='PROVIDER' />
-            </div>
+            <GoogleButton />
           </form>
         )}
 

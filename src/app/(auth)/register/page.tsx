@@ -71,7 +71,14 @@ export default function RegisterPage() {
       if (!result?.success) {
         const message =
           result?.message || 'Could not create your account. Please try again.';
-        setServerError(message);
+
+        // A 409 also covers accounts first created through Google — those are
+        // never merged, so point the user at the Google button instead.
+        setServerError(
+          result?.statusCode === 409
+            ? `${message} If you signed up with Google, continue with Google below.`
+            : message,
+        );
         toast.error(message);
         return;
       }
@@ -232,7 +239,11 @@ export default function RegisterPage() {
           <span className='h-px flex-1 bg-border' />
         </div>
 
-        <GoogleButton role={selectedRole} />
+        <GoogleButton />
+        <p className='mt-2 text-center text-xs text-muted-foreground'>
+          Google sign-up creates a customer account. To list gear as a provider,
+          use the form above.
+        </p>
 
         {/* Divider */}
         <div className='my-6 flex items-center gap-3'>
