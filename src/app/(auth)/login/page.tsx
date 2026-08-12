@@ -185,7 +185,10 @@ function LoginPageInner() {
               This account was created with Google. Continue with Google to
               sign in.
             </p>
-            <GoogleButton label='Continue with Google' />
+            <div className='flex w-full flex-col gap-2'>
+              <GoogleButton role='CUSTOMER' />
+              <GoogleButton role='PROVIDER' />
+            </div>
             <button
               type='button'
               onClick={() => setGoogleOnly(false)}
@@ -240,7 +243,10 @@ function LoginPageInner() {
               Sign in
             </Button>
 
-            <GoogleButton />
+            <div className='flex flex-col gap-2'>
+              <GoogleButton role='CUSTOMER' />
+              <GoogleButton role='PROVIDER' />
+            </div>
           </form>
         )}
 

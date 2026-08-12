@@ -4,17 +4,21 @@ import { buttonClasses } from '@/components/ui/Button';
 import { GoogleIcon } from '@/components/ui/BrandIcons';
 import { buildGoogleAuthUrl, type GoogleAuthRole } from '@/lib/oauth';
 
+const ROLE_LABEL: Record<GoogleAuthRole, string> = {
+  CUSTOMER: 'Continue with Google as a Customer',
+  PROVIDER: 'Continue with Google as a Provider',
+};
+
 /**
- * Starts the Google OAuth flow. Renders as a plain `<a>` so the browser
- * performs a full navigation — required for the backend's CSRF-state
- * cookie and the redirect to Google's consent screen to work.
+ * Starts the Google OAuth flow for the given role. Renders as a plain `<a>`
+ * so the browser performs a full navigation — required for the backend's
+ * CSRF-state cookie and the redirect to Google's consent screen to work.
  */
 export function GoogleButton({
   role,
-  label = 'Continue with Google',
+  label = ROLE_LABEL[role],
 }: {
-  /** Only applied when Google creates a *new* user. Omit on the login page. */
-  role?: GoogleAuthRole;
+  role: GoogleAuthRole;
   label?: string;
 }) {
   return (

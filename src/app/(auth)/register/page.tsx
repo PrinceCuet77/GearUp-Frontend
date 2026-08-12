@@ -232,10 +232,7 @@ export default function RegisterPage() {
           <span className='h-px flex-1 bg-border' />
         </div>
 
-        <GoogleButton
-          role={selectedRole}
-          label={`Continue with Google as ${selectedRole === 'PROVIDER' ? 'a Provider' : 'a Customer'}`}
-        />
+        <GoogleButton role={selectedRole} />
 
         {/* Divider */}
         <div className='my-6 flex items-center gap-3'>
