@@ -16,8 +16,10 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { registerSchema } from '@/lib/validations/auth';
 import { registerAction } from '@/app/(auth)/_actions/registerActions';
+import { loginAction } from '@/app/(auth)/_actions/loginActions';
 import { Button } from '@/components/ui/Button';
 import { FormField, PasswordInput } from '@/components/ui/FormField';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 import { cn } from '@/lib/cn';
 
 type Role = 'CUSTOMER' | 'PROVIDER';
@@ -66,14 +68,34 @@ export default function RegisterPage() {
 
       const result = await registerAction(undefined, formData);
 
-      if (result?.success) {
-        toast.success('Account created successfully!');
-        router.push('/login');
-      } else {
+      if (!result?.success) {
         const message =
           result?.message || 'Could not create your account. Please try again.';
         setServerError(message);
         toast.error(message);
+        return;
+      }
+
+      // Register doesn't log the user in — sign them in immediately with the
+      // same credentials rather than bouncing them to the login form.
+      const loginFormData = new FormData();
+      loginFormData.append('email', values.email);
+      loginFormData.append('password', values.password);
+      const loginResult = await loginAction(null, loginFormData);
+
+      if (!loginResult?.success) {
+        toast.success('Account created! Please sign in to continue.');
+        router.push('/login');
+        return;
+      }
+
+      const role = loginResult.data?.user?.role;
+      toast.success('Account created successfully!');
+
+      if (role === 'PROVIDER') {
+        router.push('/provider');
+      } else {
+        router.push('/customer');
       }
     });
   };
@@ -202,6 +224,18 @@ export default function RegisterPage() {
             Create Account
           </Button>
         </form>
+
+        {/* Divider */}
+        <div className='my-6 flex items-center gap-3'>
+          <span className='h-px flex-1 bg-border' />
+          <span className='text-xs text-muted-foreground'>Or</span>
+          <span className='h-px flex-1 bg-border' />
+        </div>
+
+        <GoogleButton
+          role={selectedRole}
+          label={`Continue with Google as ${selectedRole === 'PROVIDER' ? 'a Provider' : 'a Customer'}`}
+        />
 
         {/* Divider */}
         <div className='my-6 flex items-center gap-3'>

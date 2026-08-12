@@ -16,7 +16,7 @@ export const refreshTokenAction = async () => {
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/auth/refresh`,
+      `${process.env.BACKEND_API_URL}/api/v1/auth/refresh`,
       {
         method: 'POST',
         headers: {

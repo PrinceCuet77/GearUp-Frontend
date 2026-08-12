@@ -11,7 +11,7 @@ export const registerSchema = z.object({
     .string()
     .min(6, 'Password must be at least 6 characters')
     .max(20, 'Password cannot exceed 20 characters'),
-  role: z.enum(['CUSTOMER', 'PROVIDER', 'ADMIN']).optional(), // Or required based on logic
+  role: z.enum(['CUSTOMER', 'PROVIDER']),
 });
 
 /** Same length rules as registration, plus the confirm-and-differ checks. */

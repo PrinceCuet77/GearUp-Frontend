@@ -6,7 +6,7 @@ import { cookies } from 'next/headers';
 import { refreshTokenAction } from './app/(auth)/_actions/refreshTokenAction';
 
 const AUTH_ROUTES = ['/login', '/register'];
-const PUBLIC_ROUTES = ['/', '/gears', '/about'];
+const PUBLIC_ROUTES = ['/', '/gears', '/about', '/oauth/callback'];
 
 // This function can be marked `async` if using `await` inside
 export async function proxy(request: NextRequest) {

@@ -1,11 +1,18 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { Suspense, useState, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Dumbbell, Loader2, ShieldCheck, Store, User } from 'lucide-react';
+import {
+  AlertCircle,
+  Dumbbell,
+  Loader2,
+  ShieldCheck,
+  Store,
+  User,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { loginSchema } from '@/lib/validations/auth';
 import {
@@ -15,6 +22,7 @@ import {
 } from '@/app/(auth)/_actions/loginActions';
 import { Button } from '@/components/ui/Button';
 import { FormField, PasswordInput } from '@/components/ui/FormField';
+import { GoogleButton } from '@/components/auth/GoogleButton';
 import z from 'zod';
 
 const DEMO_OPTIONS: {
@@ -27,6 +35,10 @@ const DEMO_OPTIONS: {
   { role: 'ADMIN', label: 'Demo Admin', icon: ShieldCheck },
 ];
 
+/** Exact message the backend returns for a Google-linked account (§3.2/§6.3). */
+const GOOGLE_ONLY_MESSAGE =
+  'This account was created with Google. Please continue with Google.';
+
 /** Divider with a centred caption, used twice on this card. */
 function Divider({ children }: { children: React.ReactNode }) {
   return (
@@ -38,9 +50,23 @@ function Divider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function LoginPage() {
+type LoginResult = {
+  success?: boolean;
+  statusCode?: number;
+  message?: string;
+  data?: { user?: { role?: string } };
+};
+
+function LoginPageInner() {
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [demoLoadingRole, setDemoLoadingRole] = useState<DemoRole | null>(null);
+  const [bannerError, setBannerError] = useState<string | null>(() => {
+    const urlError = searchParams.get('error');
+    return urlError ? decodeURIComponent(urlError) : null;
+  });
+  const [suspended, setSuspended] = useState(false);
+  const [googleOnly, setGoogleOnly] = useState(false);
   const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -51,11 +77,7 @@ export default function LoginPage() {
     },
   });
 
-  const handleLoginResult = (result: {
-    success?: boolean;
-    message?: string;
-    data?: { user?: { role?: string } };
-  }) => {
+  const handleLoginResult = (result: LoginResult) => {
     if (result?.success) {
       const role = result.data?.user?.role;
       const roleLabel =
@@ -80,9 +102,30 @@ export default function LoginPage() {
       } else if (role === 'PROVIDER') {
         router.push('/provider');
       }
-    } else {
-      toast.error(result?.message || 'Login failed. Please try again.');
+      return;
     }
+
+    const message = result?.message || 'Login failed. Please try again.';
+    const statusCode = result?.statusCode;
+
+    setBannerError(null);
+    setSuspended(false);
+    setGoogleOnly(false);
+
+    if (statusCode === 404) {
+      form.setError('email', { message });
+    } else if (statusCode === 401 && message === GOOGLE_ONLY_MESSAGE) {
+      setGoogleOnly(true);
+    } else if (statusCode === 401) {
+      form.setError('password', { message });
+    } else if (statusCode === 403) {
+      setSuspended(true);
+      setBannerError(message);
+    } else {
+      setBannerError(message);
+    }
+
+    toast.error(message);
   };
 
   const onSubmit = (data: z.infer<typeof loginSchema>) => {
@@ -126,45 +169,80 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className='flex flex-col gap-5'
-          noValidate
-        >
-          <FormField label='Email' error={errors.email?.message} required>
-            {(props) => (
-              <input
-                {...props}
-                {...form.register('email')}
-                type='email'
-                autoComplete='email'
-                placeholder='Enter your email'
-              />
-            )}
-          </FormField>
-
-          <FormField label='Password' error={errors.password?.message} required>
-            {(props) => (
-              <PasswordInput
-                {...props}
-                {...form.register('password')}
-                autoComplete='current-password'
-                placeholder='Enter your password'
-              />
-            )}
-          </FormField>
-
-          <Button
-            type='submit'
-            fullWidth
-            className='mt-1'
-            loading={isPending && demoLoadingRole === null}
-            loadingText='Signing in…'
+        {bannerError && (
+          <div
+            role='alert'
+            className='mb-5 flex items-center gap-2 rounded-control border border-danger/40 bg-danger-soft px-4 py-3 text-sm font-medium text-danger-soft-foreground'
           >
-            Sign in
-          </Button>
-        </form>
+            <AlertCircle className='h-4 w-4 shrink-0' aria-hidden='true' />
+            {bannerError}
+          </div>
+        )}
+
+        {googleOnly ? (
+          <div className='flex flex-col items-center gap-4 rounded-control border border-border bg-muted px-4 py-6 text-center'>
+            <p className='text-sm text-muted-foreground'>
+              This account was created with Google. Continue with Google to
+              sign in.
+            </p>
+            <GoogleButton label='Continue with Google' />
+            <button
+              type='button'
+              onClick={() => setGoogleOnly(false)}
+              className='text-xs font-semibold text-muted-foreground hover:text-foreground hover:underline'
+            >
+              Use a different account
+            </button>
+          </div>
+        ) : (
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='flex flex-col gap-5'
+            noValidate
+          >
+            <FormField label='Email' error={errors.email?.message} required>
+              {(props) => (
+                <input
+                  {...props}
+                  {...form.register('email')}
+                  type='email'
+                  autoComplete='email'
+                  placeholder='Enter your email'
+                  disabled={suspended}
+                />
+              )}
+            </FormField>
+
+            <FormField
+              label='Password'
+              error={errors.password?.message}
+              required
+            >
+              {(props) => (
+                <PasswordInput
+                  {...props}
+                  {...form.register('password')}
+                  autoComplete='current-password'
+                  placeholder='Enter your password'
+                  disabled={suspended}
+                />
+              )}
+            </FormField>
+
+            <Button
+              type='submit'
+              fullWidth
+              className='mt-1'
+              loading={isPending && demoLoadingRole === null}
+              loadingText='Signing in…'
+              disabled={suspended}
+            >
+              Sign in
+            </Button>
+
+            <GoogleButton />
+          </form>
+        )}
 
         <Divider>Or try a demo account</Divider>
 
@@ -202,5 +280,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

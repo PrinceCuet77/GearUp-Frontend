@@ -21,7 +21,7 @@ export const registerAction = async (
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/auth/register`,
+      `${process.env.BACKEND_API_URL}/api/v1/auth/register`,
       {
         method: 'POST',
         headers: {

@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 async function performLogin(email: string, password: string) {
   try {
     const response = await fetch(
-      `${process.env.BACKEND_API_URL}/api/auth/login`,
+      `${process.env.BACKEND_API_URL}/api/v1/auth/login`,
       {
         method: 'POST',
         headers: {
