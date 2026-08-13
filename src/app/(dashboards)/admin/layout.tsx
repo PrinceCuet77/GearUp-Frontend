@@ -14,12 +14,6 @@ const navItems: NavItem[] = [
     exact: true,
   },
   {
-    href: '/admin/analytics',
-    label: 'Analytics',
-    icon: 'ChartColumn',
-    group: 'Dashboard',
-  },
-  {
     href: '/admin/users',
     label: 'Manage Users',
     icon: 'Users',

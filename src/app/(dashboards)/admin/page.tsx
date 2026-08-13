@@ -89,8 +89,6 @@ export default async function AdminOverviewPage() {
       <SectionHeader
         title='Platform activity'
         description={`Derived from live account and listing data.${sampleNote}`}
-        linkHref='/admin/analytics'
-        linkLabel='Full analytics'
       />
       <div className='mb-8 grid gap-4 lg:grid-cols-3'>
         <ChartCard
