@@ -17,14 +17,14 @@ type AdoptResult = {
  * (spec §3.4) into this origin's own `accessToken`/`refreshToken` cookies.
  *
  * The backend also sets its own cookies, but on a split-domain deployment those
- * are third-party — Safari, Firefox and Chrome incognito drop them (spec §2).
+ * are third-party - Safari, Firefox and Chrome incognito drop them (spec §2).
  * Everything here (middleware RBAC, every server action) reads *our* cookies, so
  * adopting the tokens is what actually creates the session. Same cookie flags as
  * `loginActions.ts`, so a Google session and a credentials session are identical
  * from this point on.
  *
  * Both tokens are verified against the shared JWT secrets before anything is
- * written — a token that fails verification would only get rejected by the
+ * written - a token that fails verification would only get rejected by the
  * middleware on the next request anyway, so failing here gives a clean error.
  */
 export const adoptGoogleSessionAction = async (
@@ -67,7 +67,7 @@ export const adoptGoogleSessionAction = async (
   });
 
   // The JWT carries the role, so routing never depends on the profile call
-  // succeeding — that only fills the auth store to skip a fetch on the dashboard.
+  // succeeding - that only fills the auth store to skip a fetch on the dashboard.
   const claims = decodedAccessToken.data as JwtPayload;
   const role = (claims?.role as UserRole) ?? null;
 

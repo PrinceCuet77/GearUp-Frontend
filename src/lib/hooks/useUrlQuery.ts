@@ -24,7 +24,7 @@ export interface UrlQuery {
  * URL-search-param state for server-paginated, server-filtered tables.
  *
  * Filters live in the URL rather than component state so a filtered view stays
- * shareable, bookmarkable and survives a refresh — the same convention the
+ * shareable, bookmarkable and survives a refresh - the same convention the
  * public gear browser uses.
  */
 export function useUrlQuery(): UrlQuery {

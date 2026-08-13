@@ -311,7 +311,7 @@ export function CategoriesContent({
           <FormField
             label='Description'
             error={errors.description}
-            hint='Optional — shown to customers when browsing.'
+            hint='Optional - shown to customers when browsing.'
           >
             {(props) => (
               <input

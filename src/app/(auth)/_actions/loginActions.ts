@@ -33,7 +33,7 @@ async function performLogin(email: string, password: string) {
     });
 
     // The backend currently returns the bcrypt hash (and a `userId` duplicate of
-    // `id`) on the user object — drop both so neither can reach client state.
+    // `id`) on the user object - drop both so neither can reach client state.
     const user = { ...result.data.user };
     delete user.password;
     delete user.userId;

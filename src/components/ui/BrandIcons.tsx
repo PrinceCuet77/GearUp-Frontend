@@ -55,9 +55,15 @@ export const YouTubeIcon: BrandIcon = (props) => (
   </Svg>
 );
 
-/** Full-colour Google "G" mark — unlike the others it doesn't theme via `currentColor`. */
+/** Full-colour Google "G" mark - unlike the others it doesn't theme via `currentColor`. */
 export const GoogleIcon: BrandIcon = (props) => (
-  <svg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' aria-hidden='true' focusable='false' {...props}>
+  <svg
+    viewBox='0 0 24 24'
+    xmlns='http://www.w3.org/2000/svg'
+    aria-hidden='true'
+    focusable='false'
+    {...props}
+  >
     <path
       fill='#4285F4'
       d='M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47c-.28 1.48-1.13 2.74-2.41 3.58v2.98h3.89c2.28-2.1 3.57-5.2 3.57-8.75Z'

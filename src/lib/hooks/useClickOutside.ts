@@ -5,7 +5,7 @@ import { useEffect, useRef, type RefObject } from 'react';
 /**
  * Closes a popover-style surface on an outside pointer press or `Escape`.
  *
- * Returns the ref to attach to the element that should stay open — anything
+ * Returns the ref to attach to the element that should stay open - anything
  * inside it (including the trigger) is treated as "inside".
  */
 export function useClickOutside<T extends HTMLElement = HTMLDivElement>(

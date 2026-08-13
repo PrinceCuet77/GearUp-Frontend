@@ -15,7 +15,7 @@ import { AboutValues } from './_components/AboutValues';
 import { AboutContact } from './_components/AboutContact';
 
 export const metadata: Metadata = {
-  title: `About — ${SITE.name}`,
+  title: `About - ${SITE.name}`,
   description: `${SITE.description} Learn how GearUp verifies providers, protects payments and keeps reviews honest.`,
 };
 

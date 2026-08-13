@@ -56,7 +56,7 @@ export function PaymentsTable({
       header: 'Rental order',
       cell: (payment) => {
         if (!payment.rentalOrderId) {
-          return <span className='text-muted-foreground'>—</span>;
+          return <span className='text-muted-foreground'>-</span>;
         }
         return (
           <Link

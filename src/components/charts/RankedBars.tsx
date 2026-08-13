@@ -12,7 +12,7 @@ export interface RankedBar {
 
 export interface RankedBarsProps {
   data: RankedBar[];
-  /** What the bar length means — announced to screen readers. */
+  /** What the bar length means - announced to screen readers. */
   valueLabel: string;
   /**
    * Denominator for the bar lengths. Defaults to the largest value, which
@@ -25,7 +25,7 @@ export interface RankedBarsProps {
 }
 
 /**
- * Ranked horizontal bars — the readable form when categories are many, or
+ * Ranked horizontal bars - the readable form when categories are many, or
  * their names are long enough to collide on a vertical axis.
  *
  * Built from ordinary elements rather than SVG: the label and the figure are

@@ -25,7 +25,7 @@ interface Props {
   onClose: () => void;
 }
 
-/** `YYYY-MM-DD` in the user's local timezone (not UTC — avoids off-by-one). */
+/** `YYYY-MM-DD` in the user's local timezone (not UTC - avoids off-by-one). */
 function toDateInputValue(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -145,7 +145,7 @@ export default function AddToCartModal({ gear, onClose }: Props) {
       >
         {/* Header */}
         <div className='flex items-start gap-3 border-b border-border p-5'>
-          {/* Decorative thumbnail — the name beside it carries the meaning */}
+          {/* Decorative thumbnail - the name beside it carries the meaning */}
           <Image
             src={image}
             alt=''
@@ -194,7 +194,7 @@ export default function AddToCartModal({ gear, onClose }: Props) {
                 </p>
                 <p className='text-sm text-muted-foreground'>
                   {quantity} × {gear.name} for {days} day{days === 1 ? '' : 's'}{' '}
-                  — {formatBDT(total)} total.
+                  - {formatBDT(total)} total.
                 </p>
               </div>
 

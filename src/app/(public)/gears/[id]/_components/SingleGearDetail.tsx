@@ -41,7 +41,7 @@ interface SingleGearDetailProps {
   related?: GearItem[];
 }
 
-/** Avatar fallback — brand tokens only, so it themes with everything else. */
+/** Avatar fallback - brand tokens only, so it themes with everything else. */
 function Avatar({
   src,
   name,
@@ -100,12 +100,16 @@ function SpecRow({
   );
 }
 
-export function SingleGearDetail({ gear, related = [] }: SingleGearDetailProps) {
+export function SingleGearDetail({
+  gear,
+  related = [],
+}: SingleGearDetailProps) {
   const reviews = gear.reviews ?? [];
   const images = parseGearImages(gear.images);
   const avgRating = reviews.length > 0 ? calcAvgRating(reviews) : 0;
   const availability = getGearAvailability(gear);
-  const isRentable = availability === 'available' || availability === 'low-stock';
+  const isRentable =
+    availability === 'available' || availability === 'low-stock';
 
   const [activeImage, setActiveImage] = useState(0);
   const [imgModalOpen, setImgModalOpen] = useState(false);
@@ -168,7 +172,7 @@ export function SingleGearDetail({ gear, related = [] }: SingleGearDetailProps) 
               </span>
             </button>
 
-            {/* Thumbnail strip — selects the main image */}
+            {/* Thumbnail strip - selects the main image */}
             {images.length > 1 && (
               <div className='flex gap-2 overflow-x-auto pb-1'>
                 {images.map((src, i) => (
@@ -386,7 +390,10 @@ export function SingleGearDetail({ gear, related = [] }: SingleGearDetailProps) 
           {reviews.length === 0 ? (
             <div className='surface-card flex flex-col items-center justify-center px-6 py-14 text-center'>
               <span className='mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted'>
-                <Star className='h-7 w-7 text-muted-foreground' aria-hidden='true' />
+                <Star
+                  className='h-7 w-7 text-muted-foreground'
+                  aria-hidden='true'
+                />
               </span>
               <p className='text-base font-bold text-foreground'>
                 No reviews yet

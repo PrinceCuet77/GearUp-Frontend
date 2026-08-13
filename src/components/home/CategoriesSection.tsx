@@ -52,7 +52,7 @@ export function CategoriesSection({
       ) : (
         <RevealGroup className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4'>
           {visible.map((category) => {
-            // Empty categories have no listing to borrow an image from — fall
+            // Empty categories have no listing to borrow an image from - fall
             // back to artwork so the tile still reads as a finished card.
             const image = category.image
               ? parseGearImages(category.image)[0]

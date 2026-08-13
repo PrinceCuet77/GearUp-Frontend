@@ -1,9 +1,4 @@
-import {
-  Calendar,
-  Package,
-  CreditCard,
-  Receipt,
-} from 'lucide-react';
+import { Calendar, Package, CreditCard, Receipt } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function OrderDetailLoading() {
@@ -33,9 +28,7 @@ export default function OrderDetailLoading() {
       {/* Cards grid skeleton */}
       <div className='grid gap-4 sm:grid-cols-2'>
         {/* Rental period card */}
-        <div
-          className='surface-card p-5'
-        >
+        <div className='surface-card p-5'>
           <div className='mb-3 flex items-center gap-2'>
             <Calendar className='h-4 w-4' style={{ color: 'var(--primary)' }} />
             <Skeleton className='h-4 w-28 rounded' />
@@ -45,9 +38,7 @@ export default function OrderDetailLoading() {
         </div>
 
         {/* Total amount card */}
-        <div
-          className='surface-card p-5'
-        >
+        <div className='surface-card p-5'>
           <div className='mb-3 flex items-center gap-2'>
             <CreditCard className='h-4 w-4 text-accent' />
             <Skeleton className='h-4 w-28 rounded' />
@@ -58,9 +49,7 @@ export default function OrderDetailLoading() {
       </div>
 
       {/* Items list skeleton */}
-      <div
-        className='mt-4 surface-card'
-      >
+      <div className='mt-4 surface-card'>
         <div
           className='flex items-center gap-2 border-b px-5 py-4'
           style={{ borderColor: 'var(--border)' }}
@@ -103,9 +92,7 @@ export default function OrderDetailLoading() {
       </div>
 
       {/* Payment History skeleton */}
-      <div
-        className='mt-4 surface-card'
-      >
+      <div className='mt-4 surface-card'>
         <div
           className='flex items-center gap-2 border-b px-5 py-4'
           style={{ borderColor: 'var(--border)' }}
@@ -127,10 +114,8 @@ export default function OrderDetailLoading() {
         ))}
       </div>
 
-      {/* Reviews skeleton — mirrors the "No reviews yet" empty state */}
-      <div
-        className='mt-4 surface-card'
-      >
+      {/* Reviews skeleton - mirrors the "No reviews yet" empty state */}
+      <div className='mt-4 surface-card'>
         <div
           className='flex items-center gap-2 border-b px-5 py-4'
           style={{ borderColor: 'var(--border)' }}

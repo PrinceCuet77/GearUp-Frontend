@@ -10,7 +10,7 @@ import {
 import { SITE } from '@/lib/site';
 
 export const metadata: Metadata = {
-  title: `Browse Gear — ${SITE.name}`,
+  title: `Browse Gear - ${SITE.name}`,
   description:
     'Browse sports and outdoor equipment available to rent by the day. Filter by category, price and rating.',
 };

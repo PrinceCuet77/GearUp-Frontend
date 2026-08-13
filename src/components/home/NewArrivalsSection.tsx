@@ -21,7 +21,7 @@ export function NewArrivalsSection({ gears }: { gears: GearItem[] }) {
         eyebrow='Just listed'
         eyebrowIcon={<Clock3 className='h-3.5 w-3.5' />}
         title='Fresh out of the garage'
-        description='The newest gear published by providers — usually the first to get booked for the weekend.'
+        description='The newest gear published by providers - usually the first to get booked for the weekend.'
         action={
           <ButtonLink
             href='/gears?sortBy=createdAt&sortOrder=desc'

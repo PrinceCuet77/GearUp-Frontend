@@ -40,7 +40,7 @@ function pageWindow(page: number, totalPages: number): Array<number | null> {
 }
 
 /**
- * The one pagination control used by every dashboard table — numbered pages on
+ * The one pagination control used by every dashboard table - numbered pages on
  * desktop, a compact "page x of y" on mobile.
  */
 export function Pagination({
@@ -82,8 +82,8 @@ export function Pagination({
           </>
         ) : (
           <>
-            Page <span className='font-semibold text-foreground'>{page}</span> of{' '}
-            {totalPages}
+            Page <span className='font-semibold text-foreground'>{page}</span>{' '}
+            of {totalPages}
           </>
         )}
       </p>

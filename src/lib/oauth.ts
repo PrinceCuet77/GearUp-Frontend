@@ -2,7 +2,7 @@ import type { UserRole } from '@/lib/types';
 
 /**
  * Frontend path the backend sends the browser back to once Google is done.
- * Must start with `/` — the backend rejects absolute/protocol-relative values
+ * Must start with `/` - the backend rejects absolute/protocol-relative values
  * to avoid being turned into an open redirect.
  */
 export const OAUTH_CALLBACK_PATH = '/oauth/callback';
@@ -18,13 +18,13 @@ const GOOGLE_START_PATH: Record<GoogleSignupRole, string> = {
 /**
  * Google OAuth start URL (spec §3.3).
  *
- * `role` only applies to accounts being *created* — an existing user keeps the
+ * `role` only applies to accounts being *created* - an existing user keeps the
  * role they signed up with, whichever variant they come through. The role, the
  * `redirect` path and the origin are packed into a signed 10-minute `state`, so
  * nothing needs to survive the redirect in `localStorage`.
  *
  * Must be opened via a full browser navigation (a plain `<a>` or
- * `window.location.href`), never `fetch` — an XHR can't follow the redirect to
+ * `window.location.href`), never `fetch` - an XHR can't follow the redirect to
  * Google's consent screen and CORS blocks it.
  */
 export function buildGoogleAuthUrl(
@@ -73,7 +73,7 @@ export type OAuthFragmentTokens = {
 
 /**
  * Reads the tokens out of a URL fragment. The fragment is used (rather than a
- * query param) because it never reaches a server — no access logs, no `Referer`
+ * query param) because it never reaches a server - no access logs, no `Referer`
  * leakage. Returns `null` when either token is missing.
  */
 export function readOAuthFragment(hash: string): OAuthFragmentTokens | null {

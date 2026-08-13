@@ -10,7 +10,7 @@ import {
 
 export interface CountUpProps {
   value: number;
-  /** Decimal places to render — use 1 for averages like 4.7. */
+  /** Decimal places to render - use 1 for averages like 4.7. */
   decimals?: number;
   duration?: number;
   prefix?: string;

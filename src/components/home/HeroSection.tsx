@@ -68,7 +68,9 @@ export function HeroSection({
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = query.trim();
-    router.push(trimmed ? `/gears?search=${encodeURIComponent(trimmed)}` : '/gears');
+    router.push(
+      trimmed ? `/gears?search=${encodeURIComponent(trimmed)}` : '/gears',
+    );
   };
 
   const active = hasShowcase ? showcase[index] : null;
@@ -78,8 +80,11 @@ export function HeroSection({
       className='relative flex items-center overflow-hidden border-b border-border bg-background py-14 sm:py-16 lg:h-[68vh] lg:max-h-[780px] lg:min-h-[560px] lg:py-0'
       aria-label='Rent sports and outdoor gear'
     >
-      {/* Ambient background — three brand colours only */}
-      <div className='pointer-events-none absolute inset-0 -z-10' aria-hidden='true'>
+      {/* Ambient background - three brand colours only */}
+      <div
+        className='pointer-events-none absolute inset-0 -z-10'
+        aria-hidden='true'
+      >
         <div
           className='absolute inset-0'
           style={{
@@ -97,9 +102,14 @@ export function HeroSection({
         <motion.div
           className='absolute top-1/4 right-1/3 h-64 w-64 rounded-full blur-3xl'
           style={{
-            backgroundColor: 'color-mix(in srgb, var(--secondary) 14%, transparent)',
+            backgroundColor:
+              'color-mix(in srgb, var(--secondary) 14%, transparent)',
           }}
-          animate={reduceMotion ? undefined : { y: [0, -24, 0], opacity: [0.6, 1, 0.6] }}
+          animate={
+            reduceMotion
+              ? undefined
+              : { y: [0, -24, 0], opacity: [0.6, 1, 0.6] }
+          }
           transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
         />
       </div>
@@ -137,7 +147,7 @@ export function HeroSection({
               className='mt-5 text-base leading-relaxed text-pretty text-muted-foreground sm:text-lg'
             >
               Bikes, tents, kayaks and climbing kit from verified providers
-              across Bangladesh — booked by the day, paid securely, reviewed by
+              across Bangladesh - booked by the day, paid securely, reviewed by
               people who actually used them.
             </motion.p>
 
@@ -206,7 +216,10 @@ export function HeroSection({
               className='mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground'
             >
               <span className='flex items-center gap-2'>
-                <ShieldCheck className='h-4 w-4 text-secondary' aria-hidden='true' />
+                <ShieldCheck
+                  className='h-4 w-4 text-secondary'
+                  aria-hidden='true'
+                />
                 Secure SSLCommerz payments
               </span>
               <span className='flex items-center gap-2'>
@@ -312,11 +325,18 @@ export function HeroSection({
               {/* Floating stat card */}
               <motion.div
                 animate={reduceMotion ? undefined : { y: [0, -8, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
                 className='surface-card absolute -bottom-6 -left-6 flex items-center gap-3 px-4 py-3 shadow-lg'
               >
                 <span className='flex h-10 w-10 items-center justify-center rounded-xl bg-secondary-soft'>
-                  <Compass className='h-5 w-5 text-secondary' aria-hidden='true' />
+                  <Compass
+                    className='h-5 w-5 text-secondary'
+                    aria-hidden='true'
+                  />
                 </span>
                 <div>
                   <p className='text-sm font-extrabold text-foreground'>
@@ -332,7 +352,10 @@ export function HeroSection({
             <div className='hidden lg:block'>
               <div className='surface-card flex aspect-4/3 flex-col items-center justify-center gap-4 p-10 text-center'>
                 <span className='flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft'>
-                  <Compass className='h-7 w-7 text-primary' aria-hidden='true' />
+                  <Compass
+                    className='h-7 w-7 text-primary'
+                    aria-hidden='true'
+                  />
                 </span>
                 <p className='text-base font-bold text-foreground'>
                   The catalogue is warming up

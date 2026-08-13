@@ -9,7 +9,7 @@ export interface LegendItem {
 
 /**
  * Identity key for a chart. Present whenever a chart carries two or more
- * series, so the reading never depends on colour alone — the swatch is a
+ * series, so the reading never depends on colour alone - the swatch is a
  * secondary cue next to the text, not the only one.
  */
 export function ChartLegend({
@@ -20,7 +20,9 @@ export function ChartLegend({
   className?: string;
 }) {
   return (
-    <ul className={cn('flex flex-wrap items-center gap-x-4 gap-y-2', className)}>
+    <ul
+      className={cn('flex flex-wrap items-center gap-x-4 gap-y-2', className)}
+    >
       {items.map((item) => (
         <li key={item.label} className='flex items-center gap-2 text-xs'>
           <span

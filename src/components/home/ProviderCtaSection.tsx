@@ -21,7 +21,7 @@ const PROVIDER_PERKS = [
     icon: BarChart3,
     title: 'Track it in one dashboard',
     description:
-      'Listings, incoming orders, pickups and returns — all in the provider console.',
+      'Listings, incoming orders, pickups and returns - all in the provider console.',
   },
 ];
 
@@ -88,7 +88,10 @@ export function ProviderCtaSection() {
                       className='flex items-start gap-4 rounded-card bg-white/12 p-5 backdrop-blur-sm'
                     >
                       <span className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20'>
-                        <Icon className='h-5 w-5 text-white' aria-hidden='true' />
+                        <Icon
+                          className='h-5 w-5 text-white'
+                          aria-hidden='true'
+                        />
                       </span>
                       <div>
                         <p className='text-sm font-bold text-white'>

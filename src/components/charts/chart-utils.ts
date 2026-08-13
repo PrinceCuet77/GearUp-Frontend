@@ -1,7 +1,7 @@
 /**
  * Geometry and formatting helpers shared by every chart.
  *
- * Pure functions only — safe to import from Server Components that pre-compute
+ * Pure functions only - safe to import from Server Components that pre-compute
  * chart data, and from the `'use client'` chart components that draw it.
  */
 
@@ -16,7 +16,7 @@ export interface ChartPoint {
 /**
  * Series colours resolve to CSS custom properties so light/dark are two steps
  * of one system rather than two hard-coded palettes. Slots are assigned in
- * fixed order — a series keeps its colour when siblings are filtered away.
+ * fixed order - a series keeps its colour when siblings are filtered away.
  */
 export const CHART_SLOTS = [
   'var(--chart-1)',
@@ -48,7 +48,7 @@ export function formatCompactBDT(value: number): string {
  * How a chart renders its numbers.
  *
  * A plain string rather than a formatter function, because the pages that
- * derive chart data are Server Components — a function prop cannot cross the
+ * derive chart data are Server Components - a function prop cannot cross the
  * server/client boundary, so the choice is passed by name and resolved here.
  */
 export type ValueFormat = 'count' | 'currency';

@@ -2,7 +2,12 @@
 
 import { useState } from 'react';
 import { ChartDataTable } from './ChartDataTable';
-import { donutArc, formatValue, percentOf, type ValueFormat } from './chart-utils';
+import {
+  donutArc,
+  formatValue,
+  percentOf,
+  type ValueFormat,
+} from './chart-utils';
 
 const SIZE = 176;
 const OUTER = 84;
@@ -28,7 +33,7 @@ export interface DonutChartProps {
  * Part-to-whole for a handful of categories.
  *
  * Every slice is named and numbered in the legend, so identity never rests on
- * colour alone — which also covers the pairs that sit close under tritanopia.
+ * colour alone - which also covers the pairs that sit close under tritanopia.
  */
 export function DonutChart({
   data,
@@ -41,14 +46,12 @@ export function DonutChart({
   const total = visible.reduce((sum, slice) => sum + slice.value, 0);
   const gapDegrees = (GAP_PX * 180) / (Math.PI * OUTER);
 
-  // A lone 100% slice must keep its full ring — there is no seam to carve out.
+  // A lone 100% slice must keep its full ring - there is no seam to carve out.
   const inset = visible.length > 1 ? gapDegrees / 2 : 0;
   const sweeps = visible.map((slice) => (slice.value / total) * 360);
 
   const segments = visible.map((slice, index) => {
-    const start = sweeps
-      .slice(0, index)
-      .reduce((sum, sweep) => sum + sweep, 0);
+    const start = sweeps.slice(0, index).reduce((sum, sweep) => sum + sweep, 0);
     const end = start + sweeps[index];
     return {
       slice,

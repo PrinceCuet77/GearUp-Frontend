@@ -45,7 +45,7 @@ function getInitials(name?: string | null, email?: string) {
   return (email?.[0] ?? 'U').toUpperCase();
 }
 
-/** Dashboard root for a role — also the prefix for profile/password routes. */
+/** Dashboard root for a role - also the prefix for profile/password routes. */
 function dashboardRoot(role?: AvailableRole | null) {
   if (role === 'ADMIN') return '/admin';
   if (role === 'PROVIDER') return '/provider';
@@ -174,10 +174,7 @@ export default function Navbar() {
         backdropFilter: scrolled ? 'blur(12px)' : undefined,
       }}
     >
-      <nav
-        className='container-page'
-        aria-label='Primary'
-      >
+      <nav className='container-page' aria-label='Primary'>
         <div className='flex h-16 items-center justify-between gap-4 lg:h-18'>
           {/* Logo */}
           <Link
@@ -449,7 +446,7 @@ export default function Navbar() {
                     href={link.href}
                     label={link.label}
                     active={isActive(link.href)}
-                      onNavigate={closeMobileMenu}
+                    onNavigate={closeMobileMenu}
                   />
                 ))}
 
@@ -470,7 +467,7 @@ export default function Navbar() {
                         href={link.href}
                         label={link.label}
                         active={isActive(link.href)}
-                      onNavigate={closeMobileMenu}
+                        onNavigate={closeMobileMenu}
                       />
                     ))}
                     <MobileLink

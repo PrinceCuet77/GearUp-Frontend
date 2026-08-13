@@ -8,31 +8,31 @@
 
 ## Authentication
 
-| Method  | Endpoint                                                   | Frontend File                                        | Description                                                                        |
-| ------- | ---------------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST`  | `/api/v1/auth/login`                                       | `src/app/(auth)/_actions/loginActions.ts`            | Authenticates user, sets access & refresh tokens in httpOnly cookies               |
-| `POST`  | `/api/v1/auth/register`                                    | `src/app/(auth)/_actions/registerActions.ts`         | Registers a new user with email, password, and role                                |
-| `GET`   | `/api/user/me`                                             | `src/app/(auth)/_actions/getProfileActions.ts`       | Fetches the authenticated user's profile                                           |
-| `POST`  | `/api/v1/auth/refresh`                                     | `src/app/(auth)/_actions/refreshTokenAction.ts`      | Refreshes an expired access token using the refresh token cookie                   |
-| `POST`  | `/api/v1/auth/logout`                                      | `src/app/(auth)/_actions/logoutActions.ts`           | Clears backend cookies, then deletes ours and revalidates cache                     |
-| `GET`   | `/api/v1/auth/google/{customer,provider}`                  | `src/lib/oauth.ts` → `src/components/auth/GoogleButton.tsx` | Browser navigation (never `fetch`) that starts Google OAuth; role applies to new accounts only |
-| _(n/a)_ | `/api/v1/auth/google/callback` → `/oauth/callback` redirect | `src/app/(auth)/oauth/callback/page.tsx`             | Reads the tokens from the URL fragment and hands them to `adoptGoogleSessionAction` |
-| _(n/a)_ | _(no request — local cookie write)_                        | `src/app/(auth)/_actions/googleAuthActions.ts`       | Verifies the OAuth tokens and stores them as this origin's own session cookies      |
+| Method  | Endpoint                                                    | Frontend File                                               | Description                                                                                    |
+| ------- | ----------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `POST`  | `/api/v1/auth/login`                                        | `src/app/(auth)/_actions/loginActions.ts`                   | Authenticates user, sets access & refresh tokens in httpOnly cookies                           |
+| `POST`  | `/api/v1/auth/register`                                     | `src/app/(auth)/_actions/registerActions.ts`                | Registers a new user with email, password, and role                                            |
+| `GET`   | `/api/user/me`                                              | `src/app/(auth)/_actions/getProfileActions.ts`              | Fetches the authenticated user's profile                                                       |
+| `POST`  | `/api/v1/auth/refresh`                                      | `src/app/(auth)/_actions/refreshTokenAction.ts`             | Refreshes an expired access token using the refresh token cookie                               |
+| `POST`  | `/api/v1/auth/logout`                                       | `src/app/(auth)/_actions/logoutActions.ts`                  | Clears backend cookies, then deletes ours and revalidates cache                                |
+| `GET`   | `/api/v1/auth/google/{customer,provider}`                   | `src/lib/oauth.ts` → `src/components/auth/GoogleButton.tsx` | Browser navigation (never `fetch`) that starts Google OAuth; role applies to new accounts only |
+| _(n/a)_ | `/api/v1/auth/google/callback` → `/oauth/callback` redirect | `src/app/(auth)/oauth/callback/page.tsx`                    | Reads the tokens from the URL fragment and hands them to `adoptGoogleSessionAction`            |
+| _(n/a)_ | _(no request - local cookie write)_                         | `src/app/(auth)/_actions/googleAuthActions.ts`              | Verifies the OAuth tokens and stores them as this origin's own session cookies                 |
 
 **Related Components:**
 
-- `src/app/(auth)/login/page.tsx` — Login form
-- `src/app/(auth)/register/page.tsx` — Registration form (role selection drives the Google variant)
-- `src/app/(auth)/oauth/callback/page.tsx` — Google OAuth landing page
-- `src/components/auth/GoogleButton.tsx` — "Continue with Google" link
-- `src/components/Navbar.tsx` — Logout via `logoutAction()` + `clearUser()`
-- `src/components/UserInitializer.tsx` — Syncs server profile into Zustand store
-- `src/store/useAuthStore.ts` — Zustand auth store (client-side state)
+- `src/app/(auth)/login/page.tsx` - Login form
+- `src/app/(auth)/register/page.tsx` - Registration form (role selection drives the Google variant)
+- `src/app/(auth)/oauth/callback/page.tsx` - Google OAuth landing page
+- `src/components/auth/GoogleButton.tsx` - "Continue with Google" link
+- `src/components/Navbar.tsx` - Logout via `logoutAction()` + `clearUser()`
+- `src/components/UserInitializer.tsx` - Syncs server profile into Zustand store
+- `src/store/useAuthStore.ts` - Zustand auth store (client-side state)
 
 **Google OAuth session note:** the backend sets its own cookies on the API domain,
 but those are third-party on a split-domain deployment and are blocked by Safari,
 Firefox and Chrome incognito. The session that actually matters here is the one
-`adoptGoogleSessionAction` writes from the tokens in the callback's URL fragment —
+`adoptGoogleSessionAction` writes from the tokens in the callback's URL fragment -
 first-party, same flags as credential login, so the middleware and every server
 action treat a Google session exactly like a credentials one.
 
@@ -46,12 +46,12 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/admin/page.tsx` — Admin dashboard overview
-- `src/components/dashboard/StatsCard.tsx` — Displays individual stats
+- `src/app/(dashboards)/admin/page.tsx` - Admin dashboard overview
+- `src/components/dashboard/StatsCard.tsx` - Displays individual stats
 
 ---
 
-## Admin — Categories
+## Admin - Categories
 
 | Method  | Endpoint                            | Frontend File                                                      | Description                               |
 | ------- | ----------------------------------- | ------------------------------------------------------------------ | ----------------------------------------- |
@@ -60,12 +60,12 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/admin/categories/page.tsx` — Category management page
-- `src/app/(dashboards)/admin/categories/_components/` — Category form/modal components
+- `src/app/(dashboards)/admin/categories/page.tsx` - Category management page
+- `src/app/(dashboards)/admin/categories/_components/` - Category form/modal components
 
 ---
 
-## Admin — Gears
+## Admin - Gears
 
 | Method | Endpoint           | Frontend File                                                      | Description                                                                                |
 | ------ | ------------------ | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
@@ -73,11 +73,11 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/admin/gears/page.tsx` — Admin gear listing
+- `src/app/(dashboards)/admin/gears/page.tsx` - Admin gear listing
 
 ---
 
-## Admin — Users
+## Admin - Users
 
 | Method  | Endpoint                         | Frontend File                                                   | Description                                                                       |
 | ------- | -------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -86,7 +86,7 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/admin/users/page.tsx` — User management page
+- `src/app/(dashboards)/admin/users/page.tsx` - User management page
 
 ---
 
@@ -98,28 +98,28 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/customer/page.tsx` — Customer dashboard overview
-- `src/app/(dashboards)/customer/_components/` — Dashboard UI components
+- `src/app/(dashboards)/customer/page.tsx` - Customer dashboard overview
+- `src/app/(dashboards)/customer/_components/` - Dashboard UI components
 
 ---
 
-## Customer — Profile
+## Customer - Profile
 
-| Method  | Endpoint                | Frontend File                                                              | Description                              |
-| ------- | ----------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
-| `PATCH` | `/api/user/me`          | `src/app/(dashboards)/customer/profile/_actions/updateProfile.ts`          | Updates the user's name and/or avatarUrl |
+| Method  | Endpoint                | Frontend File                                                       | Description                              |
+| ------- | ----------------------- | ------------------------------------------------------------------- | ---------------------------------------- |
+| `PATCH` | `/api/user/me`          | `src/app/(dashboards)/customer/profile/_actions/updateProfile.ts`   | Updates the user's name and/or avatarUrl |
 | `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/customer/settings/_actions/passwordChange.ts` | Changes the user's password (old + new)  |
 
 **Related Components:**
 
-- `src/app/(dashboards)/customer/profile/page.tsx` — Profile view/edit
-- `src/app/(dashboards)/customer/settings/page.tsx` — Account settings (password change)
-- `src/components/dashboard/ProfileContent.tsx` — Profile display
-- `src/components/dashboard/ChangePasswordForm.tsx` — Password form
+- `src/app/(dashboards)/customer/profile/page.tsx` - Profile view/edit
+- `src/app/(dashboards)/customer/settings/page.tsx` - Account settings (password change)
+- `src/components/dashboard/ProfileContent.tsx` - Profile display
+- `src/components/dashboard/ChangePasswordForm.tsx` - Password form
 
 ---
 
-## Customer — Rental Orders
+## Customer - Rental Orders
 
 | Method  | Endpoint                        | Frontend File                                                                       | Description                                                                   |
 | ------- | ------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -131,15 +131,15 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/customer/rental-orders/page.tsx` — Rental orders listing
-- `src/app/(public)/gears/[id]/` — Gear detail page (creates rental order)
-- `src/components/dashboard/StatusBadge.tsx` — Order status display
-- `src/components/dashboard/UpdateOrderStatusModal.tsx` — Status update modal
-- `src/store/useRentalStore.ts` — Client-side rental state
+- `src/app/(dashboards)/customer/rental-orders/page.tsx` - Rental orders listing
+- `src/app/(public)/gears/[id]/` - Gear detail page (creates rental order)
+- `src/components/dashboard/StatusBadge.tsx` - Order status display
+- `src/components/dashboard/UpdateOrderStatusModal.tsx` - Status update modal
+- `src/store/useRentalStore.ts` - Client-side rental state
 
 ---
 
-## Customer — Payments
+## Customer - Payments
 
 | Method | Endpoint               | Frontend File                                                                | Description                                                                  |
 | ------ | ---------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -148,11 +148,11 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/customer/payments/page.tsx` — Payments listing
+- `src/app/(dashboards)/customer/payments/page.tsx` - Payments listing
 
 ---
 
-## Customer — Reviews
+## Customer - Reviews
 
 | Method   | Endpoint                 | Frontend File                                                               | Description                                                                |
 | -------- | ------------------------ | --------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
@@ -164,8 +164,8 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/customer/reviews/page.tsx` — Reviews listing
-- `src/components/dashboard/ReviewFormModal.tsx` — Review create/edit modal
+- `src/app/(dashboards)/customer/reviews/page.tsx` - Reviews listing
+- `src/components/dashboard/ReviewFormModal.tsx` - Review create/edit modal
 
 ---
 
@@ -177,25 +177,25 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/provider/page.tsx` — Provider dashboard overview
+- `src/app/(dashboards)/provider/page.tsx` - Provider dashboard overview
 
 ---
 
-## Provider — Profile
+## Provider - Profile
 
-| Method  | Endpoint                | Frontend File                                                              | Description                              |
-| ------- | ----------------------- | -------------------------------------------------------------------------- | ---------------------------------------- |
-| `PATCH` | `/api/user/me`          | `src/app/(dashboards)/provider/profile/_actions/updateProfile.ts`          | Updates provider's name and/or avatarUrl |
+| Method  | Endpoint                | Frontend File                                                       | Description                              |
+| ------- | ----------------------- | ------------------------------------------------------------------- | ---------------------------------------- |
+| `PATCH` | `/api/user/me`          | `src/app/(dashboards)/provider/profile/_actions/updateProfile.ts`   | Updates provider's name and/or avatarUrl |
 | `PATCH` | `/api/user/me/password` | `src/app/(dashboards)/customer/settings/_actions/passwordChange.ts` | Changes the provider's password          |
 
 **Related Components:**
 
-- `src/app/(dashboards)/provider/profile/page.tsx` — Profile page
-- `src/app/(dashboards)/provider/settings/page.tsx` — Account settings (password change)
+- `src/app/(dashboards)/provider/profile/page.tsx` - Profile page
+- `src/app/(dashboards)/provider/settings/page.tsx` - Account settings (password change)
 
 ---
 
-## Provider — Gears
+## Provider - Gears
 
 | Method   | Endpoint                      | Frontend File                                                                     | Description                                                   |
 | -------- | ----------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
@@ -207,12 +207,12 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/provider/gears/page.tsx` — Provider gear listing
-- `src/components/dashboard/GearForm.tsx` — Gear create/edit form
+- `src/app/(dashboards)/provider/gears/page.tsx` - Provider gear listing
+- `src/components/dashboard/GearForm.tsx` - Gear create/edit form
 
 ---
 
-## Provider — Rental Orders
+## Provider - Rental Orders
 
 | Method  | Endpoint                         | Frontend File                                                                           | Description                                                                         |
 | ------- | -------------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
@@ -221,12 +221,12 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(dashboards)/provider/rental-orders/page.tsx` — Provider order listing
-- `src/components/dashboard/UpdateOrderStatusModal.tsx` — Status update modal
+- `src/app/(dashboards)/provider/rental-orders/page.tsx` - Provider order listing
+- `src/components/dashboard/UpdateOrderStatusModal.tsx` - Status update modal
 
 ---
 
-## Public — Gears & Categories
+## Public - Gears & Categories
 
 | Method | Endpoint                     | Frontend File                                                             | Description                                                                   |
 | ------ | ---------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -237,15 +237,15 @@ action treat a Google session exactly like a credentials one.
 
 **Related Components:**
 
-- `src/app/(public)/page.tsx` — Homepage
-- `src/app/(public)/gears/page.tsx` — Gear browsing page
-- `src/app/(public)/gears/[id]/page.tsx` — Gear detail page
-- `src/app/(public)/_components/GearBrowseContent.tsx` — Gear browsing UI
-- `src/app/(public)/_components/GearCard.tsx` — Gear card component
-- `src/app/(public)/_components/GearFilters.tsx` — Filter sidebar
-- `src/app/(public)/_components/AddToCartModal.tsx` — Add to cart modal
-- `src/components/cart/CartSidebar.tsx` — Cart sidebar
-- `src/store/useCartStore.ts` — Client-side cart state
+- `src/app/(public)/page.tsx` - Homepage
+- `src/app/(public)/gears/page.tsx` - Gear browsing page
+- `src/app/(public)/gears/[id]/page.tsx` - Gear detail page
+- `src/app/(public)/_components/GearBrowseContent.tsx` - Gear browsing UI
+- `src/app/(public)/_components/GearCard.tsx` - Gear card component
+- `src/app/(public)/_components/GearFilters.tsx` - Filter sidebar
+- `src/app/(public)/_components/AddToCartModal.tsx` - Add to cart modal
+- `src/components/cart/CartSidebar.tsx` - Cart sidebar
+- `src/store/useCartStore.ts` - Client-side cart state
 
 ---
 
@@ -266,4 +266,4 @@ action treat a Google session exactly like a credentials one.
 - **Auth Pattern**: httpOnly cookies (`accessToken`, `refreshToken`) set on login, included via `Cookie` header in server actions.
 - **Server Actions**: All API calls are made through Next.js server actions in `_actions/` directories, following the pattern: try/catch, return `{ success, message, data }`, never throw.
 - **Token Refresh**: `src/proxy.ts` middleware calls `refreshTokenAction()` for expired tokens and redirects based on user role.
-- **Client Stores**: `useAuthStore`, `useCartStore`, `useRentalStore` are Zustand stores for client-side state — they contain no direct API calls.
+- **Client Stores**: `useAuthStore`, `useCartStore`, `useRentalStore` are Zustand stores for client-side state - they contain no direct API calls.

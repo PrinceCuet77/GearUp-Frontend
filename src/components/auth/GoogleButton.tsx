@@ -6,7 +6,7 @@ import { buildGoogleAuthUrl, type GoogleSignupRole } from '@/lib/oauth';
 
 /**
  * Starts the Google OAuth flow. Renders as a plain `<a>` so the browser
- * performs a full navigation — required for the redirect to Google's consent
+ * performs a full navigation - required for the redirect to Google's consent
  * screen, which an XHR could not follow.
  *
  * `role` decides what a *brand-new* Google account is created as; signing in

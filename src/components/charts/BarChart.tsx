@@ -13,7 +13,7 @@ import {
 } from './chart-utils';
 
 const PADDING = { top: 12, right: 14, bottom: 26, left: 46 };
-/** Surface gap between neighbouring bars — the spacer, not a colour change. */
+/** Surface gap between neighbouring bars - the spacer, not a colour change. */
 const BAR_GAP = 2;
 const MAX_BAR_WIDTH = 46;
 const CORNER = 4;

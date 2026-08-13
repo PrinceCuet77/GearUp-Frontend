@@ -1,4 +1,4 @@
-# GearUp — Sports & Outdoor Gear Rental Platform
+# GearUp - Sports & Outdoor Gear Rental Platform
 
 ## Project Overview
 
@@ -10,7 +10,7 @@ GearUp is a backend API for a sports and outdoor equipment rental service. Custo
 
 ## 📋 Table of Contents
 
-- [GearUp — Sports \& Outdoor Gear Rental Platform](#gearup--sports--outdoor-gear-rental-platform)
+- [GearUp - Sports \& Outdoor Gear Rental Platform](#gearup--sports--outdoor-gear-rental-platform)
   - [Project Overview](#project-overview)
   - [📋 Table of Contents](#-table-of-contents)
   - [Overview](#overview)
@@ -38,7 +38,7 @@ GearUp is a backend API for a sports and outdoor equipment rental service. Custo
 
 ## Overview
 
-**GearUp** is a multi-role gear rental platform where customers can browse and rent sports & outdoor equipment, providers can list and manage their inventory, and admins oversee the entire marketplace. The application communicates with a RESTful backend API exclusively through Next.js Server Actions — no API keys or tokens are ever exposed to the client.
+**GearUp** is a multi-role gear rental platform where customers can browse and rent sports & outdoor equipment, providers can list and manage their inventory, and admins oversee the entire marketplace. The application communicates with a RESTful backend API exclusively through Next.js Server Actions - no API keys or tokens are ever exposed to the client.
 
 **Currency:** Bangladeshi Taka (৳) · **Timezone:** `Asia/Dhaka`
 
@@ -63,7 +63,7 @@ GearUp is a backend API for a sports and outdoor equipment rental service. Custo
 │                    Next.js App Router                        │
 ├─────────────────────────────────────────────────────────────┤
 │  Middleware (proxy.ts)                                       │
-│  ├── Auth guard — redirects unauthenticated users            │
+│  ├── Auth guard - redirects unauthenticated users            │
 │  ├── Role-based access control (CUSTOMER / PROVIDER / ADMIN) │
 │  └── Automatic JWT token refresh                             │
 ├─────────────────────────────────────────────────────────────┤
@@ -75,24 +75,24 @@ GearUp is a backend API for a sports and outdoor equipment rental service. Custo
 │  └── Public: getAllGears, getAllCategories                    │
 ├─────────────────────────────────────────────────────────────┤
 │  Client State (Zustand)                                      │
-│  ├── useAuthStore   — persisted user & auth status           │
-│  ├── useCartStore   — persisted cart items & subtotal         │
-│  └── useRentalStore — transient order creation state          │
+│  ├── useAuthStore   - persisted user & auth status           │
+│  ├── useCartStore   - persisted cart items & subtotal         │
+│  └── useRentalStore - transient order creation state          │
 ├─────────────────────────────────────────────────────────────┤
 │  Validation (Zod)                                            │
-│  ├── auth.ts     — login, register schemas                   │
-│  ├── gear.ts     — create & update gear schemas              │
-│  └── category.ts — create & update category schemas          │
+│  ├── auth.ts     - login, register schemas                   │
+│  ├── gear.ts     - create & update gear schemas              │
+│  └── category.ts - create & update category schemas          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 **Key Design Patterns:**
 
-- **Server-first authentication** — User profile is fetched server-side in the root layout and synced to Zustand via `UserInitializer`, eliminating auth-related UI flicker.
-- **Cookie-based JWT** — Tokens are stored as `httpOnly` cookies and passed to backend via `Cookie` header in server actions. No secrets reach the client bundle.
-- **Consistent error handling** — All server actions return `{ success, data, error }` and never throw, providing uniform error surfaces.
-- **URL-driven filters** — Gear browsing state (search, category, price range, sort, page) lives in search params, making filters shareable and bookmarkable.
-- **CSS variable theming** — All colors use CSS custom properties (`var(--primary)`, `var(--foreground)`, etc.) with seamless dark mode support.
+- **Server-first authentication** - User profile is fetched server-side in the root layout and synced to Zustand via `UserInitializer`, eliminating auth-related UI flicker.
+- **Cookie-based JWT** - Tokens are stored as `httpOnly` cookies and passed to backend via `Cookie` header in server actions. No secrets reach the client bundle.
+- **Consistent error handling** - All server actions return `{ success, data, error }` and never throw, providing uniform error surfaces.
+- **URL-driven filters** - Gear browsing state (search, category, price range, sort, page) lives in search params, making filters shareable and bookmarkable.
+- **CSS variable theming** - All colors use CSS custom properties (`var(--primary)`, `var(--foreground)`, etc.) with seamless dark mode support.
 
 ## Project Structure
 
@@ -231,32 +231,32 @@ Access is enforced at the **middleware level** (`proxy.ts`). Unauthorized role a
 
 ## Pages & Routes
 
-| Route                       | Access   | Description              |
-| --------------------------- | -------- | ------------------------ |
-| `/`                         | Public   | Landing page             |
-| `/gears`                    | Public   | Browse gear catalog      |
-| `/gears/[id]`               | Public   | Gear detail page         |
-| `/login`                    | Public   | User login               |
-| `/register`                 | Public   | User registration        |
-| `/admin`                    | Admin    | Admin dashboard overview |
-| `/admin/users`              | Admin    | User management          |
-| `/admin/gears`              | Admin    | Gear moderation          |
-| `/admin/categories`         | Admin    | Category management      |
-| `/admin/profile`            | Admin    | Admin profile            |
-| `/admin/analytics`          | Admin    | Platform analytics       |
-| `/admin/settings`           | Admin    | Account settings         |
-| `/customer`                 | Customer | Dashboard overview       |
-| `/customer/rental-orders`   | Customer | Rental order history     |
-| `/customer/payments`        | Customer | Payment records          |
-| `/customer/reviews`         | Customer | Review management        |
-| `/customer/profile`         | Customer | Customer profile         |
-| `/customer/settings`        | Customer | Account settings         |
-| `/provider`                 | Provider | Dashboard overview       |
-| `/provider/gears`           | Provider | Inventory management     |
-| `/provider/rental-orders`   | Provider | Order processing         |
-| `/provider/profile`         | Provider | Provider profile         |
-| `/provider/analytics`       | Provider | Provider analytics       |
-| `/provider/settings`        | Provider | Account settings         |
+| Route                     | Access   | Description              |
+| ------------------------- | -------- | ------------------------ |
+| `/`                       | Public   | Landing page             |
+| `/gears`                  | Public   | Browse gear catalog      |
+| `/gears/[id]`             | Public   | Gear detail page         |
+| `/login`                  | Public   | User login               |
+| `/register`               | Public   | User registration        |
+| `/admin`                  | Admin    | Admin dashboard overview |
+| `/admin/users`            | Admin    | User management          |
+| `/admin/gears`            | Admin    | Gear moderation          |
+| `/admin/categories`       | Admin    | Category management      |
+| `/admin/profile`          | Admin    | Admin profile            |
+| `/admin/analytics`        | Admin    | Platform analytics       |
+| `/admin/settings`         | Admin    | Account settings         |
+| `/customer`               | Customer | Dashboard overview       |
+| `/customer/rental-orders` | Customer | Rental order history     |
+| `/customer/payments`      | Customer | Payment records          |
+| `/customer/reviews`       | Customer | Review management        |
+| `/customer/profile`       | Customer | Customer profile         |
+| `/customer/settings`      | Customer | Account settings         |
+| `/provider`               | Provider | Dashboard overview       |
+| `/provider/gears`         | Provider | Inventory management     |
+| `/provider/rental-orders` | Provider | Order processing         |
+| `/provider/profile`       | Provider | Provider profile         |
+| `/provider/analytics`     | Provider | Provider analytics       |
+| `/provider/settings`      | Provider | Account settings         |
 
 ## State Management
 
@@ -270,15 +270,15 @@ All client state is managed via **Zustand** stores:
 
 **Derived state:**
 
-- `cartStore.itemCount` — total number of items in cart
-- `cartStore.subtotal` — `Σ(price × quantity × rental days)`
+- `cartStore.itemCount` - total number of items in cart
+- `cartStore.subtotal` - `Σ(price × quantity × rental days)`
 
 ## Authentication & Security
 
-- **JWT tokens** stored as `httpOnly` cookies (`accessToken` — 1 day, `refreshToken` — 7 days)
+- **JWT tokens** stored as `httpOnly` cookies (`accessToken` - 1 day, `refreshToken` - 7 days)
 - **Automatic token refresh** in middleware when access token expires
 - **Server-side profile verification** on every protected route via `getProfileAction()`
-- **No secrets in client bundle** — all API calls go through server actions
+- **No secrets in client bundle** - all API calls go through server actions
 - **Role-based access control** enforced at the middleware layer
 
 ## API Integration
@@ -358,7 +358,7 @@ The app will be available at [http://localhost:3000](http://localhost:3000).
 Create a `.env.local` file in the project root:
 
 ```env
-# Backend API base URL (server-side only — never exposed to the client)
+# Backend API base URL (server-side only - never exposed to the client)
 BACKEND_API_URL=https://your-backend-api.com
 ```
 

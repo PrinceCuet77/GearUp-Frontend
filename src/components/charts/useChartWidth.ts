@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
 /**
  * Measures the chart container so the SVG can be drawn at true pixel size.
  *
- * Scaling a fixed viewBox would be less code, but it scales the type with it —
+ * Scaling a fixed viewBox would be less code, but it scales the type with it -
  * axis labels end up huge on a wide screen and unreadable on a narrow one.
  * Drawing at real pixels keeps every chart's typography identical to the rest
  * of the dashboard at every breakpoint.

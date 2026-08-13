@@ -48,7 +48,7 @@ interface ProfileContentClientProps {
 /**
  * Profile page: identity summary plus the editable fields, inline.
  *
- * Editing happens on the page rather than in a modal — the form is the point of
+ * Editing happens on the page rather than in a modal - the form is the point of
  * the page, and an inline form keeps the current values visible while typing.
  */
 export function ProfileContentClient({ user }: ProfileContentClientProps) {
@@ -217,7 +217,11 @@ export function ProfileContentClient({ user }: ProfileContentClientProps) {
           </p>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className='space-y-5'>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          className='space-y-5'
+        >
           <FormField
             label='Full name'
             required

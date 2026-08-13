@@ -34,7 +34,7 @@ interface CartState {
   closeCart: () => void;
   toggleCart: () => void;
 
-  /* Derived — computed on the fly so they stay in sync */
+  /* Derived - computed on the fly so they stay in sync */
   itemCount: () => number;
   subtotal: () => number;
 }

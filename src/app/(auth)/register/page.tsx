@@ -5,13 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  AlertCircle,
-  Check,
-  Dumbbell,
-  ShoppingBag,
-  Store,
-} from 'lucide-react';
+import { AlertCircle, Check, Dumbbell, ShoppingBag, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { registerSchema } from '@/lib/validations/auth';
@@ -72,7 +66,7 @@ export default function RegisterPage() {
         const message =
           result?.message || 'Could not create your account. Please try again.';
 
-        // A 409 also covers accounts first created through Google — those are
+        // A 409 also covers accounts first created through Google - those are
         // never merged, so point the user at the Google button instead.
         setServerError(
           result?.statusCode === 409
@@ -83,7 +77,7 @@ export default function RegisterPage() {
         return;
       }
 
-      // Register doesn't log the user in — sign them in immediately with the
+      // Register doesn't log the user in - sign them in immediately with the
       // same credentials rather than bouncing them to the login form.
       const loginFormData = new FormData();
       loginFormData.append('email', values.email);

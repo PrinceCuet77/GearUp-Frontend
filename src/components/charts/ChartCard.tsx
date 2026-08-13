@@ -5,7 +5,7 @@ import { cn } from '@/lib/cn';
 export interface ChartCardProps {
   title: string;
   description?: string;
-  /** Rendered top-right — usually a headline figure or a range control. */
+  /** Rendered top-right - usually a headline figure or a range control. */
   action?: ReactNode;
   /** Legend row, shown under the plot. Required whenever ≥ 2 series. */
   legend?: ReactNode;
@@ -36,12 +36,16 @@ export function ChartCard({
   children,
 }: ChartCardProps) {
   return (
-    <section className={cn('surface-card flex h-full min-w-0 flex-col p-5', className)}>
+    <section
+      className={cn('surface-card flex h-full min-w-0 flex-col p-5', className)}
+    >
       <header className='mb-4 flex items-start justify-between gap-4'>
         <div className='min-w-0'>
           <h3 className='text-sm font-bold text-foreground'>{title}</h3>
           {description && (
-            <p className='mt-0.5 text-xs text-muted-foreground'>{description}</p>
+            <p className='mt-0.5 text-xs text-muted-foreground'>
+              {description}
+            </p>
           )}
         </div>
         {action && <div className='shrink-0 text-right'>{action}</div>}

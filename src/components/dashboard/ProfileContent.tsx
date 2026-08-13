@@ -7,7 +7,7 @@ import type { User, UserStatus } from '@/lib/types';
 /**
  * Profile page body, shared by all three roles.
  *
- * Fetches server-side so the form renders already populated — no empty-input
+ * Fetches server-side so the form renders already populated - no empty-input
  * flash while a client request resolves.
  */
 export async function ProfileContent() {

@@ -1,6 +1,6 @@
 /**
  * Shared utilities for gear-related display logic.
- * Pure functions — safe to use in both Server and Client components.
+ * Pure functions - safe to use in both Server and Client components.
  */
 
 export type SortBy = 'createdAt' | 'name' | 'price';
@@ -65,7 +65,7 @@ export const GEAR_IMAGE_FALLBACK = '/gear-placeholder.svg';
 /**
  * A source `next/image` can actually render here: an app-local path, or an
  * HTTPS URL (the only remote protocol allowed in `next.config.ts`). Plain
- * `http://` is excluded deliberately — the optimizer rejects it and browsers
+ * `http://` is excluded deliberately - the optimizer rejects it and browsers
  * block it as mixed content, so it would render as a broken image either way.
  */
 function isRenderableImageSrc(value: unknown): value is string {
@@ -91,7 +91,7 @@ export function parseGearImages(raw: string): string[] {
       if (urls.length > 0) return urls;
     }
   } catch {
-    // not JSON — fall through
+    // not JSON - fall through
   }
   if (isRenderableImageSrc(raw)) return [raw];
   return [GEAR_IMAGE_FALLBACK];
@@ -136,7 +136,11 @@ export function formatShortDate(iso: string): string {
  * Availability of a gear item, derived from the two fields that gate renting.
  * Centralised so the card, the detail page and the cart agree.
  */
-export type GearAvailability = 'available' | 'low-stock' | 'out-of-stock' | 'inactive';
+export type GearAvailability =
+  | 'available'
+  | 'low-stock'
+  | 'out-of-stock'
+  | 'inactive';
 
 export function getGearAvailability(gear: {
   isActive: boolean;

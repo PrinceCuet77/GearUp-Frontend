@@ -18,7 +18,7 @@ const PADDING = { top: 12, right: 14, bottom: 26, left: 46 };
 
 export interface LineChartProps {
   data: ChartPoint[];
-  /** Series name — used by the tooltip and the screen-reader table. */
+  /** Series name - used by the tooltip and the screen-reader table. */
   seriesLabel: string;
   /** CSS colour for the line and its area fill. */
   color?: string;
@@ -94,7 +94,7 @@ export function LineChart({
           </linearGradient>
         </defs>
 
-        {/* Value grid — recessive, behind every mark */}
+        {/* Value grid - recessive, behind every mark */}
         {ticks.map((tick) => {
           const y = yAt(tick);
           return (

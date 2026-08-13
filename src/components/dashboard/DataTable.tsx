@@ -1,7 +1,12 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { ArrowDown, ArrowUp, ChevronsUpDown, type LucideIcon } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
+  type LucideIcon,
+} from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/cn';
@@ -15,7 +20,7 @@ export interface DataTableColumn<T> {
   /** Hide this column below the given breakpoint to keep narrow screens readable. */
   hideBelow?: 'sm' | 'md' | 'lg';
   sortable?: boolean;
-  /** Header text is decorative for action columns — announce it instead. */
+  /** Header text is decorative for action columns - announce it instead. */
   srOnlyHeader?: boolean;
   width?: string;
 }
@@ -40,18 +45,20 @@ export interface DataTableProps<T> {
   className?: string;
 }
 
-const HIDE_BELOW: Record<NonNullable<DataTableColumn<unknown>['hideBelow']>, string> =
-  {
-    sm: 'hidden sm:table-cell',
-    md: 'hidden md:table-cell',
-    lg: 'hidden lg:table-cell',
-  };
+const HIDE_BELOW: Record<
+  NonNullable<DataTableColumn<unknown>['hideBelow']>,
+  string
+> = {
+  sm: 'hidden sm:table-cell',
+  md: 'hidden md:table-cell',
+  lg: 'hidden lg:table-cell',
+};
 
 /**
  * The dashboard's one table.
  *
  * Owns the surface, header, row rhythm, loading skeleton, empty state and
- * footer slot, so every table in every role looks and behaves identically —
+ * footer slot, so every table in every role looks and behaves identically -
  * callers supply only columns and rows.
  */
 export function DataTable<T>({

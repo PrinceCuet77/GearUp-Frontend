@@ -32,7 +32,7 @@ export default async function CustomerOverviewPage() {
   });
   const ordersByStatus = rentalStatusBreakdown(orders);
 
-  // Bar length here is the money involved, not the transaction count — a
+  // Bar length here is the money involved, not the transaction count - a
   // single failed high-value payment matters more than three small ones.
   const paymentsByOutcome = (
     ['COMPLETED', 'PENDING', 'FAILED'] as PaymentStatus[]
@@ -48,9 +48,7 @@ export default async function CustomerOverviewPage() {
     (sum, order) => sum + (Number(order.amount) || 0),
     0,
   );
-  const sampleNote = sampled
-    ? ' Based on your 100 most recent orders.'
-    : '';
+  const sampleNote = sampled ? ' Based on your 100 most recent orders.' : '';
 
   return (
     <div>

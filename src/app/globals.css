@@ -4,10 +4,10 @@
    GearUp Design System
    --------------------------------------------------------------------------
    Brand palette is limited to THREE colours plus a neutral ramp:
-     1. Primary   — Ember Orange   (brand identity, primary actions)
-     2. Secondary — Deep Teal      (trust, availability, positive states)
-     3. Accent    — Indigo         (data, highlights, secondary emphasis)
-     N. Neutral   — Slate          (surfaces, text, borders)
+     1. Primary   - Ember Orange   (brand identity, primary actions)
+     2. Secondary - Deep Teal      (trust, availability, positive states)
+     3. Accent    - Indigo         (data, highlights, secondary emphasis)
+     N. Neutral   - Slate          (surfaces, text, borders)
 
    `--danger` / `--warning` are *state* colours, not brand colours. They are
    reserved exclusively for destructive and cautionary UI feedback.
@@ -16,7 +16,7 @@
    to an undefined variable.
    ========================================================================== */
 
-/* Class-based dark mode — toggled via .dark class on <html> */
+/* Class-based dark mode - toggled via .dark class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -39,21 +39,21 @@
   --input-border: #cbd5e1;
   --overlay: rgba(15, 23, 42, 0.55);
 
-  /* ── 1. Primary — Ember Orange ─────────────────────────────────────── */
+  /* ── 1. Primary - Ember Orange ─────────────────────────────────────── */
   --primary: #ea580c;
   --primary-hover: #c2410c;
   --primary-foreground: #ffffff;
   --primary-soft: #fff1e7;
   --primary-soft-foreground: #9a3412;
 
-  /* ── 2. Secondary — Deep Teal ──────────────────────────────────────── */
+  /* ── 2. Secondary - Deep Teal ──────────────────────────────────────── */
   --secondary: #0d9488;
   --secondary-hover: #0f766e;
   --secondary-foreground: #ffffff;
   --secondary-soft: #e6fffa;
   --secondary-soft-foreground: #115e59;
 
-  /* ── 3. Accent — Indigo ────────────────────────────────────────────── */
+  /* ── 3. Accent - Indigo ────────────────────────────────────────────── */
   --accent: #4f46e5;
   --accent-hover: #4338ca;
   --accent-foreground: #ffffff;
@@ -78,7 +78,7 @@
      Categorical series slots. These are the SAME three brand hues, re-stepped
      per theme so the set passes the six palette checks (lightness band, chroma
      floor, CVD separation, normal-vision floor, contrast) against the chart
-     surface it is painted on. Assign slots in fixed order — never cycle a 4th.
+     surface it is painted on. Assign slots in fixed order - never cycle a 4th.
      -------------------------------------------------------------------- */
   --chart-1: #ea580c;
   --chart-2: #0d9488;
@@ -90,11 +90,14 @@
   --nav-bg: rgba(255, 255, 255, 0.88);
   --nav-border: #e2e8f0;
 
-  /* ── Elevation — one scale, used everywhere ────────────────────────── */
+  /* ── Elevation - one scale, used everywhere ────────────────────────── */
   --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.05);
+  --shadow-sm:
+    0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md:
+    0 4px 12px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg:
+    0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.05);
   --shadow-xl: 0 24px 48px rgba(15, 23, 42, 0.14);
 }
 
@@ -114,21 +117,21 @@
   --input-border: #35455f;
   --overlay: rgba(2, 6, 16, 0.7);
 
-  /* ── 1. Primary — Ember Orange (lifted for contrast on dark) ───────── */
+  /* ── 1. Primary - Ember Orange (lifted for contrast on dark) ───────── */
   --primary: #fb923c;
   --primary-hover: #fdba74;
   --primary-foreground: #1a0d02;
   --primary-soft: rgba(251, 146, 60, 0.14);
   --primary-soft-foreground: #fdba74;
 
-  /* ── 2. Secondary — Deep Teal ──────────────────────────────────────── */
+  /* ── 2. Secondary - Deep Teal ──────────────────────────────────────── */
   --secondary: #2dd4bf;
   --secondary-hover: #5eead4;
   --secondary-foreground: #042f2a;
   --secondary-soft: rgba(45, 212, 191, 0.14);
   --secondary-soft-foreground: #5eead4;
 
-  /* ── 3. Accent — Indigo ────────────────────────────────────────────── */
+  /* ── 3. Accent - Indigo ────────────────────────────────────────────── */
   --accent: #818cf8;
   --accent-hover: #a5b4fc;
   --accent-foreground: #101034;
@@ -166,7 +169,7 @@
 }
 
 /* ==========================================================================
-   Tailwind theme bridge — exposes every token as a utility
+   Tailwind theme bridge - exposes every token as a utility
    (bg-primary, text-muted-foreground, border-border, shadow-md, rounded-card…)
    ========================================================================== */
 @theme inline {
@@ -219,7 +222,7 @@
   --color-chart-grid: var(--chart-grid);
   --color-chart-axis: var(--chart-axis);
 
-  /* Single radius scale — `rounded-card` is THE card radius, project-wide. */
+  /* Single radius scale - `rounded-card` is THE card radius, project-wide. */
   --radius-card: 1rem;
   --radius-control: 0.75rem;
 
@@ -335,7 +338,7 @@ html {
 }
 
 /* ==========================================================================
-   Component classes — the single source of truth for shared visual style.
+   Component classes - the single source of truth for shared visual style.
    Components compose these instead of re-declaring padding/radius/colour.
    ========================================================================== */
 @layer components {
@@ -356,7 +359,7 @@ html {
     @apply -translate-y-1 border-primary/40 shadow-lg;
   }
 
-  /* Buttons — every button in the app derives from `.btn` ---------------- */
+  /* Buttons - every button in the app derives from `.btn` ---------------- */
   .btn {
     @apply inline-flex shrink-0 cursor-pointer items-center justify-center gap-2
       rounded-control font-semibold whitespace-nowrap transition-all duration-200
@@ -432,7 +435,7 @@ html {
   .field-input[aria-invalid='true'] {
     border-color: var(--danger);
   }
-  /* An invalid field keeps its danger border while focused — the focus ring
+  /* An invalid field keeps its danger border while focused - the focus ring
      alone would otherwise repaint it as if the error had been resolved. */
   .field-input[aria-invalid='true']:focus {
     border-color: var(--danger);
@@ -459,7 +462,7 @@ html {
     @apply mt-1.5 text-xs text-muted-foreground;
   }
 
-  /* Data tables — one look for every table in the dashboard -------------- */
+  /* Data tables - one look for every table in the dashboard -------------- */
   .table-th {
     @apply px-5 py-3.5 text-left text-[11px] font-bold tracking-wider
       whitespace-nowrap text-muted-foreground uppercase;
@@ -474,7 +477,7 @@ html {
     background-color: var(--muted);
   }
 
-  /* Section rhythm — identical vertical spacing on every landing section - */
+  /* Section rhythm - identical vertical spacing on every landing section - */
   .section-y {
     @apply py-16 sm:py-20 lg:py-24;
   }
@@ -512,7 +515,7 @@ html {
 }
 
 /* ==========================================================================
-   Motion preferences — honour the OS setting for everyone
+   Motion preferences - honour the OS setting for everyone
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   html {

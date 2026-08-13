@@ -58,7 +58,7 @@ export default function ImageModal({
 
       {/* Panel */}
       <div className='relative z-10 w-full max-w-5xl'>
-        {/* × close button — top-right */}
+        {/* × close button - top-right */}
         <button
           onClick={onClose}
           aria-label='Close image preview'

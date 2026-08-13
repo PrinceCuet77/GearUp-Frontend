@@ -33,7 +33,7 @@ interface SectionHeaderProps {
   linkLabel?: string;
 }
 
-/** Heading for a block within a page — charts, tables, quick actions. */
+/** Heading for a block within a page - charts, tables, quick actions. */
 export function SectionHeader({
   title,
   description,

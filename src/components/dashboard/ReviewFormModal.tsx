@@ -67,9 +67,7 @@ function StarPicker({
             <Star
               className={cn(
                 'h-6 w-6 transition-colors',
-                value <= shown
-                  ? 'text-warning'
-                  : 'text-border-strong',
+                value <= shown ? 'text-warning' : 'text-border-strong',
               )}
               fill='currentColor'
               aria-hidden='true'
@@ -96,7 +94,7 @@ export function ReviewFormModal({
   const [saving, setSaving] = useState(false);
 
   // Seed the form from the initial values each time the modal opens. Done
-  // during render so the first painted frame already shows the right values —
+  // during render so the first painted frame already shows the right values -
   // an effect would flash the previous review's text for one frame.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
@@ -138,7 +136,12 @@ export function ReviewFormModal({
   };
 
   return (
-    <Modal open={open} onClose={() => !saving && onClose()} title={title} noFooter>
+    <Modal
+      open={open}
+      onClose={() => !saving && onClose()}
+      title={title}
+      noFooter
+    >
       <form
         className='space-y-4'
         noValidate

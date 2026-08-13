@@ -8,7 +8,7 @@ interface StarRatingProps {
 }
 
 /**
- * Thin wrapper kept for the detail-page call sites — delegates to the shared
+ * Thin wrapper kept for the detail-page call sites - delegates to the shared
  * `Rating` primitive so stars look identical everywhere in the app.
  */
 export function StarRating({ rating, size = 'sm' }: StarRatingProps) {

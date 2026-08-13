@@ -7,7 +7,7 @@ const LIMIT = 10;
 export function ReviewSkeleton({ rows = LIMIT }: { rows?: number }) {
   return (
     <div>
-      {/* PageHeader skeleton — matches PageHeader with title + description */}
+      {/* PageHeader skeleton - matches PageHeader with title + description */}
       <div className='mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between'>
         <div>
           {/* h1 text-2xl font-bold tracking-tight */}
@@ -18,9 +18,7 @@ export function ReviewSkeleton({ rows = LIMIT }: { rows?: number }) {
       </div>
 
       {/* Reviews card */}
-      <div
-        className='surface-card'
-      >
+      <div className='surface-card'>
         <ul className='divide-y' style={{ borderColor: 'var(--border)' }}>
           {Array.from({ length: rows }).map((_, i) => (
             <li key={i} className='p-5'>
@@ -33,12 +31,12 @@ export function ReviewSkeleton({ rows = LIMIT }: { rows?: number }) {
                         <Skeleton key={j} className='h-3.5 w-3.5 rounded-sm' />
                       ))}
                     </div>
-                    {/* Date placeholder — text-xs ≈ h-3 */}
+                    {/* Date placeholder - text-xs ≈ h-3 */}
                     <Skeleton className='h-3 w-20' />
                   </div>
-                  {/* Gear name placeholder — text-sm font-medium ≈ h-4 */}
+                  {/* Gear name placeholder - text-sm font-medium ≈ h-4 */}
                   <Skeleton className='h-4 w-3/5' />
-                  {/* Comment placeholder — mt-1 text-sm ≈ mt-1 h-4 */}
+                  {/* Comment placeholder - mt-1 text-sm ≈ mt-1 h-4 */}
                   <Skeleton className='mt-1 h-4 w-full max-w-md' />
                 </div>
                 {/* Delete button placeholder */}

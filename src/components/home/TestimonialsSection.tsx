@@ -20,7 +20,7 @@ function initials(name: string) {
 
 /**
  * Renders real reviews pulled from the catalogue. Renders nothing at all when
- * there are none — an empty testimonial wall is better than an invented one.
+ * there are none - an empty testimonial wall is better than an invented one.
  */
 export function TestimonialsSection({
   testimonials,
@@ -35,17 +35,14 @@ export function TestimonialsSection({
         eyebrow='Renter stories'
         eyebrowIcon={<Quote className='h-3.5 w-3.5' />}
         title='Reviews from completed rentals'
-        description='Every quote below comes from a customer who finished a rental order on GearUp — the only people our platform lets review.'
+        description='Every quote below comes from a customer who finished a rental order on GearUp - the only people our platform lets review.'
       />
 
       <RevealGroup className='grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3'>
         {testimonials.map((testimonial) => (
           <RevealItem key={testimonial.id}>
             <figure className='surface-card-interactive flex h-full flex-col p-6'>
-              <Quote
-                className='h-7 w-7 text-primary/35'
-                aria-hidden='true'
-              />
+              <Quote className='h-7 w-7 text-primary/35' aria-hidden='true' />
 
               <Rating
                 value={testimonial.rating}

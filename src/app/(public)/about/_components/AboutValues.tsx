@@ -11,7 +11,7 @@ export function AboutValues() {
         eyebrow='What we stand for'
         eyebrowIcon={<Heart className='h-3.5 w-3.5' />}
         title='Four principles behind every product decision'
-        description='They are not slogans — each one shows up somewhere concrete in how the platform behaves.'
+        description='They are not slogans - each one shows up somewhere concrete in how the platform behaves.'
       />
 
       <RevealGroup className='grid grid-cols-1 gap-6 sm:grid-cols-2'>

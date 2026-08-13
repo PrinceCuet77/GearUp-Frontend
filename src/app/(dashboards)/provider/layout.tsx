@@ -14,12 +14,6 @@ const navItems: NavItem[] = [
     exact: true,
   },
   {
-    href: '/provider/analytics',
-    label: 'Analytics',
-    icon: 'ChartColumn',
-    group: 'Dashboard',
-  },
-  {
     href: '/provider/gears',
     label: 'My Gear',
     icon: 'Package',

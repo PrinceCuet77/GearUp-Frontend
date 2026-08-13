@@ -79,7 +79,7 @@ export function GearAlertsSection({
               </h2>
               <p className='mt-4 max-w-lg text-base leading-relaxed text-muted-foreground'>
                 Tell us what you are hunting for and we will let you know when a
-                matching listing goes live — no weekly digest, no noise.
+                matching listing goes live - no weekly digest, no noise.
               </p>
             </div>
 
@@ -169,7 +169,7 @@ export function GearAlertsSection({
                       ))}
                     </select>
                     <p className='field-hint'>
-                      Optional — pick a category to narrow the alerts.
+                      Optional - pick a category to narrow the alerts.
                     </p>
                   </div>
 

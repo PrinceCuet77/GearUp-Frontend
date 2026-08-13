@@ -16,7 +16,7 @@ export function FaqSection() {
             eyebrow='FAQ'
             eyebrowIcon={<HelpCircle className='h-3.5 w-3.5' />}
             title='Questions renters ask us most'
-            description='Everything below reflects how GearUp actually behaves — order states, payment timing, review rules and all.'
+            description='Everything below reflects how GearUp actually behaves - order states, payment timing, review rules and all.'
             className='mb-8 sm:mb-8'
           />
 
@@ -37,7 +37,7 @@ export function FaqSection() {
                   >
                     {SITE.contact.email}
                   </a>{' '}
-                  — we reply {SITE.contact.hours.toLowerCase()}.
+                  - we reply {SITE.contact.hours.toLowerCase()}.
                 </p>
               </div>
             </div>

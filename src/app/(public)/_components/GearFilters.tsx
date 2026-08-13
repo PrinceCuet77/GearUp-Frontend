@@ -31,7 +31,7 @@ const GROUP_LABEL =
   'mb-2 block text-xs font-bold tracking-wide text-muted-foreground uppercase';
 
 /**
- * Reusable filter panel — rendered in the desktop sidebar and
+ * Reusable filter panel - rendered in the desktop sidebar and
  * the mobile bottom-sheet drawer.
  */
 export default function GearFilters({
@@ -104,7 +104,11 @@ export default function GearFilters({
         <span id={categoryGroupId} className={GROUP_LABEL}>
           Category
         </span>
-        <div className='flex flex-wrap gap-2' role='group' aria-labelledby={categoryGroupId}>
+        <div
+          className='flex flex-wrap gap-2'
+          role='group'
+          aria-labelledby={categoryGroupId}
+        >
           <button
             type='button'
             onClick={() => onCategory('')}

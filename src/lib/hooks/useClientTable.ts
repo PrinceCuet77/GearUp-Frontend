@@ -52,7 +52,7 @@ export interface ClientTableResult<T> {
  *
  * Used by the tables whose full result set is already on the client (recent
  * activity, categories, reviews). Server-paginated tables drive the same
- * controls through the URL instead — see `useUrlQuery`.
+ * controls through the URL instead - see `useUrlQuery`.
  */
 export function useClientTable<T>(
   data: T[],
@@ -80,7 +80,7 @@ export function useClientTable<T>(
 
   /* Filtering and sorting run on every render rather than behind a memo. The
      hook only ever sees a page-sized array (at most a few hundred rows), so
-     the work is negligible — and memoising would mean depending on the
+     the work is negligible - and memoising would mean depending on the
      accessor literals callers recreate each render, which is where stale-data
      bugs come from. */
   const term = debouncedSearch.trim().toLowerCase();

@@ -209,7 +209,7 @@ export const VALUE_PROPS: ValueProp[] = [
   {
     title: 'One dashboard, end to end',
     description:
-      'Track orders through Placed, Confirmed, Paid, Picked Up and Returned — with every payment and review in the same place.',
+      'Track orders through Placed, Confirmed, Paid, Picked Up and Returned - with every payment and review in the same place.',
     icon: CalendarCheck2,
     tone: 'accent',
   },
@@ -228,7 +228,7 @@ export const FAQ_ITEMS: FaqEntry[] = [
     id: 'booking',
     question: 'How does a GearUp rental actually work?',
     answer:
-      'Pick your gear and rental dates, then place the order. It starts as Placed while the provider reviews it. Once they confirm, you pay online and the status moves to Paid. After you collect the gear it becomes Picked Up, and when you hand it back it is marked Returned — at which point you can leave a review.',
+      'Pick your gear and rental dates, then place the order. It starts as Placed while the provider reviews it. Once they confirm, you pay online and the status moves to Paid. After you collect the gear it becomes Picked Up, and when you hand it back it is marked Returned - at which point you can leave a review.',
   },
   {
     id: 'pricing',
@@ -246,7 +246,7 @@ export const FAQ_ITEMS: FaqEntry[] = [
     id: 'cancel',
     question: 'Can I cancel an order?',
     answer:
-      'Yes. You can cancel an order from its detail page while it is still Placed or Confirmed — that is, any time before the gear has been paid for and picked up. Once a rental is under way it can no longer be cancelled.',
+      'Yes. You can cancel an order from its detail page while it is still Placed or Confirmed - that is, any time before the gear has been paid for and picked up. Once a rental is under way it can no longer be cancelled.',
   },
   {
     id: 'provider',
@@ -281,7 +281,7 @@ export const ABOUT_VALUES: AboutValue[] = [
   {
     title: 'Access over ownership',
     description:
-      'A tent used four weekends a year is a wasted asset. GearUp exists so people can reach for good equipment without buying it outright — and so owners can put theirs to work.',
+      'A tent used four weekends a year is a wasted asset. GearUp exists so people can reach for good equipment without buying it outright - and so owners can put theirs to work.',
   },
   {
     title: 'Trust is a feature, not a promise',

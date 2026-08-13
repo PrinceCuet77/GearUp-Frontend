@@ -11,7 +11,7 @@ interface GearDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
-/** How many "related gear" cards to show — one full 3-up row on desktop. */
+/** How many "related gear" cards to show - one full 3-up row on desktop. */
 const RELATED_LIMIT = 3;
 
 export async function generateMetadata({
@@ -21,10 +21,10 @@ export async function generateMetadata({
   const result = await getSingleGearAction(id);
   const gear = result?.data;
 
-  if (!gear) return { title: `Gear not found — ${SITE.name}` };
+  if (!gear) return { title: `Gear not found - ${SITE.name}` };
 
   return {
-    title: `${gear.name} — ${SITE.name}`,
+    title: `${gear.name} - ${SITE.name}`,
     description: gear.description,
   };
 }

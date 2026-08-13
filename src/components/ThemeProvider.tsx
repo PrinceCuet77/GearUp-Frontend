@@ -28,7 +28,7 @@ const STORAGE_KEY = 'theme';
  *
  * An inline script in the root layout stamps `.dark` on `<html>` before React
  * hydrates (see `src/app/layout.tsx`), so reading the class back is both the
- * cheapest and the most accurate snapshot — no effect, no flash, no mismatch.
+ * cheapest and the most accurate snapshot - no effect, no flash, no mismatch.
  */
 function getThemeFromDom(): Theme {
   return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
@@ -66,7 +66,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const theme = useSyncExternalStore<Theme>(
     subscribe,
     getThemeFromDom,
-    // Server snapshot — dark is the default theme (the root layout renders
+    // Server snapshot - dark is the default theme (the root layout renders
     // `<html class="dark">`), so this matches what the client hydrates into.
     () => 'dark',
   );
@@ -76,7 +76,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // Private-mode or blocked storage — the class change still applies.
+      // Private-mode or blocked storage - the class change still applies.
     }
   }, []);
 

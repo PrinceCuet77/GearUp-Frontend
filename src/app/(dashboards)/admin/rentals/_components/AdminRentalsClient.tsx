@@ -95,7 +95,7 @@ export function AdminRentalsClient({
             {order.customer?.name ?? 'Unknown customer'}
           </p>
           <p className='max-w-44 truncate text-xs text-muted-foreground'>
-            {order.customer?.email ?? '—'}
+            {order.customer?.email ?? '-'}
           </p>
         </div>
       ),
@@ -158,7 +158,7 @@ export function AdminRentalsClient({
         return payment ? (
           <PaymentStatusBadge status={payment.status} />
         ) : (
-          <span className='text-xs text-muted-foreground'>—</span>
+          <span className='text-xs text-muted-foreground'>-</span>
         );
       },
     },

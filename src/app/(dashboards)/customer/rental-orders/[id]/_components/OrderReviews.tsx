@@ -61,7 +61,7 @@ export function OrderReviews({ reviews: initialReviews }: OrderReviewsProps) {
         (review) => review.id !== deletingReview.id,
       );
       if (remaining.length === 0) {
-        // Last review deleted — refresh the server component to show the empty state
+        // Last review deleted - refresh the server component to show the empty state
         router.refresh();
       } else {
         setReviews(remaining);

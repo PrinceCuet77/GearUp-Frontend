@@ -41,7 +41,7 @@ export interface GearCardProps {
 /**
  * The single gear card used across the landing page and the browse grid.
  *
- * Fixed geometry by design — `h-full`, a 4:3 image and clamped text — so every
+ * Fixed geometry by design - `h-full`, a 4:3 image and clamped text - so every
  * card in a row is exactly the same size regardless of content length.
  */
 export default function GearCard({
@@ -50,10 +50,13 @@ export default function GearCard({
   priority = false,
 }: GearCardProps) {
   const [showModal, setShowModal] = useState(false);
-  const [imageSrc, setImageSrc] = useState(() => parseGearImages(gear.images)[0]);
+  const [imageSrc, setImageSrc] = useState(
+    () => parseGearImages(gear.images)[0],
+  );
 
   const availability = getGearAvailability(gear);
-  const isRentable = availability === 'available' || availability === 'low-stock';
+  const isRentable =
+    availability === 'available' || availability === 'low-stock';
   const reviewCount = gear.reviews?.length ?? 0;
   const avgRating = calcAvgRating(gear.reviews);
   const status = AVAILABILITY[availability];
@@ -147,7 +150,7 @@ export default function GearCard({
             </span>
           </div>
 
-          {/* Footer: price + actions — pinned to the bottom of every card */}
+          {/* Footer: price + actions - pinned to the bottom of every card */}
           <div className='mt-auto flex items-end justify-between gap-3 border-t border-border pt-4'>
             <p className='min-w-0'>
               <span className='text-xl font-extrabold text-foreground'>
@@ -176,7 +179,9 @@ export default function GearCard({
                 onClick={() => setShowModal(true)}
                 disabled={!isRentable}
                 aria-label={`Rent ${gear.name}`}
-                title={isRentable ? `Rent ${gear.name}` : status.label(gear.stock)}
+                title={
+                  isRentable ? `Rent ${gear.name}` : status.label(gear.stock)
+                }
                 className={cn(
                   buttonClasses({ variant: 'primary', size: 'sm' }),
                   'w-12 px-0',

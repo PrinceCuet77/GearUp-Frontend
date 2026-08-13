@@ -48,7 +48,7 @@ export function GearFormModal({
 
   // Populate the form when editing, or clear it when adding. Adjusting during
   // render means the modal's first painted frame already holds the right
-  // listing — an effect would flash the previously edited gear for one frame.
+  // listing - an effect would flash the previously edited gear for one frame.
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -66,9 +66,7 @@ export function GearFormModal({
 
   /** Clears a field's error as soon as the user edits it. */
   const clearError = (field: keyof FormErrors) =>
-    setErrors((prev) =>
-      prev[field] ? { ...prev, [field]: undefined } : prev,
-    );
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
 
   const validate = (): boolean => {
     const schema = isEdit ? updateGearSchema : createGearSchema;

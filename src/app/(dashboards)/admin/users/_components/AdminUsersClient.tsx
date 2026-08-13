@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Users } from 'lucide-react';
 import { toast } from 'sonner';
-import { DataTable, type DataTableColumn } from '@/components/dashboard/DataTable';
+import {
+  DataTable,
+  type DataTableColumn,
+} from '@/components/dashboard/DataTable';
 import { Pagination } from '@/components/dashboard/Pagination';
 import { TableToolbar } from '@/components/dashboard/TableToolbar';
 import { UserStatusBadge } from '@/components/dashboard/StatusBadge';
@@ -46,7 +49,7 @@ interface AdminUsersClientProps {
  * User management table.
  *
  * Search, role, status and page all live in the URL, so a filtered view is
- * shareable and the backend does the paging — the client only mirrors it.
+ * shareable and the backend does the paging - the client only mirrors it.
  */
 export function AdminUsersClient({
   initialUsers,
@@ -74,7 +77,7 @@ export function AdminUsersClient({
   // Push the debounced term into the URL; typing itself must not navigate.
   useEffect(() => {
     if (debouncedSearch !== urlSearch) query.set({ search: debouncedSearch });
-    // `query` is rebuilt each render — depending on it would loop.
+    // `query` is rebuilt each render - depending on it would loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, urlSearch]);
 
@@ -173,7 +176,10 @@ export function AdminUsersClient({
             }
           >
             {toggling && pendingUser?.id === user.id && (
-              <Loader2 className='h-3.5 w-3.5 animate-spin' aria-hidden='true' />
+              <Loader2
+                className='h-3.5 w-3.5 animate-spin'
+                aria-hidden='true'
+              />
             )}
             {user.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
             <span className='sr-only'> {user.email}</span>
@@ -254,9 +260,7 @@ export function AdminUsersClient({
             ? 'Suspend this account?'
             : 'Reactivate this account?'
         }
-        confirmLabel={
-          pendingUser?.status === 'ACTIVE' ? 'Suspend' : 'Activate'
-        }
+        confirmLabel={pendingUser?.status === 'ACTIVE' ? 'Suspend' : 'Activate'}
         description={
           pendingUser?.status === 'ACTIVE' ? (
             <>

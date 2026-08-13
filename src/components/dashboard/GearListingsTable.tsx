@@ -20,7 +20,7 @@ const STATUS_OPTIONS = [
 
 export interface GearListingsTableProps {
   gears: GearItem[];
-  /** Adds the owning provider column — admin views only. */
+  /** Adds the owning provider column - admin views only. */
   showProvider?: boolean;
   caption: string;
   emptyTitle: string;
@@ -167,7 +167,9 @@ export function GearListingsTable({
         rows={table.rows}
         getRowKey={(gear) => gear.id}
         emptyIcon={Package}
-        emptyTitle={table.hasActiveFilters ? 'No matching listings' : emptyTitle}
+        emptyTitle={
+          table.hasActiveFilters ? 'No matching listings' : emptyTitle
+        }
         emptyDescription={
           table.hasActiveFilters
             ? 'Try a different search term, category or availability.'

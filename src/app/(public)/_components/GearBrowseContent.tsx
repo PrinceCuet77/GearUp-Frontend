@@ -19,7 +19,10 @@ import { getAllGearsAction } from '../_actions/getAllGears';
 import { getAllCategoriesAction } from '../_actions/getAllCategories';
 import GearFilters from './GearFilters';
 import GearCard from './GearCard';
-import { GearGridSkeleton, GearFiltersSkeleton } from '@/components/ui/Skeleton';
+import {
+  GearGridSkeleton,
+  GearFiltersSkeleton,
+} from '@/components/ui/Skeleton';
 import { ErrorBanner } from '@/components/dashboard/ErrorBanner';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -313,7 +316,7 @@ export default function GearBrowseContent() {
             Browse gear
           </h1>
           <p className='mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base'>
-            Rent premium sports and outdoor equipment from verified providers —
+            Rent premium sports and outdoor equipment from verified providers -
             filter by category, price and rating, then book the days you need.
           </p>
         </div>
@@ -453,7 +456,7 @@ export default function GearBrowseContent() {
                 description={
                   hasFilters
                     ? 'Try widening your price range, clearing the search term, or picking another category.'
-                    : 'No gear is available right now. Check back soon — providers add listings regularly.'
+                    : 'No gear is available right now. Check back soon - providers add listings regularly.'
                 }
                 action={
                   hasFilters ? (

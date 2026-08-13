@@ -5,7 +5,7 @@ import { ChevronDown, Loader2, Search, X } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 export interface ToolbarSelect {
-  /** Stable id — also the `<select>` name. */
+  /** Stable id - also the `<select>` name. */
   key: string;
   label: string;
   value: string;
@@ -17,7 +17,7 @@ export interface TableToolbarProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
-  /** Accessible name for the search box — describe what it matches. */
+  /** Accessible name for the search box - describe what it matches. */
   searchLabel?: string;
   selects?: ToolbarSelect[];
   /** True when any filter is applied; reveals "Clear all". */

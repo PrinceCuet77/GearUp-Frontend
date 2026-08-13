@@ -18,7 +18,7 @@ import { GearAlertsSection } from '@/components/home/GearAlertsSection';
 import { FinalCtaSection } from '@/components/home/FinalCtaSection';
 
 export const metadata: Metadata = {
-  title: `${SITE.name} — ${SITE.tagline}`,
+  title: `${SITE.name} - ${SITE.tagline}`,
   description: SITE.description,
 };
 

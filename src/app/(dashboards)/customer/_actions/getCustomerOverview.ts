@@ -7,7 +7,7 @@ import type { Payment, RentalOrder } from '@/lib/types';
 
 /**
  * How many records the charts read. Headline counts still come from the API's
- * own totals — only the trend/breakdown charts work off this sample.
+ * own totals - only the trend/breakdown charts work off this sample.
  */
 const CHART_SAMPLE = 100;
 

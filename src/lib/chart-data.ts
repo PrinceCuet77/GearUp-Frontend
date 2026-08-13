@@ -1,7 +1,7 @@
 /**
  * Turns API records into chart series.
  *
- * Every dashboard chart is derived here from data the app already fetches —
+ * Every dashboard chart is derived here from data the app already fetches -
  * there is no sample or placeholder series anywhere in the dashboards. Pure
  * functions, so the derivation runs on the server alongside the fetch.
  */
@@ -79,7 +79,11 @@ export function lastMonths(count = 6, now = new Date()): MonthBucket[] {
 export function byMonth<T>(
   records: T[],
   getDate: (record: T) => string,
-  options: { months?: number; getValue?: (record: T) => number; now?: Date } = {},
+  options: {
+    months?: number;
+    getValue?: (record: T) => number;
+    now?: Date;
+  } = {},
 ): ChartPoint[] {
   const { months = 6, getValue, now } = options;
   const buckets = lastMonths(months, now);
@@ -99,7 +103,7 @@ export function byMonth<T>(
 }
 
 /**
- * Running total across a series — turns "new per month" into "total to date".
+ * Running total across a series - turns "new per month" into "total to date".
  * `base` seeds the first point with everything that happened before the window.
  */
 export function cumulative(points: ChartPoint[], base = 0): ChartPoint[] {
@@ -138,7 +142,9 @@ export function distribute<T>(
   for (const record of records) {
     const value = getValue(record);
     if (!Number.isFinite(value)) continue;
-    const band = bands.find((candidate) => value < candidate.max) ?? bands[bands.length - 1];
+    const band =
+      bands.find((candidate) => value < candidate.max) ??
+      bands[bands.length - 1];
     band.value += 1;
   }
 
@@ -148,14 +154,18 @@ export function distribute<T>(
 /**
  * This month against last month, as a rounded percentage.
  *
- * Returns `undefined` when last month had nothing to compare against — a jump
+ * Returns `undefined` when last month had nothing to compare against - a jump
  * from zero is not a percentage, and printing "+100%" there would be a claim
  * the data does not support.
  */
 export function monthOverMonth<T>(
   records: T[],
   getDate: (record: T) => string,
-  options: { getValue?: (record: T) => number; label?: string; now?: Date } = {},
+  options: {
+    getValue?: (record: T) => number;
+    label?: string;
+    now?: Date;
+  } = {},
 ): { percent: number; label: string } | undefined {
   const { getValue, label = 'vs last month', now } = options;
   const series = byMonth(records, getDate, { months: 2, getValue, now });
@@ -210,7 +220,7 @@ export function topEntries(
  * Status palettes
  *
  * These mirror `StatusBadge` exactly, so a status reads the same in a chart,
- * a badge and a table row. Status colours are reserved for state — they are
+ * a badge and a table row. Status colours are reserved for state - they are
  * never handed out as an extra categorical series.
  * ------------------------------------------------------------------------ */
 
@@ -253,7 +263,12 @@ export const ROLE_META: Record<UserRole, { label: string; color: string }> = {
 /** Rental orders grouped into the lifecycle order, zero buckets included. */
 export function rentalStatusBreakdown(
   orders: Array<{ status: string }>,
-): Array<{ label: string; value: number; color: string; status: RentalStatus }> {
+): Array<{
+  label: string;
+  value: number;
+  color: string;
+  status: RentalStatus;
+}> {
   const counts = countBy(orders, (order) => order.status);
   return RENTAL_STATUS_ORDER.map((status) => ({
     status,

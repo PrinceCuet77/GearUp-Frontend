@@ -46,7 +46,7 @@ export function AboutAudience() {
       <SectionHeading
         eyebrow='Two sides, one platform'
         title='Whichever side of the rental you are on'
-        description='GearUp is the same marketplace for both — with a dashboard shaped around what each role actually needs to do.'
+        description='GearUp is the same marketplace for both - with a dashboard shaped around what each role actually needs to do.'
       />
 
       <RevealGroup className='grid grid-cols-1 gap-6 lg:grid-cols-2'>

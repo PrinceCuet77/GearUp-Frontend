@@ -22,7 +22,7 @@ const MISSION_POINTS = [
 ];
 
 /**
- * Mission narrative paired with a real listing photo — no stock imagery, so
+ * Mission narrative paired with a real listing photo - no stock imagery, so
  * the page always reflects gear that genuinely exists on the platform.
  */
 export function AboutMission({ showcase }: { showcase: GearItem | null }) {

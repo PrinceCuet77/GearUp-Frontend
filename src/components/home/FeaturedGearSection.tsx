@@ -15,7 +15,7 @@ export function FeaturedGearSection({ gears }: { gears: GearItem[] }) {
         eyebrow='Featured'
         eyebrowIcon={<Sparkles className='h-3.5 w-3.5' />}
         title='Top-rated gear this season'
-        description='Ranked by verified renter reviews — the kit people actually came back and recommended.'
+        description='Ranked by verified renter reviews - the kit people actually came back and recommended.'
         action={
           <ButtonLink
             href='/gears'

@@ -1,5 +1,5 @@
 /**
- * Skeleton — the single source of loading placeholders for the whole app.
+ * Skeleton - the single source of loading placeholders for the whole app.
  *
  * Every block is built from the same `Skeleton` primitive and uses design
  * tokens, so placeholders stay correct in both light and dark themes and match
@@ -122,7 +122,7 @@ export function CategorySkeleton({ rows = 5 }: { rows?: number }) {
 }
 
 /**
- * A whole table page: title, filter row, table and pagination — matching the
+ * A whole table page: title, filter row, table and pagination - matching the
  * `PageHeader` + `TableToolbar` + `DataTable` composition every list page uses.
  */
 export function TablePageSkeleton({
@@ -170,10 +170,7 @@ export function ChartCardSkeleton({ height = 224 }: { height?: number }) {
         </div>
         <Skeleton className='h-8 w-20' />
       </div>
-      <Skeleton
-        className='w-full rounded-control'
-        style={{ height }}
-      />
+      <Skeleton className='w-full rounded-control' style={{ height }} />
       <div className='mt-4 flex gap-4'>
         <Skeleton className='h-3 w-24' />
         <Skeleton className='h-3 w-24' />
@@ -184,7 +181,7 @@ export function ChartCardSkeleton({ height = 224 }: { height?: number }) {
 
 /**
  * The overview layout: stat tiles, a wide chart beside a narrow one, then the
- * activity table — the same grid the real page renders.
+ * activity table - the same grid the real page renders.
  */
 export function DashboardOverviewSkeleton({ cols = 4 }: { cols?: number }) {
   return (
@@ -220,8 +217,8 @@ export function DashboardOverviewSkeleton({ cols = 4 }: { cols?: number }) {
 }
 
 /**
- * Mirrors `GearCard` exactly — same aspect ratio, same body rhythm, same
- * footer — so the grid does not reflow when real data arrives.
+ * Mirrors `GearCard` exactly - same aspect ratio, same body rhythm, same
+ * footer - so the grid does not reflow when real data arrives.
  */
 export function GearCardSkeleton() {
   return (
@@ -282,7 +279,7 @@ export function GearFiltersSkeleton() {
         <Skeleton className='h-10 w-full rounded-control' />
       </div>
 
-      {/* Categories — chips, matching the real filter */}
+      {/* Categories - chips, matching the real filter */}
       <div>
         <Skeleton className='mb-2 h-3 w-20' />
         <div className='flex flex-wrap gap-2'>

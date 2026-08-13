@@ -93,7 +93,7 @@ export function UpdateOrderStatusModal({
                 aria-hidden='true'
               />
               <span className='truncate text-muted-foreground'>
-                {order.customer?.name ?? order.customer?.email ?? '—'}
+                {order.customer?.name ?? order.customer?.email ?? '-'}
               </span>
             </div>
             <div className='flex items-center gap-1.5'>

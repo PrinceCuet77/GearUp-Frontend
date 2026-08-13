@@ -7,7 +7,11 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { adoptGoogleSessionAction } from '@/app/(auth)/_actions/googleAuthActions';
 import { buttonClasses } from '@/components/ui/Button';
-import { OAUTH_PARAMS, oauthErrorMessage, readOAuthFragment } from '@/lib/oauth';
+import {
+  OAUTH_PARAMS,
+  oauthErrorMessage,
+  readOAuthFragment,
+} from '@/lib/oauth';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { User, UserRole } from '@/lib/types';
 
@@ -33,7 +37,7 @@ function OAuthCallbackInner() {
   const setUser = useAuthStore((s) => s.setUser);
   const [error, setError] = useState<string | null>(null);
   // Effects run twice in dev under StrictMode, and the fragment is consumed
-  // (and cleared) on the first pass — guard so the second doesn't see an empty
+  // (and cleared) on the first pass - guard so the second doesn't see an empty
   // hash and report a failure.
   const startedRef = useRef(false);
 
@@ -47,7 +51,7 @@ function OAuthCallbackInner() {
     const roleParam = searchParams.get(OAUTH_PARAMS.role) as UserRole | null;
 
     // Strip the tokens from the address bar (and so from history/bookmarks)
-    // before anything else — they are already in hand.
+    // before anything else - they are already in hand.
     if (window.location.hash) {
       window.history.replaceState(
         null,
@@ -96,7 +100,7 @@ function OAuthCallbackInner() {
 
       // No profile came back with the session. A client-side navigation would
       // leave the store (and so the navbar) looking logged out, because the
-      // root layout — where UserInitializer hydrates it — doesn't re-render.
+      // root layout - where UserInitializer hydrates it - doesn't re-render.
       // Take the full page load instead so the server hydrates it.
       window.location.replace(destination);
     })();
