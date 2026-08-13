@@ -74,6 +74,7 @@ export default async function AdminOverviewPage() {
           icon={ClipboardList}
           description='Orders placed all time'
           tone='accent'
+          href='/admin/rentals'
         />
         <StatsCard
           title='Categories'

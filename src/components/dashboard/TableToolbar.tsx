@@ -70,7 +70,7 @@ export function TableToolbar({
               />
               <input
                 id={searchId}
-                type='search'
+                type='text'
                 value={searchValue ?? ''}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder={searchPlaceholder}

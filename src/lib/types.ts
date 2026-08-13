@@ -165,6 +165,20 @@ export interface GearsResult {
   error: string | null;
 }
 
+export interface AdminRentalsMeta extends ApiMeta {
+  /** Count of every rental order in the system, unaffected by filters. */
+  totalRentals: number;
+  /** Count per `RentalStatus`, unaffected by filters. Zero-count statuses are omitted. */
+  statusCounts: Partial<Record<RentalStatus, number>>;
+}
+
+export interface AdminRentalsResult {
+  success: boolean;
+  data: RentalOrder[] | null;
+  meta: AdminRentalsMeta | null;
+  error: string | null;
+}
+
 export interface CustomerRentalOrder {
   id: string;
   customerId: string;

@@ -26,6 +26,12 @@ const navItems: NavItem[] = [
     group: 'Management',
   },
   {
+    href: '/admin/rentals',
+    label: 'Rental Orders',
+    icon: 'ClipboardList',
+    group: 'Management',
+  },
+  {
     href: '/admin/categories',
     label: 'Categories',
     icon: 'Tag',
