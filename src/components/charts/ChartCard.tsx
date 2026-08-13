@@ -36,7 +36,7 @@ export function ChartCard({
   children,
 }: ChartCardProps) {
   return (
-    <section className={cn('surface-card flex h-full flex-col p-5', className)}>
+    <section className={cn('surface-card flex h-full min-w-0 flex-col p-5', className)}>
       <header className='mb-4 flex items-start justify-between gap-4'>
         <div className='min-w-0'>
           <h3 className='text-sm font-bold text-foreground'>{title}</h3>
@@ -66,7 +66,7 @@ export function ChartCard({
         </div>
       ) : (
         <>
-          <div className='flex-1'>{children}</div>
+          <div className='min-w-0 flex-1'>{children}</div>
           {legend && <div className='mt-4'>{legend}</div>}
         </>
       )}
