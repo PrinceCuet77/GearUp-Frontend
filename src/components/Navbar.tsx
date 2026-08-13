@@ -150,13 +150,6 @@ export default function Navbar() {
   // On /login, offer a way to Register; everywhere else (including /register), offer Sign In.
   const showRegisterCta = pathname === '/login';
 
-  /* Inside a dashboard the topbar carries its own account menu. Rendering this
-     one too would put two identical dropdowns on the same screen, so the site
-     header steps back and leaves account actions to the dashboard chrome. */
-  const inDashboard = ['/admin', '/provider', '/customer'].some((root) =>
-    pathname.startsWith(root),
-  );
-
   const handleLogout = async () => {
     await logoutAction();
     clearUser();
@@ -254,7 +247,7 @@ export default function Navbar() {
 
             {/* Desktop auth */}
             <div className='hidden items-center gap-2 md:flex'>
-              {userProfile && inDashboard ? null : userProfile ? (
+              {userProfile ? (
                 <div className='relative' ref={userMenuRef}>
                   <button
                     onClick={() => setUserMenuOpen((open) => !open)}

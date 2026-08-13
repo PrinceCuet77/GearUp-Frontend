@@ -21,7 +21,6 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Badge, type BadgeTone } from '@/components/ui/Badge';
-import { ProfileMenu } from './ProfileMenu';
 import { UserAvatar } from './UserAvatar';
 import { cn } from '@/lib/cn';
 import type { UserRole } from '@/lib/types';
@@ -255,8 +254,6 @@ export function DashboardShell({
               </Badge>
             )}
           </div>
-
-          <ProfileMenu basePath={basePath} />
         </header>
 
         <main className='flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8'>
